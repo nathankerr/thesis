@@ -1,0 +1,35 @@
+\documentclass{article}
+
+\author{Nathan Kerr}
+\title{Design of a Parallel GIS System}
+
+\begin{document}
+
+\section{General Program Flow}
+
+\begin{enumerate}
+  \item{setup local PostgreSQL}
+  \item{extend local PostgreSQL with PostGIS and other extensions}
+  \item{decompose and load data}
+  \item{run calculation}
+  \item{store results}
+  \item{tear down local PostgreSQL}
+\end{enumerate}
+
+\section{Program Modes}
+
+pgis is an MPI program with local PostgreSQL instances attached to each MPI task. All program communication is done through the MPI tasks.
+
+\subsection{Independent Execution}
+
+The simplest form of execution is independent. This means that the program is ran to produce the results of a series of known operations and then terminate. The calculation itself understands the parallel nature of the data. Thus the software infrastructure is as simple as possible. Data storage and GIS queries are handled by PostGIS. Aggregations are handled by the MPI tasks.
+
+\subsection{USF Server (Parallel PostGIS)}
+
+In this mode, pgis provides a PostgreSQL compatible server which then interactively runs received commands on pgis; dynamically rewriting the SQL to take advantage of the parallel nature of pgis.
+
+\section{Methods of Decomposing GIS Data}
+
+The most straight forward method is to divide the data into geographic clusters by means of dividing the domain into sections defined by bounding boxes. Features that exist in more than one bounding box will be stored everywhere they are overlaid by a bounding box with one MPI task being defined as that feature's Master. Thus features that overlap multiple bounding boxes are replicated across every task that covers them, but control is still maintained. This methodology also allows for the use of ghost row type optimizations with no further program architecture being needed to handle the overlap. Some sort of arbitration scheme will need to be created should shared features need to be updated in more than one place.
+  
+\end{document}
