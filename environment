@@ -1,0 +1,7 @@
+#!/bin/bash
+
+export PGIS=/home/alaster/pgis
+export PGIS_SOFTWARE=$PGIS/software
+
+export PATH=$PGIS_SOFTWARE/bin:$PATH
+export LD_LIBRARY_PATH=$PGIS_SOFTWARE/lib:$LD_LIBRARY_PATH
