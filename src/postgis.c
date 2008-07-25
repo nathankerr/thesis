@@ -7,6 +7,7 @@
 
 #define RETRY_COUNT 15
 
+/* Setups and starts a local instance of PostgreSQL. Then creates a PostGIS database and connects to it */
 void postgis_start(char* pgdata) {
 	char cmd[256];
 	int count = 0;
@@ -39,13 +40,22 @@ void postgis_start(char* pgdata) {
 	sprintf(cmd, "psql -h %s -d pgis -f /home/alaster/pgis/software/share/lwpostgis.sql 2> /dev/null > /dev/null", postgis_data);
 	check(system(cmd));
 
+	status("Connecting to PostgreSQL");
+	sprintf(cmd, "host = %s dbname = pgis", postgis_data);
+	postgis_conninfo = malloc(sizeof(char)*(strlen(cmd)+1));
+	strcpy(postgis_conninfo, cmd);
+	check(PQstatus(postgis_connection()) != CONNECTION_OK);
+
 	status("PostGIS Started");
 }
 
+/* Stops the PostgreSQL connection and server. Removes the local setup */
 void postgis_stop(void) {
 	char cmd[256];
-
 	status("Stopping PostGIS");
+
+	status("Disconnecting from PostgreSQL");
+	PQfinish(postgis_connection());
 
 	status("Stopping PostgreSQL");
 	sprintf(cmd, "pg_ctl -D %s status > /dev/null", postgis_data);
@@ -61,8 +71,18 @@ void postgis_stop(void) {
 	status("PostGIS Stopped");
 }
 
+/* Checks to see if the PostgreSQL server is accepting connections */
 int postgis_status(void) {
 	char cmd[256];
 	sprintf(cmd, "psql -h %s postgres -c '' 2> /dev/null > /dev/null", postgis_data);
 	return system(cmd);
+}
+
+/* Returns an active connection. If the connection died, reconnects first */
+PGconn* postgis_connection(void) {
+	if (PQstatus(postgis_conn) != CONNECTION_OK) {
+		PQfinish(postgis_conn);
+		postgis_conn = PQconnectdb(postgis_conninfo);
+	}
+	return postgis_conn;
 }

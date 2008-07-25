@@ -1,6 +1,8 @@
 #ifndef PGIS
 #define PGIS
 
+#include <libpq-fe.h>
+
 int rank;
 int size;
 
@@ -12,6 +14,9 @@ void error_abort(char*, char*, int);
 void postgis_start(char*);
 void postgis_stop(void);
 int postgis_status(void);
+PGconn* postgis_connection(void);
 char* postgis_data;
+char* postgis_conninfo;
+PGconn* postgis_conn;
 
 #endif

@@ -28,6 +28,10 @@ int main(int argc, char* argv[]) {
 	sprintf(pgdata, "/tmp/pgis-%d-%d", getpid(), rank);
 	postgis_start(pgdata);
 
+	/* Decompose and Load Data */
+	/* Perform Calculation */
+	/* Save data */
+
 	postgis_stop();
 	MPI_Finalize();
 	return 0;
