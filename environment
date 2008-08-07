@@ -1,9 +1,10 @@
 #!/bin/bash
 
+use gcc4-openmpi-1.2.4b0
+
 export PGIS=/home/alaster/pgis
 export PGIS_SOFTWARE=$PGIS/software
 
 export PATH=$PGIS_SOFTWARE/bin:$PATH
 export LD_LIBRARY_PATH=$PGIS_SOFTWARE/lib:$LD_LIBRARY_PATH
-
-use gcc-openmpi-1.2.4b0
+export MANPATH=/usr/local/ofed/mpi/gcc4/openmpi-1.2.4b0/man:$MANPATH
