@@ -14,25 +14,30 @@ void error_abort(char* message, char* filename, int linenum) {
 	MPI_Abort(MPI_COMM_WORLD, 1);
 }
 
-void init(int argc, char* argv[]) {
+void init(int argc, char* argv[], char* pgdata) {
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+	sprintf(pgdata, "/tmp/pgis-%d-%d", getpid(), rank);
+	postgis_start(pgdata);
+}
+
+void finalize() {
+	postgis_stop();
+	MPI_Finalize();
 }
 
 int main(int argc, char* argv[]) {
 	char pgdata[256];
 
-	init(argc, argv);
+	init(argc, argv, pgdata);
 
-	sprintf(pgdata, "/tmp/pgis-%d-%d", getpid(), rank);
-	postgis_start(pgdata);
 
 	/* Decompose and Load Data */
 	/* Perform Calculation */
 	/* Save data */
 
-	postgis_stop();
-	MPI_Finalize();
+	finalize();
 	return 0;
 }

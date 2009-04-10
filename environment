@@ -2,8 +2,11 @@
 
 use gcc-openmpi-1.2.7
 
-export PGIS=/home/alaster/pgis
+export PGIS=/home/alaster/projects/pgis
 export PGIS_SOFTWARE=$PGIS/software
+
+export POSTGIS=$PGIS/experiments/postgis
+export HADOOP=$PGIS/experiments/hadoop
 
 export PATH=$PGIS_SOFTWARE/bin:$PATH
 export LD_LIBRARY_PATH=$PGIS_SOFTWARE/lib:$LD_LIBRARY_PATH
