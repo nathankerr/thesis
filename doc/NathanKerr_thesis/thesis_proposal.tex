@@ -1,4 +1,6 @@
-\documentclass{article}
+\documentclass[12pt]{article}
+
+\usepackage{setspace}
 
 \title{Parallel GIS Processing\\Thesis Proposal}
 \author{Nathan~Kerr}
@@ -6,19 +8,63 @@
 
 \begin{document}
 	\maketitle
+	\doublespacing
 	
 	\section{Intentions}
-	I intend to explore at least two different methods for processing GIS data in a parallel environment.
+	Develop and explore methods for decreasing turn around time for processing and analyzing GIS datasets. Focus is given on the execution environment and not the user interface, though implementation difficulty of adhoc operations will also be considered.
 	
 	\section{Value}
 	
-	As datasets get larger and GIS processing and analysis becomes more sophisticated 
+	Exploration and analysis of GIS datasets is made difficult because of the length of time between starting an analysis or exploration routine and the return of results. Exploration and analysis abilities would be increased by enabling near realtime (minutes instead of hours) interaction with GIS capabilities.
 	
 	\section{Plan}
 	
+	Compare turn around time and difficulty of implementing a selection of GIS operations on several different environments.
+	
+	\subsection{GIS Operations}
+		\subsubsection{Indexing}
+			Indexing times (Generate index for all geometry columns)
+		\subsection{Filtering}
+			Find all the records that intersect a given geometry
+		\subsection{Search}
+			For a set of points representing employers, find the nearest parcel of land (polygon data) with compatible zoning codes.
+	
+	\subsection{Environments}
+		\subsubsection{PostGIS}
+			PostgreSQL extended with PostGIS (OGC SFS complient)
+		\subsection{Hadoop}
+			Map/Reduce environment with GIS extensions (Java Topology Suite)
+		\subsection{Distributed PostGIS}
+			Datasets distributed between multiple PostGIS instances connected with an MPI application
+		\subsection{Paradise???}
+			Distributed object relational database with GIS extensions (If I can figure out how to run it)
+		\subsection{Serial JTS}
+			Use the Java Topology Suite in a serial java program
+		\subsection{Serial GEOS}
+			Use the GEOS library (a C++ port of JTS) to process the data
+		\subsection{Parallel GEOS}
+			Use the GEOS library in a MPI program to execute the operations
+		
 	\section{Completion Criteria}
 	
+	\begin{enumerate}
+		\item A comparison of turn around times for the given GIS operations in the different environments
+		\item A comparison of implementation difficulty levels for the GIS operations in each environment
+		\item Recommendations on which environment to further develop and use for processing GIS operations
+	\end{enumerate}
+	
 	\section{Timeline}
+	
+	Dates are approximate.
+	
+	\begin{itemize}
+		\item End of April 2009 - Define queries and run in PostGIS
+		\item Mid May 2009 - Hadoop and Serial JTS
+		\item End of May 2009 - Distributed PostGIS
+		\item Mid June 2009 - Serial and Parallel GEOS
+		\item Mid July
+		\item End of July 2009 - Defend
+	\end{itemize}
 	
 	\section{Bibliography}
 \end{document}
