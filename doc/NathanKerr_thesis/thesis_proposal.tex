@@ -13,13 +13,11 @@
 
 Geospatial (GIS) simulation, analysis, and simulation are important processes to understanding and improving our environment, both urban and natural.
 
-Many times GIS processing has been done with desktop applications such as ArcGIS \cite{arcgis}, QuantumGIS \cite{qgis}, and GRASS GIS \cite{grass}. These programs provide graphical, clickable interfaces that allow for relatively easy processing of data.
+GIS processing and analysis is often accomplished through desktop applications such as ArcGIS \cite{arcgis}, QuantumGIS \cite{qgis}, and GRASS GIS \cite{grass}. Simulation is often done with the popular UrbanSim \cite{urbansim} package. These programs provide graphical, clickable interfaces that allow for relatively easy processing of data.
 
-As datasets grow in size and complexity, the capabilities of these programs runs into the processor and memory limitations of being executed on a single computer.
+An alternative approach to using these desktop programs is to employ a geospatial databases like PostGIS \cite{postgis}. In addition to performing the required computation, databases allow collaboration and organization through multi-user access controls. PostGIS forms the core of the Urban Systems Framework \cite{usf} developed by the Digital Phoenix project \cite{digitalphoenix}.
 
-While attempting to solve collaboration and traceability problems in GIS processing with the Digital Phoenix group the Urban Systems Framework (USF) \cite{usf} was developed which centralized storage and looked to allow for processing in a central database. The database used was PostgreSQL \cite{postgresql} with the PostGIS \cite{postgis} GIS extensions.
-
-While USF allow the research collaborators to easily access the exact same dataset for review and evaluation, and while processing could be done through SQL queries with the exact queries being saved for later traceability and work replication, the processing speeds were limited to a single computer, in fact a single processor, much like the desktop applications.
+As datasets grow and the associated processing becomes more sophisticated, these programs run into the limitations of being executed on a single computer.
 
 In 1994 David DeWitt and Jim Gray stated that parallel databases were the future for high performance databases \cite{hpdb}. Parallel databases should be able to spread both data storage and query execution across multiple computers without complicating the SQL writing process. This ability would give the SQL query writer access to execution on more computers at a time, thus decreasing time to solution, while not increasing the complexity of the researcher's query.
 
@@ -27,9 +25,7 @@ While commercial parallel databases such as TeraData \cite{teradata} and Oracle 
 
 Many universities and research institutions already have investment in compute clusters. These clusters are groups of computer linked together with high speed network interconnects with the hardware and software already being managed by competent staffs. Of the capabilities of these high performance computing centers is available for the cost of compute cycles.
 
-If sufficient software was available to enable ad-hoc and predetermined GIS processing on these machines, then researchers utilizing GIS would be able to make use of high performance computing to speedup processing and computation time while enabling larger datasets at minimal cost.
-
-While SQL is a relatively simple way to form ad-hoc queries, programming for high performance computing clusters is much harder.
+If sufficient software was available to enable GIS processing on these machines, then researchers utilizing GIS would be able to make use of high performance computing to speedup processing and computation time while enabling larger datasets at minimal cost.
 
 \section{Thesis Work}
 
@@ -41,9 +37,9 @@ A set of sample queries will be taken from work encountered with the Digital Pho
 
 \section{Related Work}
 
-The collaboration capabilities of GRASS GIS have been used to distribute sub-queries among computers. The very existence of this paper shows the lack of penetration of parallel GIS capable databases. Because the databases aren't known about or are too expensive to be utilized, other solutions are being sought. The method described in this paper utilizes multiple instances of GRASS in a master-slave configuration where all participants access a shared data repository or filesystem. The geometries are portioned between the various nodes. Operations are done on the subsets, and the results are merged to produce the final result.\cite{pgrass} This methodology is very much like Map/Reduce.
-
 The Open Geospatial Consortium has created several standards for capabilities of GIS systems including interoperability. Among these standards are the set of Simple Features standards which define data types and operations for GIS data. This research makes use of several implementations of libraries supporting these standards. This research does not intend to create this functionality, but instead consume it. The libraries used are the Java Topology Suite (JTS) \cite{jts} and the GEOS library \cite{geos}. GEOS is a port of the JTS and was developed as part of the PostGIS extensions for PostgreSQL.
+
+The collaboration capabilities of GRASS GIS have been used to distribute sub-queries among computers. The very existence of this paper shows the lack of penetration of parallel GIS capable databases. Because the databases aren't known about or are too expensive to be utilized, other solutions are being sought. The method described in this paper utilizes multiple instances of GRASS in a master-slave configuration where all participants access a shared data repository or filesystem. The geometries are portioned between the various nodes. Operations are done on the subsets, and the results are merged to produce the final result.\cite{pgrass} This methodology is very much like Map/Reduce.
 
 \section{Value and Benefits of Research}
 
@@ -72,4 +68,19 @@ An approximate timeline for these activities follows:
 	\item Comparisons of the ease of programability and execution times for each environment
 \end{enumerate}
 
-\section{Bibliography} \end{document}
+\begin{thebibliography}{99}
+\bibitem{postgresql}http://postgresql.org/
+\bibitem{arcgis}http://www.esri.com/software/arcgis/
+\bibitem{qgis}http://www.qgis.org/
+\bibitem{grass}http://grass.itc.it/
+\bibitem{urbansim}http://urbansim.org/
+\bibitem{postgis}http://postgis.refractions.net/
+\bibitem{teradata}http://teradata.com/
+\bibitem{oracle}http://www.oracle.com/
+\bibitem{hadoop}http://hadoop.apache.org/
+\bibitem{jts}http://www.vividsolutions.com/jts/jtshome.htm
+\bibitem{geos}http://trac.osgeo.org/geos/
+\bibitem{digitalphoenix}http://digitalphoenix-asu.net/
+\end{thebibliography}
+
+\end{document}
