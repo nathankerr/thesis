@@ -11,13 +11,59 @@
 
 \section{Introduction}
 
-Geospatial (GIS) simulation, analysis, and simulation are important processes to understanding and improving our environment, both urban and natural.
+Geospatial (GIS) simulation, analysis, and simulation are important
+processes to understanding and improving our environment, both urban and
+natural. Geospatial data is made up of a georefrenced geometry such as a
+point or a polygon at a certain logitude, latitude, and altitude with
+related descriptive information such as a land use type. GIS data can be
+used to represent a large range of real-world objects such as road or power
+networks, building locations, or natural features such as lakes and rivers.
+Utilizing GIS data is one method toward processing, analyzing, and
+simulating real-world systems. One consumer application of GIS are the GPS
+based car navigation systems common today.
 
-GIS processing and analysis is often accomplished through desktop applications such as ArcGIS \cite{arcgis}, QuantumGIS \cite{qgis}, and GRASS GIS \cite{grass}. Simulation is often done with the popular UrbanSim \cite{urbansim} package. These programs provide graphical, clickable interfaces that allow for relatively easy processing of data.
+Larger scale GIS applications also exist in areas such as city planning.
+City planners use GIS to study road networks, zoning issues, and to
+simulate population growth. As cities and metropolises grow, the amount of
+data required to represent these areas also increases. As the data
+increases, so does the processing power required to complete the geospatial
+analysis, processing, and simulation.
 
-An alternative approach to using these desktop programs is to employ a geospatial databases like PostGIS \cite{postgis}. In addition to performing the required computation, databases allow collaboration and organization through multi-user access controls. PostGIS forms the core of the Urban Systems Framework \cite{usf} developed by the Digital Phoenix project \cite{digitalphoenix}.
+Desktop GIS packages such as ArcGIS\cite{arcgis}, QuantumGIS\cite{qgis},
+and GRASS GIS\cite{grass} are commonly used for GIS processing and
+analysis. While these programs provide graphical interfaces to their GIS
+capabilities, their capabilites are limited by the computers they run on.
+Datasets can be too large for their memories and computations can take too
+long to be practical. The popular simulation package,
+UrbanSim\cite{urbansim} faces these same constraints.
 
-As datasets grow and the associated processing becomes more sophisticated, these programs run into the limitations of being executed on a single computer.
+An alternative approach to using these desktop programs is to employ a
+geospatial databases like PostGIS\cite{postgis}. Geospatial databases allow
+centralized access to, and processing of, geospatial data through query
+languages such as SQL. As the data is stored by and managed by the database
+software, advanced database features such as indexes can be utilized to
+speedup data access and processing.
+
+PostGIS is utilized as the core component of the Urban
+Systems Framework\cite{usf} (USF) designed by the Digital
+Phoenix\cite{digitalphoenix} project group at Arizona State
+University. Digital Phoenix tries to integrate 3D visualization technology
+with simulated and gathered GIS data to better understands impacts of
+planning decisions.
+
+GIS data has become easier to gather in recent years with the
+proliferation on low cost GPS devices. The availability of these
+devices significantly reduces the cost of data collection, moving
+it from a government funded service to the capabilities of private
+companies and individuals even to the point of open source style maps
+such as OpenStreetMap\cite{openstreetmap}. With the reduced cost of data
+collection, the amount of data has grown significantly. As datasets grow
+and the associated processing becomes more sophisticated, the abilities of
+programs that only work on a single computer are felt through long
+processing times and inability to work with the required data. Thus a
+method of utilizing multiple computers to complete the required processing
+is needed to increase the size of the data that can be processed and reduce
+the time required to complete the processing.
 
 In 1994 David DeWitt and Jim Gray stated that parallel databases were the future for high performance databases \cite{hpdb}. Parallel databases should be able to spread both data storage and query execution across multiple computers without complicating the SQL writing process. This ability would give the SQL query writer access to execution on more computers at a time, thus decreasing time to solution, while not increasing the complexity of the researcher's query.
 
@@ -94,6 +140,7 @@ future of high performance database systems. Commun. ACM 35, 6 (Jun. 1992),
 85-98. DOI= http://doi.acm.org.ezproxy1.lib.asu.edu/10.1145/129888.129894
 \bibitem{usf}Robert Pahle and Nathan Kerr. 2009. A data centric framework
 for research in planning. UPE8.
+\bibitem{openstreetmap}http://www.openstreetmap.org
 \end{thebibliography}
 
 \end{document}
