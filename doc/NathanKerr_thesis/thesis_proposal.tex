@@ -2,7 +2,7 @@
 
 \usepackage{setspace}
 
-\title{Parallel GIS Processing\\Thesis Proposal} 
+\title{Parallel GIS Processing on Compute Clusters\\Thesis Proposal} 
 \author{Nathan~Kerr} 
 \date{May 2009}
 
@@ -65,13 +65,85 @@ method of utilizing multiple computers to complete the required processing
 is needed to increase the size of the data that can be processed and reduce
 the time required to complete the processing.
 
-In 1994 David DeWitt and Jim Gray stated that parallel databases were the future for high performance databases \cite{hpdb}. Parallel databases should be able to spread both data storage and query execution across multiple computers without complicating the SQL writing process. This ability would give the SQL query writer access to execution on more computers at a time, thus decreasing time to solution, while not increasing the complexity of the researcher's query.
+One method of using multiple computers to perform the required
+processing is the use of parallel databases\cite{hpdb}. Parallel
+databases should be able to spread both data storage and
+processing across multple computers transparently from the view
+of the SQL query programmer. Several commercial databases such as
+TeraData\cite{teradata} and Oracle\cite{oracle} provide support for this
+method of operation. Opensource databases such as MySQL\cite{mysql}
+and PostgreSQL\cite{postgres} currently do not support this
+methodology. Parallel databases generally do not require a shared
+datarepository or filesystem.
 
-While commercial parallel databases such as TeraData \cite{teradata} and Oracle \cite{oracle} do exist today, they come with a hefty price tag that seems to overwhelm what an individual researcher or small research group can afford. Adding to the price of the database software and the associated support fees, these systems often need specialized knowledge to get, and keep, running.
+Parallel database techniques have been used to build a scalable
+geo-spatial database system\cite{paradise,cs-paradise}. Data is spread
+between computers using round-robin, hash, or spatial partioning. Because
+the data is able to be distributed between multiple computers, the
+processing is able to scale to larger datasets.
 
-Many universities and research institutions already have investment in compute clusters. These clusters are groups of computer linked together with high speed network interconnects with the hardware and software already being managed by competent staffs. Of the capabilities of these high performance computing centers is available for the cost of compute cycles.
+When a query is processed across the database, a thread is created
+for each fragment of the data. Thus as the data grows larger, the
+processing capabilities of the system also increase. If a particular
+processing operation requires relatively less computation for each
+data record this is fine. However, after the amount of computation per
+data record increases beyond a certain point, which is dependant on the
+machine used, the processing operation can be sped up by utilizing more
+processors. Major factors in determining how much data should be processed
+on each machine, and therefore how the data should be spread between
+machines, are memory, computation, and communication overhead to move
+the data and computation to another machine. The ratio of computation
+to memory and commucation requirements is often referred to as grain
+size. Finer grained processes have more computation per data record, while
+coarser grained processes have little computation for each data record.
 
-If sufficient software was available to enable GIS processing on these machines, then researchers utilizing GIS would be able to make use of high performance computing to speedup processing and computation time while enabling larger datasets at minimal cost.
+Databases excel at working with indexed data while providing multiple
+users to interact with the data in a concurrently safe manner through the
+use of atomic transactions. The requirements placed upon database systems
+to handle these situations slow down computations that don't utilize
+indexes or work on an entire dataset at once by added overhead. The
+processing operations this research looks at do not require these
+restrictions, and as such a more efficient system can be created.
+
+Using databases can also limit the reusablity of computer resources
+to complete other processes. For example, a process could benefit from
+utilizing more processors, but the disks on those database nodes could
+already be fully utilized, thus making them unable to accomodate the
+computation as it is directly tied to data storage. This is only really
+an issue when trying to fully utilize hardware resources for different
+purposes.
+
+Many universities and research institutions already have investment in
+compute clusters. These clusters are groups of computer linked together
+with high speed network interconnects and high performance parallel
+filesystems such as Lustre\cite{lustre}. By separting compute and storage
+resourses at the cost of a high speed network, compute clusters are able
+to separate computation from data storage.
+
+Parallel filesystems alleviate the problems of separating the data from
+the computer where the processing will be executed by spreading files
+across multiple network connected fileservers allowing access that is
+sometimes faster than utilizing a computer's local disk for storage
+while also enabling processing to spread across the availble compute
+resourses based entirely on the process' grain size.
+
+TODO: Current programs can't run on a cluster. GRASS has been extended
+to, but is interactive while clusters are usually batch.
+
+The collaboration capabilities of GRASS GIS\cite{pgrass} have been used
+to distribute sub-queries among computers. The method described in this
+paper utilizes multiple instances of GRASS in a master-slave configuration
+where all participants access a shared data repository or filesystem. The
+geometries are portioned between the various nodes. Operations are done
+on the subsets, and the results are merged to produce the final result.
+
+Need a batch capable method (could have a graphical front-end)
+
+Inspired by Hadoop and work with hadoop. Created pgis.
+
+Pgis has methods to:
+* load data (partioned or complete copy per task)
+* Full geospatial functionality (JTS, GEOS)
 
 \section{Thesis Work}
 
@@ -81,11 +153,8 @@ The first approach will utilize the standard means of programming for high perfo
 
 A set of sample queries will be taken from work encountered with the Digital Phoenix project and with other GIS research as available.
 
-\section{Related Work}
-
 The Open Geospatial Consortium has created several standards for capabilities of GIS systems including interoperability. Among these standards are the set of Simple Features standards which define data types and operations for GIS data. This research makes use of several implementations of libraries supporting these standards. This research does not intend to create this functionality, but instead consume it. The libraries used are the Java Topology Suite (JTS) \cite{jts} and the GEOS library \cite{geos}. GEOS is a port of the JTS and was developed as part of the PostGIS extensions for PostgreSQL.
 
-The collaboration capabilities of GRASS GIS have been used to distribute sub-queries among computers. The very existence of this paper shows the lack of penetration of parallel GIS capable databases. Because the databases aren't known about or are too expensive to be utilized, other solutions are being sought. The method described in this paper utilizes multiple instances of GRASS in a master-slave configuration where all participants access a shared data repository or filesystem. The geometries are portioned between the various nodes. Operations are done on the subsets, and the results are merged to produce the final result.\cite{pgrass} This methodology is very much like Map/Reduce.
 
 \section{Value and Benefits of Research}
 
