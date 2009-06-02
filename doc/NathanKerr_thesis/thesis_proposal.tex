@@ -1,10 +1,12 @@
 \documentclass[12pt]{article}
 
+\pdfpagewidth 8.5in
+\pdfpageheight 11in
+
 \usepackage{setspace}
 
 \title{Parallel GIS Processing on Compute Clusters\\Thesis Proposal} 
 \author{Nathan~Kerr} 
-\date{May 2009}
 
 \begin{document} 
 \maketitle \doublespacing
@@ -127,25 +129,66 @@ sometimes faster than utilizing a computer's local disk for storage
 while also enabling processing to spread across the availble compute
 resourses based entirely on the process' grain size.
 
-TODO: Current programs can't run on a cluster. GRASS has been extended
-to, but is interactive while clusters are usually batch.
+Current desktop approaches to GIS processing such as ArcGIS are unable
+to make use of the multi-machine processing environment that compute
+clusters provide. While reworking these programs to utilize these extended
+resourses is possible, it is non-trivial. The collaboration capabilities
+of GRASS GIS\cite{pgrass} have been used to distribute sub-queries among
+computers. The method described in this paper utilizes multiple instances
+of GRASS in a master-slave configuration where all participants access
+a shared data repository or filesystem. The geometries are portioned
+between the various nodes. Operations are done on the subsets, and the
+results are merged to produce the final result.
 
-The collaboration capabilities of GRASS GIS\cite{pgrass} have been used
-to distribute sub-queries among computers. The method described in this
-paper utilizes multiple instances of GRASS in a master-slave configuration
-where all participants access a shared data repository or filesystem. The
-geometries are portioned between the various nodes. Operations are done
-on the subsets, and the results are merged to produce the final result.
+While the method used to extend GRASS GIS will in fact speed up GIS
+processing, it has two flaws. First, the overhead of a graphic user
+environment is required on each node to support the graphical nature
+of the program, reducing the amount of memory and processing capability
+available. Second, the entire set of data used must still fit on a single
+computer to move it in or out of the environment.
 
-Need a batch capable method (could have a graphical front-end)
+A good cluster based GIS processing enviroment needs to be separate from
+a graphical user interface so that it does not incur addtional overhead
+on the compute nodes and so that it can interact well with the generally
+batch-scheduled environment of a cluster. In addition, it must be able to
+distribute data between all the nodes used such that a single node does
+not become a limiting factor in the environment's scalability. A variety
+of data distribution models should also be available so that the data
+is distributed in a manner consistant with the required processing. Of
+course, the environment should be able to execute all the standard
+geospatial operations.
 
-Inspired by Hadoop and work with hadoop. Created pgis.
+\section{Thesis Work}
+
+Create an architecturally sound parallel GIS processing enviroment utilizing MPI based on lessons learned from Hadoop based implimentation.
+
+* Load and distribute data (modular for differing domain decompositions) (How to note what decomp is used? struct? pgisData datatype with data and 
+	pgis\_file\_load\_as\_distributed\_array(file, \&pgisdata)
+ load(file, ref to pgisData, decompType)
+ loadChunked(file, chunk\#, \&pgisData, decompType)
+
+ pgisdata->data[12][123] to access local data (all are char arrays)
+* Impliment basic processing queries to show functionality
+  * select a row
+  * perform geospatial filter (search) - representative of any geospatial function that does not require access to other parts of the dataset
+  * nearest 'x' - multi-dataset or introspective look w/o complicated decomp.
+* Utilize GEOS library (SimpleFeatures standard)
+* Inspired by Hadoop and work with hadoop. Created pgis.
+* Importance of fault recovery? RERUN
+
+Future:
+* Raster data
+
+Use Case:
+* User tells enviroment how to load the data (location of data, and decomposition method) If preprocessing is needed for a dataset, the loader will do it and then cache the results to disk. cache used if newer than dataset.
+* User interacts with the data as needed
+* Export of distributed data
 
 Pgis has methods to:
 * load data (partioned or complete copy per task)
 * Full geospatial functionality (JTS, GEOS)
 
-\section{Thesis Work}
+Develop a fairly generic GIS processing model for cluster compute environments.
 
 I intend to demonstrate two different approaches to executing GIS queries on high performance computing clusters. These approaches will be compared with the database driven SQL query approach in terms of ease of programming and execution time.
 
@@ -154,7 +197,6 @@ The first approach will utilize the standard means of programming for high perfo
 A set of sample queries will be taken from work encountered with the Digital Phoenix project and with other GIS research as available.
 
 The Open Geospatial Consortium has created several standards for capabilities of GIS systems including interoperability. Among these standards are the set of Simple Features standards which define data types and operations for GIS data. This research makes use of several implementations of libraries supporting these standards. This research does not intend to create this functionality, but instead consume it. The libraries used are the Java Topology Suite (JTS) \cite{jts} and the GEOS library \cite{geos}. GEOS is a port of the JTS and was developed as part of the PostGIS extensions for PostgreSQL.
-
 
 \section{Value and Benefits of Research}
 
