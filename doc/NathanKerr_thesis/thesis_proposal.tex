@@ -156,53 +156,32 @@ not become a limiting factor in the environment's scalability. A variety
 of data distribution models should also be available so that the data
 is distributed in a manner consistant with the required processing. Of
 course, the environment should be able to execute all the standard
-geospatial operations.
+geospatial operations as defined by the Open Geospatial Consortium in
+their Simple Features\cite{ogc-sf} standard.
 
 \section{Thesis Work}
 
-Create an architecturally sound parallel GIS processing enviroment utilizing MPI based on lessons learned from Hadoop based implimentation.
+This thesis will evaluate a novel method of processing geospatial data which treats datasets as an atomic unit (as opposed to databases where records are atomic). By despensing with the requirements dictated by record level atomicity, software complexity is reduced significantly allowing for simplier implimentations with less overhead. This new viewpoint trades 
 
-* Load and distribute data (modular for differing domain decompositions) (How to note what decomp is used? struct? pgisData datatype with data and 
-	pgis\_file\_load\_as\_distributed\_array(file, \&pgisdata)
- load(file, ref to pgisData, decompType)
- loadChunked(file, chunk\#, \&pgisData, decompType)
+Compare speedup and scaleup to a theoretical linear speedup derived from the serial execution of PostGIS. Speedup = more procs, more speed. Scaleup = more procs, more data, same speed.
 
- pgisdata->data[12][123] to access local data (all are char arrays)
-* Impliment basic processing queries to show functionality
-  * select a row
-  * perform geospatial filter (search) - representative of any geospatial function that does not require access to other parts of the dataset
-  * nearest 'x' - multi-dataset or introspective look w/o complicated decomp.
-* Utilize GEOS library (SimpleFeatures standard)
-* Inspired by Hadoop and work with hadoop. Created pgis.
-* Importance of fault recovery? RERUN
+speedup, scaleup
 
-Future:
-* Raster data
+Single dataset operations:
 
-Use Case:
-* User tells enviroment how to load the data (location of data, and decomposition method) If preprocessing is needed for a dataset, the loader will do it and then cache the results to disk. cache used if newer than dataset.
-* User interacts with the data as needed
-* Export of distributed data
+* Record Create Read Update Destroy (bad for pgis, needs indexing to be fast)
 
-Pgis has methods to:
-* load data (partioned or complete copy per task)
-* Full geospatial functionality (JTS, GEOS)
+* Filter/Transform (good for pgis)
 
-Develop a fairly generic GIS processing model for cluster compute environments.
+Dual dataset operations:
 
-I intend to demonstrate two different approaches to executing GIS queries on high performance computing clusters. These approaches will be compared with the database driven SQL query approach in terms of ease of programming and execution time.
-
-The first approach will utilize the standard means of programming for high performance computing clusters, MPI \cite{mpi}. The second will use the open source version of Google's MapReduce \cite{mapreduce}, Hadoop \cite{hadoop}.
-
-A set of sample queries will be taken from work encountered with the Digital Phoenix project and with other GIS research as available.
-
-The Open Geospatial Consortium has created several standards for capabilities of GIS systems including interoperability. Among these standards are the set of Simple Features standards which define data types and operations for GIS data. This research makes use of several implementations of libraries supporting these standards. This research does not intend to create this functionality, but instead consume it. The libraries used are the Java Topology Suite (JTS) \cite{jts} and the GEOS library \cite{geos}. GEOS is a port of the JTS and was developed as part of the PostGIS extensions for PostgreSQL.
+* Nearest feature (secondary dataset could be a copy of the primary)
 
 \section{Value and Benefits of Research}
 
-While any sort of programming or query model moves away from the seeming simplicity of graphical, clickable, user interfaces, any form of script is easy to save for later replication and thus traceability of the research done. In addition, complicated tasks are more easily repeatable.
+Simplier data-access model simplifies software requirements thus lowers the cost to developing new models, simulations, or processing modules.
 
-The benefits of a programming or query model come with the definite tradeoff of a seemingly increased learning curve for the researchers. With the right model, these approaches will be no harder than writing simple SQL statements, while proving reduced time to solution on inexpensive and more available resources than the commercial parallel databases offer.
+Classifies geospatial operations based on data access requirements.
 
 \section{Research Plan}
 
@@ -220,9 +199,10 @@ An approximate timeline for these activities follows:
 
 \section{Completion Criteria}
 \begin{enumerate}
-	\item A set of GIS operations sufficient to validate an environment against real world operation
-	\item Working implementations for each operation in each environment.
-	\item Comparisons of the ease of programability and execution times for each environment
+	\item Geospatial operation classification by data access, analysis of methods required by OGC standards
+	\item Parallel GIS processing environment implimentation
+	\item Performance analysis of implimentation
+	\item Analysis of problem types that are good/bad for this approach
 \end{enumerate}
 
 \begin{thebibliography}{99}
