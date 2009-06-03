@@ -13,45 +13,46 @@
 
 \section{Introduction}
 
-Geospatial (GIS) simulation, analysis, and simulation are important
-processes to understanding and improving our environment, both urban and
-natural. Geospatial data is made up of a georefrenced geometry such as a
-point or a polygon at a certain logitude, latitude, and altitude with
-related descriptive information such as a land use type. GIS data can be
-used to represent a large range of real-world objects such as road or power
-networks, building locations, or natural features such as lakes and rivers.
-Utilizing GIS data is one method toward processing, analyzing, and
-simulating real-world systems. One consumer application of GIS are the GPS
-based car navigation systems common today.
+Geospatial (GIS) simulation and analysis are important processes
+to understanding and improving our environment, both urban and
+natural. Geospatial data is made up of a georeferenced geometry such
+as a point or a polygon at a certain longitude, latitude, and altitude
+with related descriptive information such as a land use type. GIS data
+can be used to represent a large range of real-world objects such as
+road or power networks, building locations, or natural features such as
+lakes and rivers.  Utilizing GIS data is one method toward processing,
+analyzing, and simulating real-world systems. One consumer application
+of GIS are the GPS based car navigation systems common today.
 
 Larger scale GIS applications also exist in areas such as city planning.
-City planners use GIS to study road networks, zoning issues, and to
-simulate population growth. As cities and metropolises grow, the amount of
-data required to represent these areas also increases. As the data
-increases, so does the processing power required to complete the geospatial
-analysis, processing, and simulation.
+City planners use GIS to study road networks, zoning issues, and
+to simulate population growth. As cities and metropolises grow, the
+amount of data required to represent these areas also increases. As the
+amount of data increases, so does the processing power required to complete the
+geospatial analysis, processing, and simulation.
 
 Desktop GIS packages such as ArcGIS\cite{arcgis}, QuantumGIS\cite{qgis},
 and GRASS GIS\cite{grass} are commonly used for GIS processing and
-analysis. While these programs provide graphical interfaces to their GIS
-capabilities, their capabilites are limited by the computers they run on.
-Datasets can be too large for their memories and computations can take too
-long to be practical. The popular simulation package,
+analysis. While these programs provide graphical interfaces to their
+GIS capabilities, their capabilities are limited by the computers they
+run on.  Datasets can be too large for their memories and computations
+can take too long to be practical. The popular simulation package,
 UrbanSim\cite{urbansim} faces these same constraints.
 
-An alternative approach to using these desktop programs is to employ a
-geospatial databases like PostGIS\cite{postgis}. Geospatial databases allow
-centralized access to, and processing of, geospatial data through query
-languages such as SQL. As the data is stored by and managed by the database
-software, advanced database features such as indexes can be utilized to
-speedup data access and processing.
+An alternative approach to using these desktop programs is to employ
+a geospatial database like PostGIS\cite{postgis}, ArcSDE\cite{arcsde}
+or Oracle Spatial\cite{oracle}. Geospatial databases allow centralized
+access to, and processing of, geospatial data through query languages
+such as SQL. As data is stored and managed by the database software,
+advanced database features such as indexes can be utilized to speedup
+data access and processing.
 
 PostGIS is utilized as the core component of the Urban
 Systems Framework\cite{usf} (USF) designed by the Digital
 Phoenix\cite{digitalphoenix} project group at Arizona State
 University. Digital Phoenix tries to integrate 3D visualization technology
-with simulated and gathered GIS data to better understands impacts of
-planning decisions.
+with simulated and gathered GIS data to better understand the impacts
+of urban planning decisions.
 
 GIS data has become easier to gather in recent years with the
 proliferation on low cost GPS devices. The availability of these
@@ -60,27 +61,27 @@ it from a government funded service to the capabilities of private
 companies and individuals even to the point of open source style maps
 such as OpenStreetMap\cite{openstreetmap}. With the reduced cost of data
 collection, the amount of data has grown significantly. As datasets grow
-and the associated processing becomes more sophisticated, the abilities of
-programs that only work on a single computer are felt through long
+and the associated processing becomes more sophisticated, the limitations
+of programs that only work on a single computer are felt through long
 processing times and inability to work with the required data. Thus a
 method of utilizing multiple computers to complete the required processing
-is needed to increase the size of the data that can be processed and reduce
-the time required to complete the processing.
+is needed to increase the size of the data that can be processed and
+reduce the time required to complete the processing.
 
 One method of using multiple computers to perform the required
 processing is the use of parallel databases\cite{hpdb}. Parallel
 databases should be able to spread both data storage and
-processing across multple computers transparently from the view
+processing across multiple computers transparently from the view
 of the SQL query programmer. Several commercial databases such as
 TeraData\cite{teradata} and Oracle\cite{oracle} provide support for this
-method of operation. Opensource databases such as MySQL\cite{mysql}
+method of operation. Open source databases such as MySQL\cite{mysql}
 and PostgreSQL\cite{postgres} currently do not support this
 methodology. Parallel databases generally do not require a shared
-datarepository or filesystem.
+data repository or filesystem.
 
 Parallel database techniques have been used to build a scalable
-geo-spatial database system\cite{paradise,cs-paradise}. Data is spread
-between computers using round-robin, hash, or spatial partioning. Because
+geospatial database system\cite{paradise,cs-paradise}. Data is spread
+between computers using round-robin, hash, or spatial partitioning. Because
 the data is able to be distributed between multiple computers, the
 processing is able to scale to larger datasets.
 
@@ -89,81 +90,89 @@ for each fragment of the data. Thus as the data grows larger, the
 processing capabilities of the system also increase. If a particular
 processing operation requires relatively less computation for each
 data record this is fine. However, after the amount of computation per
-data record increases beyond a certain point, which is dependant on the
-machine used, the processing operation can be sped up by utilizing more
-processors. Major factors in determining how much data should be processed
-on each machine, and therefore how the data should be spread between
-machines, are memory, computation, and communication overhead to move
-the data and computation to another machine. The ratio of computation
-to memory and commucation requirements is often referred to as grain
-size. Finer grained processes have more computation per data record, while
-coarser grained processes have little computation for each data record.
+data record increases beyond a certain point, which is dependent on the
+speed of the machine used, the processing operation can be sped up by
+utilizing more processors. Major factors in determining how much data
+should be processed on each machine, and therefore how the data should
+be spread between machines, are memory, computation, and communication
+overhead to move the data and computation to another machine. The ratio
+of computation to memory and commutation requirements is often referred
+to as grain size. Coarser grained processes have more computation per
+data record, while finer grained processes have little computation for
+each data record.
 
-Databases excel at working with indexed data while providing multiple
-users to interact with the data in a concurrently safe manner through the
-use of atomic transactions. The requirements placed upon database systems
-to handle these situations slow down computations that don't utilize
-indexes or work on an entire dataset at once by added overhead. The
-processing operations this research looks at do not require these
-restrictions, and as such a more efficient system can be created.
+Databases excel at working with indexed data while allowing multiple
+users to interact with the data in a concurrently safe manner through
+the use of atomic transactions. The requirements placed upon database
+systems to handle these situations slow down computations that don't
+utilize indexes or work on an entire dataset at once. The processing
+operations this research examines do not require these restrictions,
+and as such a more efficient system can be created.
 
-Using databases can also limit the reusablity of computer resources
+Using databases can also limit the reusability of computer resources
 to complete other processes. For example, a process could benefit from
 utilizing more processors, but the disks on those database nodes could
-already be fully utilized, thus making them unable to accomodate the
+already be fully utilized, thus making them unable to accommodate the
 computation as it is directly tied to data storage. This is only really
 an issue when trying to fully utilize hardware resources for different
 purposes.
 
-Many universities and research institutions already have investment in
-compute clusters. These clusters are groups of computer linked together
-with high speed network interconnects and high performance parallel
-filesystems such as Lustre\cite{lustre}. By separting compute and storage
-resourses at the cost of a high speed network, compute clusters are able
-to separate computation from data storage.
+Many universities and research institutions already have significant
+investment in compute clusters. These clusters are groups of computer
+linked together with high speed network interconnects and high performance
+parallel filesystems such as Lustre\cite{lustre}. By separating compute and
+storage resources at the cost of a high speed network, compute clusters
+are able to separate computation from data storage.
+%TODO: Compare to SAN approaches
 
 Parallel filesystems alleviate the problems of separating the data from
 the computer where the processing will be executed by spreading files
 across multiple network connected fileservers allowing access that is
 sometimes faster than utilizing a computer's local disk for storage
-while also enabling processing to spread across the availble compute
-resourses based entirely on the process' grain size.
+while also enabling processing to spread across the available compute
+resources based entirely on the process' grain size.
 
-Current desktop approaches to GIS processing such as ArcGIS are unable
-to make use of the multi-machine processing environment that compute
-clusters provide. While reworking these programs to utilize these extended
-resourses is possible, it is non-trivial. The collaboration capabilities
-of GRASS GIS\cite{pgrass} have been used to distribute sub-queries among
-computers. The method described in this paper utilizes multiple instances
-of GRASS in a master-slave configuration where all participants access
-a shared data repository or filesystem. The geometries are portioned
-between the various nodes. Operations are done on the subsets, and the
-results are merged to produce the final result.
+Current desktop approaches to GIS processing such as ArcGIS are
+unable to make use of the multi-machine processing environment that
+compute clusters provide. While reworking these programs to utilize
+these extended resources is possible, it is non-trivial. GRASS GIS was
+reworked\cite{pgrass} to use its collaboration features to distribute
+sub-queries among computers. The method described in this paper utilizes
+multiple instances of GRASS in a master-slave configuration where
+all participants access a shared data repository or filesystem. The
+geometries are portioned between the various nodes. Operations are done
+on the subsets, and the results are merged to produce the final result.
 
 While the method used to extend GRASS GIS will in fact speed up GIS
-processing, it has two flaws. First, the overhead of a graphic user
-environment is required on each node to support the graphical nature
-of the program, reducing the amount of memory and processing capability
-available. Second, the entire set of data used must still fit on a single
-computer to move it in or out of the environment.
+processing, it has two flaws. First, GRASS is designed to be used in an
+interactive mode rather than a batch or script driven approach.  Second,
+the entire set of data used must still fit on a single computer to move
+it in or out of the environment.
 
-A good cluster based GIS processing enviroment needs to be separate from
-a graphical user interface so that it does not incur addtional overhead
+A good cluster based GIS processing environment needs to be separate from
+a graphical user interface so that it does not incur additional overhead
 on the compute nodes and so that it can interact well with the generally
 batch-scheduled environment of a cluster. In addition, it must be able to
 distribute data between all the nodes used such that a single node does
 not become a limiting factor in the environment's scalability. A variety
 of data distribution models should also be available so that the data
-is distributed in a manner consistant with the required processing. Of
+is distributed in a manner consistent with the required processing. Of
 course, the environment should be able to execute all the standard
 geospatial operations as defined by the Open Geospatial Consortium in
 their Simple Features\cite{ogc-sf} standard.
 
 \section{Thesis Work}
 
-This thesis will evaluate a novel method of processing geospatial data which treats datasets as an atomic unit (as opposed to databases where records are atomic). By despensing with the requirements dictated by record level atomicity, software complexity is reduced significantly allowing for simplier implimentations with less overhead. This new viewpoint trades 
+This thesis will evaluate a novel method of processing geospatial data
+which treats datasets as an atomic unit (as opposed to databases where
+records are atomic). By dispensing with the requirements dictated by
+record level atomicity, software complexity is reduced significantly
+allowing for simpler implementations with less overhead.
 
-Compare speedup and scaleup to a theoretical linear speedup derived from the serial execution of PostGIS. Speedup = more procs, more speed. Scaleup = more procs, more data, same speed.
+%TODO: describe approach
+%TODO: describe queries (operations)
+
+Compare speedup and scaleup to a theoretical linear speedup derived from the serial execution of PostGIS. Speedup = more processors, more speed. Scaleup = more processors, more data, same speed.
 
 speedup, scaleup
 
@@ -179,7 +188,7 @@ Dual dataset operations:
 
 \section{Value and Benefits of Research}
 
-Simplier data-access model simplifies software requirements thus lowers the cost to developing new models, simulations, or processing modules.
+Simpler data-access model simplifies software requirements thus lowers the cost to developing new models, simulations, or processing modules.
 
 Classifies geospatial operations based on data access requirements.
 
@@ -200,8 +209,8 @@ An approximate timeline for these activities follows:
 \section{Completion Criteria}
 \begin{enumerate}
 	\item Geospatial operation classification by data access, analysis of methods required by OGC standards
-	\item Parallel GIS processing environment implimentation
-	\item Performance analysis of implimentation
+	\item Parallel GIS processing environment implementation
+	\item Performance analysis of implementation
 	\item Analysis of problem types that are good/bad for this approach
 \end{enumerate}
 
