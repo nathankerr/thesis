@@ -163,32 +163,57 @@ their Simple Features\cite{ogc-sf} standard.
 
 \section{Thesis Work}
 
-This thesis will evaluate a novel method of processing geospatial data
-which treats datasets as an atomic unit (as opposed to databases where
-records are atomic). By dispensing with the requirements dictated by
-record level atomicity, software complexity is reduced significantly
-allowing for simpler implementations with less overhead.
+This thesis will evaluate a novel method of processing geospatial data,
+called pgis, which treats datasets as an atomic unit (as opposed to
+databases where records are atomic). By dispensing with the requirements
+dictated by record level atomicity, software complexity is reduced
+significantly allowing for a simpler implementations with less overhead.
+
+The first step in pgis is to distribute the data between the computers
+participating in the operation. Pgis is a data parallel system, meaning
+that a dataset can be split up onto multiple computers and the operations
+on the data require little if any data on another computer. I will refer
+to this dataset as the primary dataset. For some operations, a secondary
+dataset is required in its entirety. For instance if the operation is
+to find the nearest record to a given georeferenced point. If both the
+primary and secondary datasets were spatially distributed between the
+computers as described in \cite{paradise} additional preprocessing would
+be needed. The limitations of having the entire secondary dataset on each
+computer are increased memory footprint and number of records that have
+to be looked at. While pgis does not implement a spatial distribution
+method, one could be added in future work.
+
+After the data is distributed, a user defined operation is executed. This operation should iterate over the subset of records from the primary dataset, creating a new dataset or modifying the existing one. This is also where the secondary dataset can be referenced
+
+* split and distribute records
+* iterate over records
+* output new dataset
+
+This new method will be evaluated for speedup and scaleup, using
+equivalent operations executed in PostGIS as a reference. Speedup
+is obtained when more execution speed is gained by adding additional
+processors, while keeping the same dataset. Scaleup measures how well
+a program can handle different sizes of datasets while adding more
+processors at the same time the dataset size grows.
+
+A series of operations meant to be representative of real-world uses will
+be used. The first set of operations look at single record create, read,
+update, and destroy. This set of operations is meant to show the strength
+of the database approach and the weakness of this new method. The second
+set of operations will extract a subset of a datset using a geospatial
+operation to determine if a record is part of the subset. This operation
+should show the strength of the new method as compared to the database
+approach. The third, and final, operation will find the spatially nearest
+feature of one dataset for each record of a dataset. This operation
+is the hardest for the database approach and shows the strength of the
+new approach. Full details for datasets and operations will be given in
+the thesis.
 
 %TODO: describe approach
-%TODO: describe queries (operations)
-
-Compare speedup and scaleup to a theoretical linear speedup derived from the serial execution of PostGIS. Speedup = more processors, more speed. Scaleup = more processors, more data, same speed.
-
-speedup, scaleup
-
-Single dataset operations:
-
-* Record Create Read Update Destroy (bad for pgis, needs indexing to be fast)
-
-* Filter/Transform (good for pgis)
-
-Dual dataset operations:
-
-* Nearest feature (secondary dataset could be a copy of the primary)
 
 \section{Value and Benefits of Research}
 
-Simpler data-access model simplifies software requirements thus lowers the cost to developing new models, simulations, or processing modules.
+Evaluation of simpler data-access model simplifies software requirements thus lowers the cost to developing new models, simulations, or processing modules.
 
 Classifies geospatial operations based on data access requirements.
 
