@@ -183,13 +183,11 @@ computer are increased memory footprint and number of records that have
 to be looked at. While pgis does not implement a spatial distribution
 method, one could be added in future work.
 
-After the data is distributed, a user defined operation is executed. This operation should iterate over the subset of records from the primary dataset, creating a new dataset or modifying the existing one. This is also where the secondary dataset can be referenced
+After the data is distributed, a user defined operation is executed. This operation should iterate over the subset of records
+from the primary dataset, creating a new dataset or modifying the existing one. This is also where the secondary dataset can
+be referenced to perform operations like nearest neighbor. After the user defined operation is completed, either the modified primary dataset or a newly created dataset is saved.
 
-* split and distribute records
-* iterate over records
-* output new dataset
-
-This new method will be evaluated for speedup and scaleup, using
+Pgis will be evaluated for speedup and scaleup, using
 equivalent operations executed in PostGIS as a reference. Speedup
 is obtained when more execution speed is gained by adding additional
 processors, while keeping the same dataset. Scaleup measures how well
@@ -206,28 +204,26 @@ should show the strength of the new method as compared to the database
 approach. The third, and final, operation will find the spatially nearest
 feature of one dataset for each record of a dataset. This operation
 is the hardest for the database approach and shows the strength of the
-new approach. Full details for datasets and operations will be given in
+new approach. Full details for datasets and operations used will be given in
 the thesis.
-
-%TODO: describe approach
 
 \section{Value and Benefits of Research}
 
-Evaluation of simpler data-access model simplifies software requirements thus lowers the cost to developing new models, simulations, or processing modules.
+By simplifying the requirements to handle process GIS operations in parallel, the cost to implementing parallel solutions will decrease, enabling more parallel processing methods to be created. This parallel methods will be able to take advantage of the increased processing powers made available through compute clusters.
 
-Classifies geospatial operations based on data access requirements.
+Another benefit of this research is a classification of geospatial operations based on data access requirements and a sample set of queries to evaluate the efficiency of a parallel GIS processing implementation.
 
 \section{Research Plan}
 
-The research will progress on two interrelated paths. The first path is determining a sufficient set of GIS operations to validate a processing environment on real world operations. The second path will be developing the MPI and Hadoop environments to execute the set of operations determined. All operations will also be executed using PostGIS to compare for query development and execution times.
+Some of the needed research has already been completed. After determining the query set and creating the PostGIS implementation of it, the processing environment was prototyped in Hadoop\cite{hadoop}, an opensource implementation of Google's MapReduce\cite{mapreduce} framework. MapReduce works by utilizing two user defined function, map and reduce. For each record of the primary dataset the map function is called. This process is made parallel by splitting the data up among several computers and running the individual map functions on those computers. After the map function is complete, the resulting set of data is passed to several reduce functions. Each instance of the reduce function receives all the data from the resulting dataset associated with the same key. The lessons learned from this prototyping phase will be applied to the MPI implementation.
 
 An approximate timeline for these activities follows:
 
 \begin{enumerate}
 	\item{Fall 2008: Definition of GIS queries}
 	\item{Fall 2008 - Early Spring 2009: Development and execution of queries in PostGIS}
-	\item{February - April 2009: Development of queries in MPI}
-	\item{April 2009 - May 2009: Development of queries in Hadoop}
+	\item{February - May 2009: Development of prototype in Hadoop}
+	\item{May - June 2009: Development of the final environment using MPI}
 	\item{June - July 2009: Analysis and Evaluation}
 \end{enumerate}
 
