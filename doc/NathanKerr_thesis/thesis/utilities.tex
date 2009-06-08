@@ -1,0 +1,218 @@
+\doublespacing
+%% ALTER TO CHANGE PRINTING OF NOTES
+\newcommand{\draftnote}[1]{}
+%\newcommand{\draftnote}[1]{\marginpar{\tiny\raggedright\textsf{\textcolor{red}{\hspace{0pt}#1}}}}
+
+
+
+\newcommand{\acomm}[1]{{}}
+
+%\newcommand{\newcomm}[1]{{\renewcommand{\baselinestretch}{0.9}%
+%        \mbox{$^\circ$}\marginpar{\footnotesize\sf\raggedright\hspace{0pt}#1}}%
+%}
+
+\newcommand{\newcomm}[1]{}%
+
+\makeatletter
+\newcommand\chapternew{\if@openright\cleardoublepage\else\clearpage\fi
+                    \thispagestyle{empty}%
+                    \global\@topnum\z@
+                    \@afterindentfalse
+                    \secdef\@chapter\@schapter
+}
+\def\@chapter[#1]#2{  \ifnum \c@secnumdepth >\m@ne
+                        \refstepcounter{chapter}%
+                        \typeout{\@chapapp\space\thechapter.}%
+                        \addcontentsline{toc}{chapter}%
+                                  {\protect\numberline{\thechapter}#1}%
+                   \else
+                     \addcontentsline{toc}{chapter}{#1}%
+                   \fi
+                   \chaptermark{#1}%
+                   \addtocontents{lof}{\protect\addvspace{10\p@}}%
+                   \addtocontents{lot}{\protect\addvspace{10\p@}}%
+%                  \@makechapternewhead{#2}
+%                    \if@twocolumn
+%                      \@topnewpage[\@makechapterhead{#2}]%
+%                    \else
+%                      \@makechapterhead{#2}%
+%                      \@afterheading
+%                   \fi
+}
+\newcommand\@makechapternewhead[1]{}%
+
+\renewcommand\section{\@startsection {section}{1}{\z@}%
+                                   {-3.5ex \@plus -1ex \@minus -.2ex}%
+                                   {2.3ex \@plus.2ex}%
+                                   {\normalfont}}
+\renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
+                                     {-3.25ex\@plus -1ex \@minus -.2ex}%
+                                     {1.5ex \@plus .2ex}%
+                                     {\normalfont}}
+\renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}%
+                                     {-3.25ex\@plus -1ex \@minus -.2ex}%
+                                     {1.5ex \@plus .2ex}%
+                                     {\normalfont}}
+\renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
+                                    {3.25ex \@plus1ex \@minus.2ex}%
+                                    {-1em}%
+                                    {\normalfont}}
+\renewcommand\subparagraph{\@startsection{subparagraph}{5}{\parindent}%
+                                       {3.25ex \@plus1ex \@minus .2ex}%
+                                       {-1em}%
+                                      {\normalfont}}
+\renewcommand*\l@chapter[2]{%
+  \ifnum \c@tocdepth >\m@ne
+    \addpenalty{-\@highpenalty}%
+    \vskip 1.0em \@plus\p@
+    \setlength\@tempdima{1.5em}%
+    \begingroup
+      \parindent \z@ \rightskip \@pnumwidth
+      \parfillskip -\@pnumwidth
+      \leavevmode %\bfseries
+      \advance\leftskip\@tempdima
+      \hskip -\leftskip
+      CHAPTER #1\nobreak\
+       \leaders\hbox{$\m@th
+        \mkern \@dotsep mu\hbox{.}\mkern \@dotsep
+        mu$}\hfil\nobreak\hb@xt@\@pnumwidth{\hss #2}\par
+      \penalty\@highpenalty
+    \endgroup
+  \fi}
+
+
+\newcommand*\l@listchapter[2]{%
+  \ifnum \c@tocdepth >\m@ne
+    \addpenalty{-\@highpenalty}%
+    \vskip 1.0em \@plus\p@
+    \setlength\@tempdima{1.5em}%
+    \begingroup
+      \parindent \z@ \rightskip \@pnumwidth
+      \parfillskip -\@pnumwidth
+      \leavevmode %\bfseries
+      \advance\leftskip\@tempdima
+      \hskip -\leftskip
+      #1\nobreak\
+       \leaders\hbox{$\m@th
+        \mkern \@dotsep mu\hbox{.}\mkern \@dotsep
+        mu$}\hfil\nobreak\hb@xt@\@pnumwidth{\hss #2}\par
+      \penalty\@highpenalty
+    \endgroup
+  \fi}
+
+\newcommand\TOCname{TABLE OF CONTENTS}
+
+\newcommand\mytableofcontents{%
+    \if@twocolumn
+      \@restonecoltrue\onecolumn
+    \else
+      \@restonecolfalse
+    \fi
+    \begin{center}\TOCname\end{center}
+    \begin{flushright}Page\end{flushright}
+
+%    \chapter*{\TOCname
+%        \@mkboth{%
+%           \MakeUppercase\TOCname}{\MakeUppercase\TOCname}}%
+    \pagestyle{fancy}
+    \lhead{}
+    \chead{}
+    \rhead{Page}
+    \lfoot{}
+    \cfoot{\thepage}
+    \rfoot{}
+    \renewcommand{\headrulewidth}{0pt}
+    \renewcommand{\footrulewidth}{0pt}
+
+    \thispagestyle{plain}
+    \@starttoc{toc}%
+    \if@restonecol\twocolumn\fi
+    }
+
+\newcommand\mylistoffigures{%
+    \if@twocolumn
+      \@restonecoltrue\onecolumn
+    \else
+      \@restonecolfalse
+    \fi
+    \begin{center}LIST OF FIGURES\end{center}
+    Figure\hspace{\stretch{1}}Page
+%    \begin{flushleft}FIGURE\end{flushleft}\begin{flushright}Page\end{flushright}
+
+%    \chapter*{\listfigurename}%
+%      \@mkboth{\MakeUppercase\listfigurename}%
+%              {\MakeUppercase\listfigurename}%
+    \pagestyle{fancy}
+    \lhead{Figure}
+    \chead{}
+    \rhead{Page}
+    \lfoot{}
+    \cfoot{\thepage}
+    \rfoot{}
+    \renewcommand{\headrulewidth}{0pt}
+    \renewcommand{\footrulewidth}{0pt}
+    \thispagestyle{plain}
+    \@starttoc{lof}%
+    \if@restonecol\twocolumn\fi
+    }
+
+\newcommand\mylistoftables{%
+    \if@twocolumn
+      \@restonecoltrue\onecolumn
+    \else
+      \@restonecolfalse
+    \fi
+    \begin{center}LIST OF TABLES\end{center}
+    Table\hspace{\stretch{1}}Page
+    \pagestyle{plain}
+
+
+%    \chapter*{\listtablename}%
+%      \@mkboth{%
+%          \MakeUppercase\listtablename}%
+%         {\MakeUppercase\listtablename}%
+    \@starttoc{lot}%
+    \if@restonecol\twocolumn\fi
+    }
+
+\newcommand\myappendix{\par
+  \setcounter{chapter}{0}%
+  \setcounter{section}{0}%
+  \gdef\thechapter{\@Alph\c@chapter}}
+
+
+\renewcommand\bibsection{{\bf BIBLIOGRAPHY}}
+\renewenvironment{thebibliography}[1]{%
+ \bibsection\parindent
+\z@\bibpreamble\bibfont\list
+   {\@biblabel{\arabic{NAT@ctr}}}{\@bibsetup{#1}%
+    \setcounter{NAT@ctr}{0}}%
+    \ifNAT@openbib
+      \renewcommand\newblock{\par}
+    \else
+      \renewcommand\newblock{\hskip .11em \@plus.33em \@minus.07em}%
+    \fi
+    \sloppy\clubpenalty4000\widowpenalty4000
+    \sfcode`\.=1000\relax
+    \let\citeN\cite \let\shortcite\cite
+    \let\citeasnoun\cite
+}
+
+\def\@makechapterhead#1{#1}%
+%\vspace*{50\p@}%  
+%  {\parindent \z@ \raggedright \normalfont
+%    \ifnum \c@secnumdepth >\m@ne
+%        \large\bfseries \@chapapp\space
+%       \thechapter
+%        \par\nobreak
+%        \vskip 20\p@
+%    \fi
+%    \interlinepenalty\@M
+%   \large\space #1\ par\nobreak
+%    \vskip 40\p@
+%}}
+
+
+\makeatother
+
+

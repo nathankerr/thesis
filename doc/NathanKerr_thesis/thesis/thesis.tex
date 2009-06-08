@@ -1,0 +1,172 @@
+\documentclass[12pt]{report}
+
+% Usepackages go here
+\usepackage{graphicx}
+\usepackage{pslatex}
+\usepackage{fancyvrb}
+%\usepackage{color}
+%\usepackage{fullpage}
+\usepackage{setspace}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{hhline}
+\usepackage{fancyhdr}
+\usepackage{tocloft}
+\usepackage{natbib}
+%\usepackage{listings}
+\usepackage[top=1in,bottom=1in,left=1.5in,right=1in]{geometry}
+\usepackage[margin=10pt,labelfont=bf,labelsep=endash]{caption}
+
+
+\include{utilities}
+
+
+\begin{document}
+
+\pagestyle{headings}
+%Begin the Title page
+\begin{center}
+\thispagestyle{empty}
+\vspace{-.1in}
+%TITLE
+PARALLEL GIS PROCESSING \\
+by \\
+Nathan Kerr
+
+\vspace{3.6in}
+
+\begin{spacing}{1}
+A Thesis Presented in Partial Fulfillment \\
+of the Requirements for the Degree \\
+Master of Science
+\end{spacing}
+
+\vspace{3.6in}
+ARIZONA STATE UNIVERSITY \\
+%DATE
+August 2009
+\end{center}
+
+
+\pagebreak
+
+%Begin the approval page
+\begin{center}
+\thispagestyle{empty}
+\vspace{-.1in}
+%TITLE
+PARALLEL GIS PROCESSING \\
+by \\
+Nathan Kerr
+
+\vspace{6ex}
+
+has been approved \\
+%DATE
+August 2009
+
+\vspace{2.6in}
+Graduate Supervisory Committee:
+
+\vspace{2ex}
+
+\begin{spacing}{1}
+Daniel Stanzione, Chair \\
+Robert Pahle \\
+TBD \\
+\end{spacing}
+\vspace{3.1in}
+ACCEPTED BY THE DIVISION OF GRADUATE STUDIES
+\end{center}
+
+
+\pagebreak
+
+% Add aproval here, update setcounter below!
+
+% ABSTRACT
+\pagenumbering{roman}
+\pagestyle{plain}
+\begin{center}
+ABSTRACT
+\end{center}
+\pagenumbering{roman}
+\pagestyle{plain}
+\setcounter{page}{3}
+\doublespacing
+%TODO: Abstract here
+
+\pagebreak
+
+% Add Dedication?
+
+% Add Acknowledgments
+\begin{center}
+ACKNOWLEDGMENTS
+\end{center}
+
+\doublespacing
+%TODO: Add acknowledgements here
+
+\pagebreak
+
+
+
+% TABLE OF CONTENTS
+
+\pagestyle{plain}
+\addtocontents{toc}{\contentsline{listchapter}{\numberline{} LIST OF TABLES}{vii}}
+\addtocontents{toc}{\contentsline{listchapter}{\numberline{} LIST OF FIGURES}{viii}}
+\rhead{Page}
+\mytableofcontents
+\newpage
+\mylistoftables
+\newpage
+\mylistoffigures
+\newpage
+\setcounter{page}{9}
+\pagenumbering{roman}
+
+\topmargin -2pt
+\headsep 10pt
+\addtolength\textheight{-.3in}
+
+\pagebreak
+\pagenumbering{arabic}
+\pagestyle{fancy}
+\lhead{}
+\chead{}
+\rhead{\thepage}
+\lfoot{}
+\cfoot{}
+\rfoot{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+
+\doublespace
+%\include{Introduction._include_}
+
+%\include{RelatedWorks._include_}
+
+%\include{Architecture._include_}
+
+%\include{Methods._include_}
+
+%\include{Results._include_}
+%\include{Testing._include_}
+
+%\include{Conclusions._include_}
+
+% \include{FutureWork._include_}
+
+\singlespace
+%\bibliographystyle{ieeetr}
+%\bibliography{BIB}
+% TODO FIX BIBLIOGRAPHY PAGE NUMBER
+\newpage
+\addtocontents{toc}{\contentsline{listchapter}{\numberline{} BIBLIOGRAPHY}{64}}
+\bibliographystyle{plain}
+\bibliography{thesis}
+
+\end{document}

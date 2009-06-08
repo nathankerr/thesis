@@ -1,0 +1,10 @@
+*.aux
+*.make
+*.bbl
+*.blg
+*.d
+*.dvi
+*.fls
+*.log
+*.ps
+*.swp
