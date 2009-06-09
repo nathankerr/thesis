@@ -164,13 +164,13 @@ their Simple Features\cite{ogc-sf} standard.
 \section{Thesis Work}
 
 This thesis will evaluate a novel method of processing geospatial data,
-called pgis, which treats datasets as an atomic unit (as opposed to
+called PGIS, which treats datasets as an atomic unit (as opposed to
 databases where records are atomic). By dispensing with the requirements
 dictated by record level atomicity, software complexity is reduced
 significantly allowing for a simpler implementations with less overhead.
 
-The first step in pgis is to distribute the data between the computers
-participating in the operation. Pgis is a data parallel system, meaning
+The first step in PGIS is to distribute the data between the computers
+participating in the operation. PGIS is a data parallel system, meaning
 that a dataset can be split up onto multiple computers and the operations
 on the data require little if any data on another computer. I will refer
 to this dataset as the primary dataset. For some operations, a secondary
@@ -180,14 +180,14 @@ primary and secondary datasets were spatially distributed between the
 computers as described in \cite{paradise} additional preprocessing would
 be needed. The limitations of having the entire secondary dataset on each
 computer are increased memory footprint and number of records that have
-to be looked at. While pgis does not implement a spatial distribution
+to be looked at. While PGIS does not implement a spatial distribution
 method, one could be added in future work.
 
 After the data is distributed, a user defined operation is executed. This operation should iterate over the subset of records
 from the primary dataset, creating a new dataset or modifying the existing one. This is also where the secondary dataset can
 be referenced to perform operations like nearest neighbor. After the user defined operation is completed, either the modified primary dataset or a newly created dataset is saved.
 
-Pgis will be evaluated for speedup and scaleup, using
+PGIS will be evaluated for speedup and scaleup, using
 equivalent operations executed in PostGIS as a reference. Speedup
 is obtained when more execution speed is gained by adding additional
 processors, while keeping the same dataset. Scaleup measures how well
