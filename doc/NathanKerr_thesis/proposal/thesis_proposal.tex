@@ -2,14 +2,53 @@
 
 \pdfpagewidth 8.5in
 \pdfpageheight 11in
+\usepackage{hyperref}
+\hypersetup{
+	pdfauthor={Nathan Kerr},
+	pdftitle={Parallel GIS Processing on Compute Clusters},
+	pdfsubject={Master's Thesis Proposal},
+	pdfkeywords={GIS, thesis proposal, cluster, parallel}
+}
 
+\usepackage{times}
 \usepackage{setspace}
+\usepackage[left=1.5in,top=1in,right=1in,bottom=1in,nohead]{geometry}
 
-\title{Parallel GIS Processing on Compute Clusters\\Thesis Proposal} 
-\author{Nathan~Kerr} 
+\title{Thesis Proposal\\for the Master's Degree in Computer
+Science\\~\\\underline{Parallel GIS Processing on Compute Clusters}\\~\\}
+\author{Prepared by:\\Nathan~Kerr} 
 
 \begin{document} 
-\maketitle \doublespacing
+\doublespacing
+
+\maketitle
+
+\vspace{8em}
+\singlespace
+\begin{center}
+\large{Approved by:\\}
+\end{center}
+
+\vspace{1em}
+
+\hspace{5em}Chairperson\underline{\hspace{20em}}
+
+\hspace{13em}Dr. Daniel Stanzione
+
+\vspace{1em}
+
+\hspace{5em}Committee\underline{\hspace{20.5em}}
+
+\hspace{13em}Dr. Robert Pahle
+
+\vspace{1em}
+
+\hspace{5em}Committee\underline{\hspace{20.5em}}
+
+\hspace{13em}Dr. Yi Chen
+
+\thispagestyle{empty}
+\doublespacing
 
 \section{Introduction}
 
@@ -120,10 +159,10 @@ purposes.
 Many universities and research institutions already have significant
 investment in compute clusters. These clusters are groups of computer
 linked together with high speed network interconnects and high performance
-parallel filesystems such as Lustre\cite{lustre}. By separating compute and
-storage resources at the cost of a high speed network, compute clusters
-are able to separate computation from data storage.
-%TODO: Compare to SAN approaches
+parallel filesystems such as Lustre\cite{lustre}. By separating compute
+and storage resources at the cost of a high speed network, compute
+clusters are able to separate computation from data storage.  %TODO:
+Compare to SAN approaches
 
 Parallel filesystems alleviate the problems of separating the data from
 the computer where the processing will be executed by spreading files
@@ -235,36 +274,9 @@ An approximate timeline for these activities follows:
 	\item Analysis of problem types that are good/bad for this approach
 \end{enumerate}
 
+\pagebreak
+\singlespace
 \bibliography{thesis}{}
 \bibliographystyle{ieeetr}
-
-%\begin{thebibliography}{99}
-%\bibitem{postgresql}http://postgresql.org/
-%\bibitem{arcgis}http://www.esri.com/software/arcgis/
-%\bibitem{qgis}http://www.qgis.org/
-%\bibitem{grass}http://grass.itc.it/
-%\bibitem{urbansim}http://urbansim.org/
-%\bibitem{postgis}http://postgis.refractions.net/
-%\bibitem{teradata}http://teradata.com/
-%\bibitem{oracle}http://www.oracle.com/
-%\bibitem{hadoop}http://hadoop.apache.org/
-%\bibitem{jts}http://www.vividsolutions.com/jts/jtshome.htm
-%\bibitem{geos}http://trac.osgeo.org/geos/
-%\bibitem{digitalphoenix}http://digitalphoenix-asu.net/
-%\bibitem{pgrass}Fang Huang; Dingsheng Liu; Peng Liu; Shaogang Wang; Yi
-%Zeng; Guoqing Li; Wenyang Yu; Jian Wang; Lingjun Zhao; Lv Pang, "Research
-%On Cluster-Based Parallel GIS with the Example of Parallelization on GRASS
-%GIS," Grid and Cooperative Computing, 2007. GCC 2007. Sixth International
-%Conference on , vol., no., pp.642-649, 16-18 Aug. 2007
-%\bibitem{mapreduce}Jeffrey Dean; Sanjay Ghemawat, "MapReduce: Simplified
-%Data Processing on Large Clusters," OSDI 2004.
-%\bibitem{mpi}http://www.mpi-forum.org/
-%\bibitem{hpdb}DeWitt, D. and Gray, J. 1992. Parallel database systems: the
-%future of high performance database systems. Commun. ACM 35, 6 (Jun. 1992),
-%85-98. DOI= http://doi.acm.org.ezproxy1.lib.asu.edu/10.1145/129888.129894
-%\bibitem{usf}Robert Pahle and Nathan Kerr. 2009. A data centric framework
-%for research in planning. UPE8.
-%\bibitem{openstreetmap}http://www.openstreetmap.org
-%\end{thebibliography}
 
 \end{document}
