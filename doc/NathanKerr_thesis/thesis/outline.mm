@@ -1,105 +1,73 @@
-<map version="0.9.0">
-<!-- To view this file, download free mind mapping software FreeMind from http://freemind.sourceforge.net -->
-<node CREATED="1244761479812" ID="ID_1607972445" MODIFIED="1244761495796" TEXT="Nathan&apos;s Thesis">
-<node CREATED="1244761545203" ID="ID_919224041" MODIFIED="1244761560953" POSITION="right">
-<richcontent TYPE="NODE"><html>
-  <head>
-    
-  </head>
-  <body>
-    <p>
-      Abstract
-    </p>
-    <p>
-      <font size="2">150 Words</font>
-    </p>
-  </body>
-</html></richcontent>
+<map version="0.7.1">
+<node ID="_ID_1607972445" TEXT="ClusterGIS">
+<node ID="_Freemind_Link_914419653" TEXT="Abstract" POSITION="right"/>
+<node ID="Freemind_Link_1043039428" TEXT="Introduction" POSITION="right">
+<node ID="Freemind_Link_813445586" TEXT="GIS processing is important"/>
+<node ID="Freemind_Link_556787421" TEXT="Desktop GIS"/>
+<node TEXT="Database GIS"/>
+<node TEXT="Limitations of single processor implimentations">
+<font NAME="SansSerif" SIZE="12"/>
 </node>
-<node CREATED="1244761499453" ID="ID_1059610229" MODIFIED="1244762159812" POSITION="right">
-<richcontent TYPE="NODE"><html>
-  <head>
-    
-  </head>
-  <body>
-    <p>
-      Introduction
-    </p>
-  </body>
-</html>
-</richcontent>
-<node CREATED="1244762137906" ID="ID_1040520283" MODIFIED="1244762140218" TEXT="Background"/>
-<node CREATED="1244762149484" ID="ID_985555486" MODIFIED="1244762151437" TEXT="Context"/>
-<node CREATED="1244762143734" ID="ID_1148785423" MODIFIED="1244762148015" TEXT="Related Work"/>
-</node>
-<node CREATED="1244761505531" ID="ID_166006262" MODIFIED="1244762213984" POSITION="right">
-<richcontent TYPE="NODE"><html>
-  <head>
-    
-  </head>
-  <body>
-    <p>
-      Thesis Statement
-    </p>
-    <p>
-      <font size="2">(35 words)</font>
-    </p>
-  </body>
-</html>
-</richcontent>
-</node>
-<node CREATED="1244761708062" ID="ID_1122243053" MODIFIED="1244762308312" POSITION="right">
-<richcontent TYPE="NODE"><html>
-  <head>
-    
-  </head>
-  <body>
-    <p>
-      Research
-    </p>
-    <p>
-      
-    </p>
-    <p>
-      Body of work
-    </p>
-    <p>
-      <font size="2">(Obama)</font>
-    </p>
-  </body>
-</html>
-</richcontent>
-<node CREATED="1244761602171" ID="ID_1603951138" MODIFIED="1244761605468" TEXT="Operation Set">
-<node CREATED="1244762083234" ID="ID_603824357" MODIFIED="1244762194546" TEXT="Data access"/>
-<node CREATED="1244762089906" ID="ID_983085292" MODIFIED="1244762100906" TEXT="OGC standard requirements"/>
-</node>
-<node CREATED="1244761630406" ID="ID_903259215" MODIFIED="1244761634640" TEXT="Harware Setup"/>
-<node CREATED="1244761783984" ID="ID_853725809" MODIFIED="1244761787078" TEXT="Implementations">
-<node CREATED="1244761593562" ID="ID_457305762" MODIFIED="1244761600171" TEXT="PostGIS"/>
-<node CREATED="1244761639062" ID="ID_390381553" MODIFIED="1244761644234" TEXT="Hadoop Prototype"/>
-<node CREATED="1244761649750" ID="ID_1109229689" MODIFIED="1244761656531" TEXT="MPI Prototype"/>
+<node TEXT="Parallel DB"/>
+<node TEXT="Parallel GRASS"/>
+<node TEXT="Problems with desktop programs on clusters"/>
+<node ID="Freemind_Link_1618623782" TEXT="Cluster programming model">
+<node TEXT="batch"/>
+<node TEXT="mpi"/>
+<node TEXT="scalable architecture"/>
+<node TEXT="spmd"/>
 </node>
 </node>
-<node CREATED="1244761754765" ID="ID_403262888" MODIFIED="1244761759750" POSITION="right" TEXT="Results">
-<node CREATED="1244761831218" ID="ID_604452279" MODIFIED="1244761836265" TEXT="Performance Analysis"/>
-<node CREATED="1244761837484" ID="ID_427323911" MODIFIED="1244761842546" TEXT="Comparisons"/>
+<node TEXT="Related Work" POSITION="right"/>
+<node ID="_Freemind_Link_1532169814" TEXT="Requirements" POSITION="right">
+<node TEXT="Batch mode"/>
+<node TEXT="Data distribution options"/>
+<node TEXT="Standard geospatial operations"/>
+<node TEXT="Scalable/Performance"/>
+<node TEXT="Dataset centric"/>
+<node TEXT="Easy to use to form new operations">
+<node TEXT="initClusterGIS"/>
+<node TEXT="loadData (distributed/replicated)"/>
+<node TEXT="process (user code here)"/>
+<node TEXT="saveData (distributed/replicated)"/>
+<node TEXT="finalizeClusterGIS"/>
 </node>
-<node CREATED="1244761871718" ID="ID_1110813491" MODIFIED="1244761875734" POSITION="right" TEXT="Recomendation">
-<node CREATED="1244761911828" ID="ID_753877231" MODIFIED="1244761921359" TEXT="Synthesis"/>
-<node CREATED="1244761922968" ID="ID_1179952677" MODIFIED="1244762006125" TEXT="Analysis of problem types that are good/bad for this approach"/>
 </node>
-<node CREATED="1244761662718" ID="ID_1004394493" MODIFIED="1244761682734" POSITION="right">
-<richcontent TYPE="NODE"><html>
-  <head>
-    
-  </head>
-  <body>
-    <p>
-      Conclusion and Outlook
-    </p>
-  </body>
-</html>
-</richcontent>
+<node ID="_Freemind_Link_1802099137" TEXT="Research" POSITION="right">
+<node ID="_Freemind_Link_180227637" TEXT="Operation Set">
+<node ID="_Freemind_Link_496223060" TEXT="Data access"/>
+<node ID="_Freemind_Link_718276810" TEXT="OGC standard requirements"/>
 </node>
+<node ID="_Freemind_Link_1090812530" TEXT="Hardware Setup">
+<node TEXT="Saguaro, keep to Clovertowns"/>
+</node>
+<node TEXT="Datasets/Sizes">
+<node TEXT="Full employers ~34k rows"/>
+<node TEXT="Full parcels ~1.2M rows"/>
+</node>
+<node ID="_Freemind_Link_1372334616" TEXT="Implementations">
+<node ID="_Freemind_Link_1524593929" TEXT="PostGIS"/>
+<node ID="_Freemind_Link_85448330" TEXT="Hadoop Prototype"/>
+<node ID="_Freemind_Link_1758972818" TEXT="MPI Prototype"/>
+</node>
+</node>
+<node ID="_Freemind_Link_403023813" TEXT="Results" POSITION="right">
+<node ID="_Freemind_Link_1686665076" TEXT="Performance Analysis">
+<node TEXT="vary procs, maintain data"/>
+<node TEXT="vary data, maintain procs"/>
+<node TEXT="vary data, vary procs"/>
+</node>
+<node ID="_Freemind_Link_811247330" TEXT="Comparisons">
+<node TEXT="PostGIS to theoretical linear speedup/scaleup"/>
+<node TEXT="Theoretical PostGIS to Hadoop"/>
+<node TEXT="Theoretical PostGIS to ClusterGIS"/>
+<node TEXT="Hadoop to ClusterGIS"/>
+</node>
+</node>
+<node ID="Freemind_Link_1171151043" TEXT="Recomendation" POSITION="right">
+<node ID="Freemind_Link_378383597" TEXT="Synthesis"/>
+<node ID="Freemind_Link_1868177310" TEXT="Analysis of problem types that are good/bad for this approach"/>
+</node>
+<node ID="Freemind_Link_1128327514" TEXT="Conclusion" POSITION="right"/>
 </node>
 </map>
