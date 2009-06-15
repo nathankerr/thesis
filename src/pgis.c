@@ -60,10 +60,8 @@ int main(int argc, char** argv) {
 		while(primary_data[i] != '\n') {
 			i++;
 		}
-		offset=i+1;
 		i+=2;
 	} else {
-		offset=i;
 		i++;
 	}
 
