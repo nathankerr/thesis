@@ -1,16 +1,16 @@
 SHELL=/bin/sh
 
 CC = mpicc
-CFLAGS = -O3 -Wall -g
-LDFLAGS = 
+CFLAGS = -O3 -Wall -I${PGIS}/software/include
+LDFLAGS = -lpq -L${PGIS}/software/lib
 
-pgis_objects = pgis.o
-Source = ${pgis_objects:.o=.c}
+pgis_objects = pgis.o postgis.o
+Source = ${pgis_objects:.o=.cc}
 
 .PHONY: all
 all: pgis
 
-include $(Source:.c=.d)
+include $(Source:.cc=.d)
 
 %.d: %.c
 	@set -e; rm -f $@; \
