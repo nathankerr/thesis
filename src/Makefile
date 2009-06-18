@@ -4,7 +4,7 @@ CC = mpicc
 CFLAGS = -O3 -Wall -g
 LDFLAGS = 
 
-pgis_objects = pgis.o
+pgis_objects = pgis.o clustergis.o
 Source = ${pgis_objects:.o=.c}
 
 .PHONY: all
@@ -22,4 +22,4 @@ pgis: ${pgis_objects}
 	${CC} -o $@ ${CFLAGS} ${pgis_objects} ${LDFLAGS}
 
 clean:
-	-rm *.o *.d pgis
+	-rm *.o *.d* pgis
