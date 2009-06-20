@@ -13,61 +13,58 @@
 %%%%%%%%%%%
 %Title page
 \thispagestyle{empty}
-\doublespacing
 \begin{center}
 GIS PROCESSING ON COMPUTE CLUSTERS\\
+~\\
 by\\
+~\\
 Nathan Thomas Kerr
-\end{center}
 
-\vspace{2.59in}
+\vspace{245pt}
 
-\singlespace
-\begin{center}
 A Thesis Presented in Partial Fulfillment\\
 of the Requirements for the Degree\\
 Master of Science
-\end{center}
 
-\vspace{2.59in}
+\vspace{245pt}
 
-\doublespace
-\begin{center}
 ARIZONA STATE UNIVERSITY\\
+~\\
 August 2009
 \end{center}
-\pagebreak
+\clearpage
 
 %%%%%%%%%%%%%%
 %Approval page
 \thispagestyle{empty}
-\doublespacing
 \begin{center}
 GIS PROCESSING ON COMPUTE CLUSTERS\\
+~\\
 by\\
-Nathan Thomas Kerr
-\\~\\
+~\\
+Nathan Thomas Kerr\\
+~\\
+~\\
+~\\
+~\\
 has been approved\\
+~\\
 August 2009
-\end{center}
 
-\vspace{2.1in}
+\vspace{195pt}
 
-\singlespace
-\begin{center}
 Graduate Supervisory Committee:
 \\~\\
 Dr. Daniel Stanzione, Chair\\
 Dr. Robert Pahle\\
 Dr. Yi Chen
-\end{center}
 
-\vspace{2.1in}
+\vspace{195pt}
 
-\begin{center}
 ACCEPTED BY THE GRADUATE COLLEGE
 \end{center}
-\pagebreak
+\addtolength\textheight{-30pt} %Change to get page number in right spot, reverted at end of this document
+\clearpage
 
 %%%%%%%%%
 %Abstract
@@ -76,7 +73,7 @@ ACCEPTED BY THE GRADUATE COLLEGE
 
 Abstract goes here
 \singlespace
-\pagebreak
+\clearpage
 
 %%%%%%%%%%%%%%%%%%%%%%
 %Dedication (optional)
@@ -85,7 +82,7 @@ Abstract goes here
 Dedication goes here
 \end{center}
 \singlespace
-\pagebreak
+\clearpage
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Acknowledgments (optional)
@@ -94,7 +91,7 @@ Dedication goes here
 
 Acknowledgments go here.
 \singlespace
-\pagebreak
+\clearpage
 
 %%%%%%%%%%%%%%%%%%
 %Table of contents
@@ -206,7 +203,7 @@ Acknowledgments go here.
 
 \@starttoc{toc}
 \makeatother
-\pagebreak
+\clearpage
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %List of tables (if tables appear in document)
@@ -215,7 +212,7 @@ Acknowledgments go here.
 %\makeatletter
 %\@starttoc{lot}
 %\makeatother
-%\pagebreak
+%\clearpage
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %List of figures (if figures appear in document)
@@ -224,7 +221,10 @@ Acknowledgments go here.
 %\makeatletter
 %\@starttoc{lof}
 %\makeatother
-%\pagebreak
+%\clearpage
 
 %Other lists (e.g., nomenclature, definitions, glossary of terms, etc.)
 %Preface (optional; must be less than 10 pages)
+
+%Revert change to get page number in right spot
+\addtolength\textheight{30pt}
