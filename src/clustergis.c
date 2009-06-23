@@ -108,35 +108,56 @@ void clusterGIS_Load_data_distributed(char* filename, clusterGIS_dataset** datas
 void clusterGIS_Load_data_replicated(char* filename, clusterGIS_dataset** dataset) {
 	MPI_File file;
 	int err;
-	int i;
-	MPI_Offset filesize;
-	char* rawdata;
+	char* buffer;
+	int buffersize = 2*1024*1024;
 	MPI_Status status;
 	clusterGIS_record** record;
+	MPI_Offset offset;
+	int count;
+	int last_full_record_end;
+	MPI_Offset filesize;
+	int i;
 
-	/* Load the file, with a full copy on each task */
 	err = MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_RDONLY, MPI_INFO_NULL, &file);
 	if(err != MPI_SUCCESS) {
-		fprintf(stderr, "Error opening file %s\n", filename);
+		fprintf(stderr, "%d: Error opening file %s\n", clusterGIS_rank, filename);
 		MPI_Abort(MPI_COMM_WORLD, err);
 	}
+
+	buffer = (char*) malloc(buffersize);
 	MPI_File_get_size(file, &filesize);
-	rawdata = (char*) malloc(filesize);
-	MPI_File_read_all(file, rawdata, filesize, MPI_CHAR, &status);
-	MPI_File_close(&file);
-	
-	/* Put the records into the dataset */
-	i = 0;
+	offset = 0;
 	(*dataset) = (clusterGIS_dataset*) malloc(sizeof(clusterGIS_dataset));
 	record = &(*dataset)->data;
-	while (i < filesize) {
-		i = clusterGIS_create_record(rawdata, i, record);
-		(*record)->next = NULL;
-		record = &(*record)->next;
-		i++;
+
+	while(offset < filesize) {
+		MPI_File_read_at_all(file, offset, buffer, buffersize, MPI_CHAR, &status);
+		MPI_Get_count(&status, MPI_CHAR, &count);
+	
+		/* find where the last full record ends */
+		last_full_record_end = count - 1;
+		while(buffer[last_full_record_end] != '\n' && last_full_record_end >= 0) {
+			last_full_record_end--;
+		}
+		if(last_full_record_end < 0) {
+			fprintf(stderr, "%d: Error in clusterGIS_Load_data_replicated: buffersize is too small, %d\n", clusterGIS_rank, count);
+			MPI_Abort(MPI_COMM_WORLD, 1);
+		}
+
+		/* Put the records into the dataset */
+		i = 0;
+		while (i < last_full_record_end) {
+			i = clusterGIS_create_record(buffer, i, record);
+			(*record)->next = NULL;
+			record = &(*record)->next;
+			i++;
+		}
+
+		offset = offset + last_full_record_end + 1;
 	}
 
-	free(rawdata);
+	free(buffer);
+	MPI_File_close(&file);
 }
 
 /* Returns index where record ends (\n)*/
@@ -147,7 +168,6 @@ int clusterGIS_create_record(char* data, int start, clusterGIS_record** record) 
 	int field_start;
 	int i;
 	int j;
-	clusterGIS_record* temp_record;
 
 	struct item {
 		char* data;
@@ -205,17 +225,15 @@ int clusterGIS_create_record(char* data, int start, clusterGIS_record** record) 
 	/* Convert the linked list to an array of strings */
 	current = head;
 	i = 0;
-	temp_record = (clusterGIS_record*) malloc(sizeof(clusterGIS_record));
-	temp_record->data = malloc(field_count * sizeof(char*));
-	temp_record->columns = field_count;
+	*record = (clusterGIS_record*) malloc(sizeof(clusterGIS_record));
+	(*record)->data = malloc(field_count * sizeof(char*));
+	//temp_record->columns = field_count;
 	for(i = 0; i < field_count; i++) {
-		temp_record->data[i] = current->data;
+		(*record)->data[i] = current->data;
 		head = current->next;
 		free(current);
 		current = head;
 	}
 
-	*record = temp_record;
-	
 	return end;
 }

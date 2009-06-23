@@ -14,7 +14,7 @@ int clusterGIS_started;
 /* clusterGIS datatypes */
 struct clusterGIS_record_el {
 	char** data;
-	int columns;
+	//int columns;
 	struct clusterGIS_record_el * next;
 };
 typedef struct clusterGIS_record_el clusterGIS_record;
