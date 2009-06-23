@@ -2,6 +2,7 @@
 
 int main(int argc, char** argv) {
 	clusterGIS_dataset* dataset;
+	clusterGIS_dataset* dataset2;
 	clusterGIS_record* record;
 	int count;
 	int total_count;
@@ -13,7 +14,8 @@ int main(int argc, char** argv) {
 	}
 
 	clusterGIS_Init(&argc, &argv);
-	clusterGIS_Load_data_distributed(argv[1], &dataset);
+	clusterGIS_Load_data_replicated(argv[1], &dataset);
+	clusterGIS_Load_data_distributed(argv[1], &dataset2);
 
 	/* User operations */
 	record = dataset->data;

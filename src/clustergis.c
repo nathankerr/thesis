@@ -21,7 +21,8 @@ int clusterGIS_Finalize() {
 void clusterGIS_Load_data_distributed(char* filename, clusterGIS_dataset** dataset) {
 	MPI_File file;
 	int err;
-	int i,j;
+	int i;
+	int j;
 	MPI_Offset chunksize, offset;
 	char* rawdata;
 	char* record_buffer;
@@ -101,6 +102,40 @@ void clusterGIS_Load_data_distributed(char* filename, clusterGIS_dataset** datas
 	}
 
 	free(record_buffer);
+	free(rawdata);
+}
+
+void clusterGIS_Load_data_replicated(char* filename, clusterGIS_dataset** dataset) {
+	MPI_File file;
+	int err;
+	int i;
+	MPI_Offset filesize;
+	char* rawdata;
+	MPI_Status status;
+	clusterGIS_record** record;
+
+	/* Load the file, with a full copy on each task */
+	err = MPI_File_open(MPI_COMM_WORLD, filename, MPI_MODE_RDONLY, MPI_INFO_NULL, &file);
+	if(err != MPI_SUCCESS) {
+		fprintf(stderr, "Error opening file %s\n", filename);
+		MPI_Abort(MPI_COMM_WORLD, err);
+	}
+	MPI_File_get_size(file, &filesize);
+	rawdata = (char*) malloc(filesize);
+	MPI_File_read_all(file, rawdata, filesize, MPI_CHAR, &status);
+	MPI_File_close(&file);
+	
+	/* Put the records into the dataset */
+	i = 0;
+	(*dataset) = (clusterGIS_dataset*) malloc(sizeof(clusterGIS_dataset));
+	record = &(*dataset)->data;
+	while (i < filesize) {
+		i = clusterGIS_create_record(rawdata, i, record);
+		(*record)->next = NULL;
+		record = &(*record)->next;
+		i++;
+	}
+
 	free(rawdata);
 }
 
