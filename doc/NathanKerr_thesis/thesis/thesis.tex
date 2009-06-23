@@ -12,21 +12,8 @@
 
 \usepackage{times}
 \usepackage{setspace}
-\usepackage[left=1.5in,top=1in,right=1in,bottom=1in,includehead,includefoot]{geometry}
-%\oddsidemargin = 31.5pt
-%\topmargin = 0pt
-%\headheight = 0pt
-%\headsep = 0pt
-%\textheight = 9in
-%\textwidth = 6in
-%\marginparsep = 0pt
-%\marginparwidth = 0pt
-%\footskip = 0pt
-%\marginparpush = 0pt
-%\hoffset = 0pt
-%\voffset = 0pt
-%\paperwidth = 8.5in
-%\paperheight = 11in
+\usepackage{fancyhdr}
+\usepackage[left=115pt,top=70pt,right=72pt,bottom=75pt]{geometry}
 
 \begin{document} 
 
@@ -41,7 +28,17 @@
 %List of figures (if figures appear in document)
 %Other lists (e.g., nomenclature, definitions, glossary of terms, etc.)
 %Preface (optional; must be less than 10 pages)
+\pagenumbering{roman}
+\pagestyle{plain}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\pagestyle{fancy}
 \include{preliminary}
+\clearpage
+\addtolength\topmargin{40pt}
+\addtolength\textheight{-40pt}
 
 % Body of Research
 %TODO: Introduction
@@ -51,6 +48,20 @@
 %TODO: Experimental Setup
 %TODO: Results
 %TODO: Conclusion
+\pagenumbering{arabic}
+% No page numbers on chapter beginnings
+\fancypagestyle{plain}{%
+	\fancyhf{}
+	\renewcommand{\headrulewidth}{0pt}
+	\renewcommand{\footrulewidth}{0pt}
+}
+% Page numbers at upper right on other pages
+\fancyhf{}
+\fancyhead[R]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\pagestyle{fancy}
+\doublespacing
 \include{body}
 
 % Back Matter
@@ -58,171 +69,6 @@
 %TODO: References (AKA “Bibliography” or “Works Cited”)
 %TODO: Appendices
 %TODO: Biographical sketch (optional)
-\include{back}
+%TODO: \include{back}
 
-\chapter{Introduction}
-
-GIS processing is important
-
-\section{Current methods}
-Desktop GIS
-
-Database GIS
-
-\section{Significance}
-
-Limitations of single processor implementations
-
-\section{Attempted solutions}
-
-Parallel DB
-
-Parallel GRASS
-
-Problems with desktop programs on clusters
-
-\section{Needed solution, cluster programming model}
-
-batch
-
-mpi
-
-scalable architecture
-
-spmd
-
-Thesis statement goes here
-
-How this document goes about supporting the thesis statement.
-
-\chapter{Related Work}
-
-\section{Desktop GIS}
-
-ArcInfo, QuantumGIS, GRASS GIS
-
-\section{Database GIS}
-
-PostGIS, Oracle Spatial, Client-Server Paradise
-
-\section{GIS libraries}
-
-JTS, GEOS
-
-\section{Parallel DB}
-
-Paradise
-
-\section{Parallel GRASS}
-
-Other converted programs?
-
-\section{MRGIS MapReduce GIS}
-
-\chapter{Requirements}
-
-batch mode processing
-
-data distribution options
-
-standard geospatial operations
-
-scalable, high performance
-
-dataset centric
-
-\section{easy to use to form new operations}
-
-Sample program:
-
-initClusterGIS
-
-loadData (distributed/replicated)
-
-process (user code here)
-
-saveData (distributed/replicated)
-
-finalizeClusterGIS
-
-\chapter{Design/Implementation}
-
-How to fulfill requirements
-
-Architecture of solution
-
-Split dataset across tasks (MPI I/O)
-
-Each task works on their own part
-
-MPI to communicate if needed
-
-\chapter{Experimental Setup/Design}
-
-How to show how well requirements were filled
-
-\section{Operation set}
-
-These operations are representative of problem space.
-
-Data access based: parallelization is based off data decomp, so operations are too.
-
-OGC standard requirements - survey of methods requiring 1, 2, or more data points.
-
-\section{Dataset Description}
-
-Full datasets; 34k employers, 1.2m parcels
-
-sub datasets, how to generate from full
-
-listing of datsets used
-
-\section{Hardware setup}
-
-Saguaro
-
-\section{implementations}
-
-\subsection{PostGIS}
-
-\subsection{Hadoop Prototype}
-
-\subsection{ClusterGIS}
-
-\chapter{Results}
-
-\section{Performance Analysis}
-
-vary procs, maintain data
-
-vary data, maintain procs
-
-vary data, vary procs
-
-\section{Comparisons}
-
-PostGIS as baseline
-
-PostGIS to Hadoop
-
-Hadoop to ClusterGIS
-
-PostGIS to ClusterGIS
-
-\chapter{Recommendations}
-
-Synthesis
-
-\section{Applicable Problem Spaces}
-Analysis of problem types that are good/bad for this approach
-
-\chapter{Conclusion}
-
-\section{Future Work}
-
-additional decomposition methods, combined with alternative MPI communicators
-
-addition of preprocessing methods (indexing, etc)
-
-chunking of replicated dataset
 \end{document}
