@@ -227,7 +227,7 @@ int clusterGIS_create_record(char* data, int start, clusterGIS_record** record) 
 	i = 0;
 	*record = (clusterGIS_record*) malloc(sizeof(clusterGIS_record));
 	(*record)->data = malloc(field_count * sizeof(char*));
-	//temp_record->columns = field_count;
+	(*record)->columns = field_count;
 	for(i = 0; i < field_count; i++) {
 		(*record)->data[i] = current->data;
 		head = current->next;
@@ -251,4 +251,39 @@ void clusterGIS_Free_dataset(clusterGIS_dataset** dataset) {
 	}
 
 	free(*dataset);
+}
+
+int clusterGIS_Write_record(MPI_File* file, clusterGIS_record* record) {
+	char* buffer;
+	int buffersize = 2*1024*1024;
+	int count = 0;
+	int i;
+	int j;
+	int err;
+	MPI_Status status;
+
+	buffer = (char*) malloc(buffersize);
+
+	/* convert record to csv */
+	for(i=0; i < record->columns; i++) {
+		buffer[count] = '"';
+		count++;
+		j = 0;
+		while(record->data[i][j] != '\0') {
+			buffer[count] = record->data[i][j];
+			count++;
+			j++;
+		}
+		buffer[count] = '"';
+		count++;
+		buffer[count]= ',';
+		count++;
+	}
+	buffer[count-1] = '\n';
+
+	/* Write to a shared pointer file */
+	err = MPI_File_write_shared(*file, buffer, count, MPI_CHAR, &status);
+
+	free(buffer);
+	return err;
 }

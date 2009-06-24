@@ -14,7 +14,7 @@ int clusterGIS_started;
 /* clusterGIS datatypes */
 struct clusterGIS_record_el {
 	char** data;
-	//int columns;
+	int columns;
 	struct clusterGIS_record_el * next;
 };
 typedef struct clusterGIS_record_el clusterGIS_record;
@@ -30,5 +30,6 @@ void clusterGIS_Load_data_distributed(char*, clusterGIS_dataset**);
 void clusterGIS_Load_data_replicated(char*, clusterGIS_dataset**);
 int clusterGIS_create_record(char* data, int start, clusterGIS_record**);
 void clusterGIS_Free_dataset(clusterGIS_dataset**);
+int clusterGIS_Write_record(MPI_File* file, clusterGIS_record* record);
 
 #endif
