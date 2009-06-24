@@ -29,5 +29,6 @@ int clusterGIS_Finalize();
 void clusterGIS_Load_data_distributed(char*, clusterGIS_dataset**);
 void clusterGIS_Load_data_replicated(char*, clusterGIS_dataset**);
 int clusterGIS_create_record(char* data, int start, clusterGIS_record**);
+void clusterGIS_Free_dataset(clusterGIS_dataset**);
 
 #endif

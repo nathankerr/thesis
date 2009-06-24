@@ -2,8 +2,10 @@
 
 int main(int argc, char** argv) {
 	clusterGIS_dataset* dataset;
+	clusterGIS_dataset* dataset2;
 	clusterGIS_record* record;
 	int count;
+	int total_count;
 
 	/* Process local arguments */
 	if (argc != 2) {
@@ -13,8 +15,8 @@ int main(int argc, char** argv) {
 
 	clusterGIS_Init(&argc, &argv);
 
-	clusterGIS_Load_data_replicated(argv[1], &dataset);
-	//clusterGIS_Load_data_distributed(argv[1], &dataset);
+	//clusterGIS_Load_data_replicated(argv[1], &dataset);
+	clusterGIS_Load_data_distributed(argv[1], &dataset);
 
 	/* User operations */
 	record = dataset->data;
@@ -26,9 +28,9 @@ int main(int argc, char** argv) {
 	}
 
 
-	//MPI_Reduce(&count, &total_count, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-	//if(clusterGIS_rank == 0) printf("Count: %d\n", total_count);
-	printf("%d: Count: %d\n", clusterGIS_rank, count);
+	MPI_Reduce(&count, &total_count, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+	if(clusterGIS_rank == 0) printf("Count: %d\n", total_count);
+	//printf("%d: Count: %d\n", clusterGIS_rank, count);
 	
 	/* Finalize */
 	clusterGIS_Finalize();

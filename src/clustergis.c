@@ -237,3 +237,18 @@ int clusterGIS_create_record(char* data, int start, clusterGIS_record** record) 
 
 	return end;
 }
+
+void clusterGIS_Free_dataset(clusterGIS_dataset** dataset) {
+	clusterGIS_record* head;
+	clusterGIS_record* current;
+
+	head = (*dataset)->data;
+	current = head;
+	while(current != NULL) {
+		head = current->next;
+		free(current);
+		current = head;
+	}
+
+	free(*dataset);
+}
