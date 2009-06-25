@@ -11,23 +11,159 @@
 
 GIS processing is important
 
+Geospatial (GIS) simulation and analysis are important processes
+to understanding and improving our environment, both urban and
+natural. Geospatial data is made up of a georeferenced geometry such
+as a point or a polygon at a certain longitude, latitude, and altitude
+with related descriptive information such as a land use type. GIS data
+can be used to represent a large range of real-world objects such as
+road or power networks, building locations, or natural features such as
+lakes and rivers.  Utilizing GIS data is one method toward processing,
+analyzing, and simulating real-world systems. One consumer application
+of GIS are the GPS based car navigation systems common today.
+
+Larger scale GIS applications also exist in areas such as city planning.
+City planners use GIS to study road networks, zoning issues, and
+to simulate population growth. As cities and metropolises grow, the
+amount of data required to represent these areas also increases. As the
+amount of data increases, so does the processing power required to complete the
+geospatial analysis, processing, and simulation.
+
 \section{Current methods}
 
 Desktop GIS
 
+Desktop GIS packages such as ArcGIS\cite{arcgis}, QuantumGIS\cite{qgis},
+and GRASS GIS\cite{grass} are commonly used for GIS processing and
+analysis. While these programs provide graphical interfaces to their
+GIS capabilities, their capabilities are limited by the computers they
+run on.  Datasets can be too large for their memories and computations
+can take too long to be practical. The popular simulation package,
+UrbanSim\cite{urbansim} faces these same constraints.
+
 Database GIS
+
+An alternative approach to using these desktop programs is to employ
+a geospatial database like PostGIS\cite{postgis}, ArcSDE\cite{arcsde}
+or Oracle Spatial\cite{oracle}. Geospatial databases allow centralized
+access to, and processing of, geospatial data through query languages
+such as SQL. As data is stored and managed by the database software,
+advanced database features such as indexes can be utilized to speedup
+data access and processing.
+
+PostGIS is utilized as the core component of the Urban
+Systems Frame-work\cite{usf} (USF) designed by the Digital
+Phoenix\cite{digitalphoenix} project group at Arizona State
+University. Digital Phoenix tries to integrate 3D visualization technology
+with simulated and gathered GIS data to better understand the impacts
+of urban planning decisions.
 
 \section{Significance}
 
 Limitations of single processor implementations
 
+GIS data has become easier to gather in recent years with the
+proliferation on low cost GPS devices. The availability of these
+devices significantly reduces the cost of data collection, moving
+it from a government funded service to the capabilities of private
+companies and individuals even to the point of open source style maps
+such as OpenStreetMap\cite{openstreetmap}. With the reduced cost of data
+collection, the amount of data has grown significantly. As datasets grow
+and the associated processing becomes more sophisticated, the limitations
+of programs that only work on a single computer are felt through long
+processing times and inability to work with the required data. Thus a
+method of utilizing multiple computers to complete the required processing
+is needed to increase the size of the data that can be processed and
+reduce the time required to complete the processing.
+
 \section{Attempted solutions}
 
 Parallel DB
 
+One method of using multiple computers to perform the required
+processing is the use of parallel databases\cite{hpdb}. Parallel
+databases should be able to spread both data storage and
+processing across multiple computers transparently from the view
+of the SQL query programmer. Several commercial databases such as
+TeraData\cite{teradata} and Oracle\cite{oracle} provide support for this
+method of operation. Open source databases such as MySQL\cite{mysql}
+and PostgreSQL\cite{postgres} currently do not support this
+methodology. Parallel databases generally do not require a shared
+data repository or filesystem.
+
+Parallel database techniques have been used to build a scalable
+geospatial database system\cite{paradise,cs-paradise}. Data is spread
+between computers using round-robin, hash, or spatial partitioning. Because
+the data is able to be distributed between multiple computers, the
+processing is able to scale to larger datasets.
+
+When a query is processed across the database, a thread is created
+for each fragment of the data. Thus as the data grows larger, the
+processing capabilities of the system also increase. If a particular
+processing operation requires relatively less computation for each
+data record this is fine. However, after the amount of computation per
+data record increases beyond a certain point, which is dependent on the
+speed of the machine used, the processing operation can be sped up by
+utilizing more processors. Major factors in determining how much data
+should be processed on each machine, and therefore how the data should
+be spread between machines, are memory, computation, and communication
+overhead to move the data and computation to another machine. The ratio
+of computation to memory and commutation requirements is often referred
+to as grain size. Coarser grained processes have more computation per
+data record, while finer grained processes have little computation for
+each data record.
+
+Databases excel at working with indexed data while allowing multiple
+users to interact with the data in a concurrently safe manner through
+the use of atomic transactions. The requirements placed upon database
+systems to handle these situations slow down computations that don't
+utilize indexes or work on an entire dataset at once. The processing
+operations this research examines do not require these restrictions,
+and as such a more efficient system can be created.
+
+Using databases can also limit the reusability of computer resources
+to complete other processes. For example, a process could benefit from
+utilizing more processors, but the disks on those database nodes could
+already be fully utilized, thus making them unable to accommodate the
+computation as it is directly tied to data storage. This is only really
+an issue when trying to fully utilize hardware resources for different
+purposes.
+
+Many universities and research institutions already have significant
+investment in compute clusters. These clusters are groups of computer
+linked together with high speed network interconnects and high performance
+parallel filesystems such as Lustre\cite{lustre}. By separating compute
+and storage resources at the cost of a high speed network, compute
+clusters are able to separate computation from data storage.  %TODO:
+Compare to SAN approaches
+
+Parallel filesystems alleviate the problems of separating the data from
+the computer where the processing will be executed by spreading files
+across multiple network connected fileservers allowing access that is
+sometimes faster than utilizing a computer's local disk for storage
+while also enabling processing to spread across the available compute
+resources based entirely on the process' grain size.
+
 Parallel GRASS
 
+Current desktop approaches to GIS processing such as ArcGIS are
+unable to make use of the multi-machine processing environment that
+compute clusters provide. While reworking these programs to utilize
+these extended resources is possible, it is non-trivial. GRASS GIS was
+reworked\cite{pgrass} to use its collaboration features to distribute
+sub-queries among computers. The method described in this paper utilizes
+multiple instances of GRASS in a master-slave configuration where
+all participants access a shared data repository or filesystem. The
+geometries are portioned between the various nodes. Operations are done
+on the subsets, and the results are merged to produce the final result.
+
 Problems with desktop programs on clusters
+
+While the method used to extend GRASS GIS will in fact speed up GIS
+processing, it has two flaws. First, GRASS is designed to be used in an
+interactive mode rather than a batch or script driven approach.  Second,
+the entire set of data used must still fit on a single computer to move
+it in or out of the environment.
 
 \section{Needed solution, cluster programming model}
 
@@ -39,9 +175,65 @@ scalable architecture
 
 spmd
 
+A good cluster based GIS processing environment needs to be separate from
+a graphical user interface so that it does not incur additional overhead
+on the compute nodes and so that it can interact well with the generally
+batch-scheduled environment of a cluster. In addition, it must be able to
+distribute data between all the nodes used such that a single node does
+not become a limiting factor in the environment's scalability. A variety
+of data distribution models should also be available so that the data
+is distributed in a manner consistent with the required processing. Of
+course, the environment should be able to execute all the standard
+geospatial operations as defined by the Open Geospatial Consortium in
+their Simple Features\cite{ogc-sf} standard.
+
 Thesis statement goes here
 
+This thesis will evaluate a novel method of processing geospatial data,
+called PGIS, which treats datasets as an atomic unit (as opposed to
+databases where records are atomic). By dispensing with the requirements
+dictated by record level atomicity, software complexity is reduced
+significantly allowing for a simpler implementations with less overhead.
+
+The first step in PGIS is to distribute the data between the computers
+participating in the operation. PGIS is a data parallel system, meaning
+that a dataset can be split up onto multiple computers and the operations
+on the data require little if any data on another computer. I will refer
+to this dataset as the primary dataset. For some operations, a secondary
+dataset is required in its entirety. For instance if the operation is
+to find the nearest record to a given georeferenced point. If both the
+primary and secondary datasets were spatially distributed between the
+computers as described in \cite{paradise} additional preprocessing would
+be needed. The limitations of having the entire secondary dataset on each
+computer are increased memory footprint and number of records that have
+to be looked at. While PGIS does not implement a spatial distribution
+method, one could be added in future work.
+
+After the data is distributed, a user defined operation is executed. This operation should iterate over the subset of records
+from the primary dataset, creating a new dataset or modifying the existing one. This is also where the secondary dataset can
+be referenced to perform operations like nearest neighbor. After the user defined operation is completed, either the modified primary dataset or a newly created dataset is saved.
+
 How this document goes about supporting the thesis statement.
+
+PGIS will be evaluated for speedup and scaleup, using
+equivalent operations executed in PostGIS as a reference. Speedup
+is obtained when more execution speed is gained by adding additional
+processors, while keeping the same dataset. Scaleup measures how well
+a program can handle different sizes of datasets while adding more
+processors at the same time the dataset size grows.
+
+A series of operations meant to be representative of real-world uses will
+be used. The first set of operations look at single record create, read,
+update, and destroy. This set of operations is meant to show the strength
+of the database approach and the weakness of this new method. The second
+set of operations will extract a subset of a datset using a geospatial
+operation to determine if a record is part of the subset. This operation
+should show the strength of the new method as compared to the database
+approach. The third, and final, operation will find the spatially nearest
+feature of one dataset for each record of a dataset. This operation
+is the hardest for the database approach and shows the strength of the
+new approach. Full details for datasets and operations used will be given in
+the thesis.
 
 \chapter{Related Work}
 
@@ -49,15 +241,102 @@ How this document goes about supporting the thesis statement.
 
 ArcInfo, QuantumGIS, GRASS GIS
 
+Desktop GIS packages such as ArcGIS\cite{arcgis}, QuantumGIS\cite{qgis},
+and GRASS GIS\cite{grass} are commonly used for GIS processing and
+analysis. While these programs provide graphical interfaces to their
+GIS capabilities, their capabilities are limited by the computers they
+run on.  Datasets can be too large for their memories and computations
+can take too long to be practical. The popular simulation package,
+UrbanSim\cite{urbansim} faces these same constraints.
+
 \section{Database GIS}
 
 PostGIS, Oracle Spatial, Client-Server Paradise
+
+An alternative approach to using these desktop programs is to employ
+a geospatial database like PostGIS\cite{postgis}, ArcSDE\cite{arcsde}
+or Oracle Spatial\cite{oracle}. Geospatial databases allow centralized
+access to, and processing of, geospatial data through query languages
+such as SQL. As data is stored and managed by the database software,
+advanced database features such as indexes can be utilized to speedup
+data access and processing.
+
+PostGIS is utilized as the core component of the Urban
+Systems Frame-work\cite{usf} (USF) designed by the Digital
+Phoenix\cite{digitalphoenix} project group at Arizona State
+University. Digital Phoenix tries to integrate 3D visualization technology
+with simulated and gathered GIS data to better understand the impacts
+of urban planning decisions.
 
 \section{GIS libraries}
 
 JTS, GEOS
 
 \section{Parallel DB}
+
+One method of using multiple computers to perform the required
+processing is the use of parallel databases\cite{hpdb}. Parallel
+databases should be able to spread both data storage and
+processing across multiple computers transparently from the view
+of the SQL query programmer. Several commercial databases such as
+TeraData\cite{teradata} and Oracle\cite{oracle} provide support for this
+method of operation. Open source databases such as MySQL\cite{mysql}
+and PostgreSQL\cite{postgres} currently do not support this
+methodology. Parallel databases generally do not require a shared
+data repository or filesystem.
+
+Parallel database techniques have been used to build a scalable
+geospatial database system\cite{paradise,cs-paradise}. Data is spread
+between computers using round-robin, hash, or spatial partitioning. Because
+the data is able to be distributed between multiple computers, the
+processing is able to scale to larger datasets.
+
+When a query is processed across the database, a thread is created
+for each fragment of the data. Thus as the data grows larger, the
+processing capabilities of the system also increase. If a particular
+processing operation requires relatively less computation for each
+data record this is fine. However, after the amount of computation per
+data record increases beyond a certain point, which is dependent on the
+speed of the machine used, the processing operation can be sped up by
+utilizing more processors. Major factors in determining how much data
+should be processed on each machine, and therefore how the data should
+be spread between machines, are memory, computation, and communication
+overhead to move the data and computation to another machine. The ratio
+of computation to memory and commutation requirements is often referred
+to as grain size. Coarser grained processes have more computation per
+data record, while finer grained processes have little computation for
+each data record.
+
+Databases excel at working with indexed data while allowing multiple
+users to interact with the data in a concurrently safe manner through
+the use of atomic transactions. The requirements placed upon database
+systems to handle these situations slow down computations that don't
+utilize indexes or work on an entire dataset at once. The processing
+operations this research examines do not require these restrictions,
+and as such a more efficient system can be created.
+
+Using databases can also limit the reusability of computer resources
+to complete other processes. For example, a process could benefit from
+utilizing more processors, but the disks on those database nodes could
+already be fully utilized, thus making them unable to accommodate the
+computation as it is directly tied to data storage. This is only really
+an issue when trying to fully utilize hardware resources for different
+purposes.
+
+Many universities and research institutions already have significant
+investment in compute clusters. These clusters are groups of computer
+linked together with high speed network interconnects and high performance
+parallel filesystems such as Lustre\cite{lustre}. By separating compute
+and storage resources at the cost of a high speed network, compute
+clusters are able to separate computation from data storage.  %TODO:
+Compare to SAN approaches
+
+Parallel filesystems alleviate the problems of separating the data from
+the computer where the processing will be executed by spreading files
+across multiple network connected fileservers allowing access that is
+sometimes faster than utilizing a computer's local disk for storage
+while also enabling processing to spread across the available compute
+resources based entirely on the process' grain size.
 
 Paradise
 
@@ -78,6 +357,18 @@ standard geospatial operations
 scalable, high performance
 
 dataset centric
+
+A good cluster based GIS processing environment needs to be separate from
+a graphical user interface so that it does not incur additional overhead
+on the compute nodes and so that it can interact well with the generally
+batch-scheduled environment of a cluster. In addition, it must be able to
+distribute data between all the nodes used such that a single node does
+not become a limiting factor in the environment's scalability. A variety
+of data distribution models should also be available so that the data
+is distributed in a manner consistent with the required processing. Of
+course, the environment should be able to execute all the standard
+geospatial operations as defined by the Open Geospatial Consortium in
+their Simple Features\cite{ogc-sf} standard.
 
 \section{easy to use to form new operations}
 
@@ -108,6 +399,8 @@ MPI to communicate if needed
 \chapter{Experimental Setup/Design}
 
 How to show how well requirements were filled
+
+Some of the needed research has already been completed. After determining the query set and creating the PostGIS implementation of it, the processing environment was prototyped in Hadoop\cite{hadoop}, an opensource implementation of Google's MapReduce\cite{mapreduce} framework. MapReduce works by utilizing two user defined function, map and reduce. For each record of the primary dataset the map function is called. This process is made parallel by splitting the data up among several computers and running the individual map functions on those computers. After the map function is complete, the resulting set of data is passed to several reduce functions. Each instance of the reduce function receives all the data from the resulting dataset associated with the same key. The lessons learned from this prototyping phase will be applied to the MPI implementation.
 
 \section{Operation set}
 
@@ -166,6 +459,10 @@ Analysis of problem types that are good/bad for this approach
 
 \chapter{Conclusion}
 
+By simplifying the requirements to handle process GIS operations in parallel, the cost to implementing parallel solutions will decrease, enabling more parallel processing methods to be created. This parallel methods will be able to take advantage of the increased processing powers made available through compute clusters.
+
+Another benefit of this research is a classification of geospatial operations based on data access requirements and a sample set of queries to evaluate the efficiency of a parallel GIS processing implementation.
+
 \section{Future Work}
 
 additional decomposition methods, combined with alternative MPI communicators
@@ -173,11 +470,3 @@ additional decomposition methods, combined with alternative MPI communicators
 addition of preprocessing methods (indexing, etc)
 
 chunking of replicated dataset
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque a augue nec sapien varius vulputate et nec purus. Vivamus venenatis massa non dolor blandit sed venenatis urna lobortis. Fusce condimentum euismod condimentum. Suspendisse ligula neque, scelerisque eget viverra vel, ornare eget nibh. Sed nec mi metus. Aliquam erat volutpat. Pellentesque sit amet libero risus, id viverra est. Suspendisse sit amet velit et quam varius laoreet. Morbi quis laoreet ante. In metus sapien, venenatis eu sodales nec, sollicitudin eu quam. Nullam consequat scelerisque placerat. Phasellus dapibus mauris vel lacus dictum venenatis. Pellentesque vestibulum bibendum purus, at vestibulum felis ullamcorper ut. Integer mattis rhoncus urna, at pellentesque magna accumsan consequat. Sed dictum ultricies viverra. In nec pharetra elit. Mauris faucibus pharetra odio faucibus pharetra. Fusce eget dolor est, sed adipiscing quam.
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque a augue nec sapien varius vulputate et nec purus. Vivamus venenatis massa non dolor blandit sed venenatis urna lobortis. Fusce condimentum euismod condimentum. Suspendisse ligula neque, scelerisque eget viverra vel, ornare eget nibh. Sed nec mi metus. Aliquam erat volutpat. Pellentesque sit amet libero risus, id viverra est. Suspendisse sit amet velit et quam varius laoreet. Morbi quis laoreet ante. In metus sapien, venenatis eu sodales nec, sollicitudin eu quam. Nullam consequat scelerisque placerat. Phasellus dapibus mauris vel lacus dictum venenatis. Pellentesque vestibulum bibendum purus, at vestibulum felis ullamcorper ut. Integer mattis rhoncus urna, at pellentesque magna accumsan consequat. Sed dictum ultricies viverra. In nec pharetra elit. Mauris faucibus pharetra odio faucibus pharetra. Fusce eget dolor est, sed adipiscing quam.
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque a augue nec sapien varius vulputate et nec purus. Vivamus venenatis massa non dolor blandit sed venenatis urna lobortis. Fusce condimentum euismod condimentum. Suspendisse ligula neque, scelerisque eget viverra vel, ornare eget nibh. Sed nec mi metus. Aliquam erat volutpat. Pellentesque sit amet libero risus, id viverra est. Suspendisse sit amet velit et quam varius laoreet. Morbi quis laoreet ante. In metus sapien, venenatis eu sodales nec, sollicitudin eu quam. Nullam consequat scelerisque placerat. Phasellus dapibus mauris vel lacus dictum venenatis. Pellentesque vestibulum bibendum purus, at vestibulum felis ullamcorper ut. Integer mattis rhoncus urna, at pellentesque magna accumsan consequat. Sed dictum ultricies viverra. In nec pharetra elit. Mauris faucibus pharetra odio faucibus pharetra. Fusce eget dolor est, sed adipiscing quam.
-Integer eu metus at nisi tincidunt ultricies quis ut odio. Vestibulum lacinia faucibus risus a tristique. Proin pretium, dolor ut vulputate iaculis, erat arcu semper quam, interdum egestas nibh erat id sem. Quisque tincidunt nisi in orci lobortis tempor porttitor ante aliquam. Proin varius, diam eu mattis cursus, risus lacus ultricies ipsum, nec iaculis quam lacus nec magna. Cras eget mollis massa. Mauris tincidunt urna vitae sapien convallis tincidunt. Mauris luctus tincidunt risus sit amet elementum. Nullam ut eros et magna posuere feugiat non sed erat. Pellentesque blandit, risus id placerat molestie, felis ante ullamcorper mi, ac laoreet urna dolor vel dolor. Maecenas in urna quis libero aliquam faucibus eget eu est. Nunc orci tellus, dictum nec eleifend eu, elementum sed nibh.
-Morbi et nisi risus, at egestas ipsum. Nunc eget orci sit amet metus porttitor aliquet. Vestibulum facilisis semper nunc ut tincidunt. In lobortis orci in eros hendrerit eleifend. Nam commodo mollis odio ut consectetur. Duis et enim arcu. Aenean lacinia facilisis metus. In hac habitasse platea dictumst. Suspendisse consequat ornare est, vitae porttitor enim viverra bibendum. Nulla sapien urna, pulvinar nec vulputate in, vehicula id est. Donec elit metus, rhoncus at iaculis et, consectetur eu lectus. Aenean sed mauris massa, vel ullamcorper justo. Maecenas et odio quis ligula ultricies elementum eu eget orci. Sed facilisis, mauris vitae vestibulum lobortis, lorem mi aliquet odio, sit amet dignissim nulla tortor nec risus. Vestibulum sit amet urna sit amet eros adipiscing consectetur.
-Vestibulum sodales tristique cursus. Aellentesque fermentum purus ac urna convallis id aliquam nulla scelerisque. Etiam auctor iaculis pharetra. liquam aliquam auctor velit quis interdum. Curabitur lectus metus, convallis non rutrum in, dictum tincidunt velit. Nulla sollicitudin, orci sit amet venenatis laoreet, metus risus porta tellus, in fermentum erat diam eget diam. Nulla turpis ante, pulvinar non tincidunt id, luctus vel nunc. Duis bibendum tincidunt urna, quis aliquet ligula aliquam vitae. Nam imperdiet ipsum ac lacus facilisis placerat. Nunc placerat nunc felis, a condimentum turpis. Praesent diam libero, feugiat eget viverra eu, scelerisque eget orci. Donec dignissim venenatis dolor, in placerat erat rutrum non.
-Nulla ut viverra dui. Pellentesque fermentum purus ac urna convallis id aliquam nulla scelerisque. Etiam auctor iaculis pharetra. Vestibulum ornare sollicitudin fermentum. Maecenas non vestibulum tortor. In hac habitasse platea dictumst. Phasellus iaculis viverra feugiat. Pellentesque sem enim, vehicula eget lacinia vel, laoreet et dolor. Vestibulum viverra lobortis nisl et dapibus. Fusce vehicula quam quis libero mattis fringilla. Mauris ut lorem eu lorem commodo pellentesque. Quisque ullamcorper ligula at velit tempus vitae varius purus fringilla. Nunc aliquam velit nec sapien cursus adipiscing. Cras sit amet neque ante. Maecenas ipsum tellus, facilisis sit amet lobortis at, semper ac ligula. Etiam pellentesque velit nec nisl vehicula scelerisque. Vivamus iaculis congue varius. 
