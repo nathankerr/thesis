@@ -1,0 +1,37 @@
+\chapter{REQUIREMENTS}
+
+\textbf{batch mode processing}
+
+\textbf{data distribution options}
+
+\textbf{standard geospatial operations}
+
+\textbf{scalable, high performance}
+
+\textbf{dataset centric}
+
+A good cluster based GIS processing environment needs to be separate from
+a graphical user interface so that it does not incur additional overhead
+on the compute nodes and so that it can interact well with the generally
+batch-scheduled environment of a cluster. In addition, it must be able to
+distribute data between all the nodes used such that a single node does
+not become a limiting factor in the environment's scalability. A variety
+of data distribution models should also be available so that the data
+is distributed in a manner consistent with the required processing. Of
+course, the environment should be able to execute all the standard
+geospatial operations as defined by the Open Geospatial Consortium in
+their Simple Features\cite{ogc-sf} standard.
+
+\section{easy to use to form new operations}
+
+Sample program:
+
+initClusterGIS
+
+loadData (distributed/replicated)
+
+process (user code here)
+
+saveData (distributed/replicated)
+
+finalizeClusterGIS

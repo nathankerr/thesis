@@ -98,68 +98,71 @@ Acknowledgments go here.
 \begin{center}TABLE OF CONTENTS\end{center}
 \begin{flushright}Page\end{flushright}
 \makeatletter
-\newcommand\chapternew{%
-	\if@openright
-		\cleardoublepage
-	\else
-		\clearpage
-	\fi
-	\thispagestyle{empty}%
-	\global\@topnum\z@
-	\@afterindentfalse
-	\secdef\@chapter\@schapter
-}
-\def\@chapter[#1]#2{%
-	\ifnum \c@secnumdepth >\m@ne
-		\refstepcounter{chapter}%
-		\typeout{\@chapapp\space\thechapter.}%
-		\addcontentsline{toc}{chapter}%
-		{\protect\numberline{\thechapter}#1}%
-	\else
-		\addcontentsline{toc}{chapter}{#1}%
-	\fi
-	\chaptermark{#1}%
-	\addtocontents{lof}{\protect\addvspace{10\p@}}%
-	\addtocontents{lot}{\protect\addvspace{10\p@}}%
-	\@makechapternewhead{#2}
-	\if@twocolumn
-		\@topnewpage[\@makechapterhead{#2}]%
-	\else
-		\@makechapterhead{#2}%
-		\@afterheading
-	\fi
-}
-\newcommand\@makechapternewhead[1]{}%
+% \newcommand\chapternew{%
+% 	\if@openright
+% 		\cleardoublepage
+% 	\else
+% 		\clearpage
+% 	\fi
+% 	\thispagestyle{empty}%
+% 	\global\@topnum\z@
+% 	\@afterindentfalse
+% 	\secdef\@chapter\@schapter
+% }
+% \def\@chapter[#1]#2{%
+% 	\ifnum \c@secnumdepth >\m@ne
+% 		\refstepcounter{chapter}%
+% 		\typeout{\@chapapp\space\thechapter.}%
+% 		\addcontentsline{toc}{chapter}%
+% 		{\protect\numberline{\thechapter}#1}%
+% 	\else
+% 		\addcontentsline{toc}{chapter}{#1}%
+% 	\fi
+% 	\chaptermark{#1}%
+% 	\addtocontents{lof}{\protect\addvspace{10\p@}}%
+% 	\addtocontents{lot}{\protect\addvspace{10\p@}}%
+% 	\@makechapternewhead{#2}
+% 	\if@twocolumn
+% 		\@topnewpage[\@makechapterhead{#2}]%
+% 	\else
+% 		\@makechapterhead{#2}%
+% 		\@afterheading
+% 	\fi
+% }
+% \newcommand\@makechapternewhead[1]{}%
+%
+% \renewcommand\section{\@startsection {section}{1}{\z@}%
+% 	{-3.5ex \@plus -1ex \@minus -.2ex}%
+% 	{2.3ex \@plus.2ex}%
+% 	{\normalfont}
+% }
+% 
+% \newcommand\chapter{%\@startsection{chapter}{1}{\z@}
+% 
+% }
+% \renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
+% 	{-3.25ex\@plus -1ex \@minus -.2ex}%
+% 	{1.5ex \@plus .2ex}%
+% 	{\normalfont}
+% }
+% 
+% \renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}%
+% 	{-3.25ex\@plus -1ex \@minus -.2ex}%
+% 	{1.5ex \@plus .2ex}%
+% 	{\normalfont}
+% }
 
-\renewcommand\section{\@startsection {section}{1}{\z@}%
-	{-3.5ex \@plus -1ex \@minus -.2ex}%
-	{2.3ex \@plus.2ex}%
-	{\normalfont}
-}
+% \renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
+% 	{3.25ex \@plus1ex \@minus.2ex}%
+% 	{-1em}%
+% 	{\normalfont}
+% }
 
-\renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
-	{-3.25ex\@plus -1ex \@minus -.2ex}%
-	{1.5ex \@plus .2ex}%
-	{\normalfont}
-}
-
-\renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}%
-	{-3.25ex\@plus -1ex \@minus -.2ex}%
-	{1.5ex \@plus .2ex}%
-	{\normalfont}
-}
-
-\renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
-	{3.25ex \@plus1ex \@minus.2ex}%
-	{-1em}%
-	{\normalfont}
-}
-
-\renewcommand\subparagraph{\@startsection{subparagraph}{5}{\parindent}%
-	{3.25ex \@plus1ex \@minus .2ex}%
-	{-1em}%
-	{\normalfont}
-}
+% \renewcommand\subparagraph{\@startsection{subparagraph}{5}{\parindent}%
+% 	{3.25ex \@plus1ex \@minus .2ex}%
+% 	{-1em}%
+% 	{\normalfont}
+% }
 
 \renewcommand*\l@chapter[2]{%
 	\ifnum \c@tocdepth >\m@ne
@@ -201,27 +204,32 @@ Acknowledgments go here.
 	\fi
 }
 
+%\fancyhead[R]{Page}
 \@starttoc{toc}
+%\fancyhead{}
+%TODO: Page heading on toc pages after the first one
 \makeatother
 \clearpage
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %List of tables (if tables appear in document)
-%\begin{center}LIST OF TABLES\end{center}
-%Table\hspace{\stretch{1}}Page
-%\makeatletter
-%\@starttoc{lot}
-%\makeatother
-%\clearpage
+\addcontentsline{toc}{listchapter}{LIST OF TABLES}
+\begin{center}LIST OF TABLES\end{center}
+Table\hspace{\stretch{1}}Page
+\makeatletter
+\@starttoc{lot}
+\makeatother
+\clearpage
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %List of figures (if figures appear in document)
-%\begin{center}LIST OF FIGURES\end{center}
-%Figure\hspace{\stretch{1}}Page
-%\makeatletter
-%\@starttoc{lof}
-%\makeatother
-%\clearpage
+\addcontentsline{toc}{listchapter}{LIST OF FIGURES}
+\begin{center}LIST OF FIGURES\end{center}
+Figure\hspace{\stretch{1}}Page
+\makeatletter
+\@starttoc{lof}
+\makeatother
+\clearpage
 
 %Other lists (e.g., nomenclature, definitions, glossary of terms, etc.)
 %Preface (optional; must be less than 10 pages)

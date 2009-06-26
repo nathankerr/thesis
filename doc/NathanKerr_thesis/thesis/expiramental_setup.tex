@@ -1,0 +1,102 @@
+\chapter{EXPERIMENTAL SETUP}
+
+\textbf{How to show how well requirements were filled}
+
+Some of the needed research has already been completed. After determining the query set and creating the PostGIS implementation of it, the processing environment was prototyped in Hadoop\cite{hadoop}, an opensource implementation of Google's MapReduce\cite{mapreduce} framework. MapReduce works by utilizing two user defined function, map and reduce. For each record of the primary dataset the map function is called. This process is made parallel by splitting the data up among several computers and running the individual map functions on those computers. After the map function is complete, the resulting set of data is passed to several reduce functions. Each instance of the reduce function receives all the data from the resulting dataset associated with the same key. The lessons learned from this prototyping phase will be applied to the MPI implementation.
+
+\section{Operation set}
+
+\textbf{These operations are representative of problem space.}
+
+\textbf{Data access based: parallelization is based off data decomp, so operations are too.}
+
+\textbf{OGC standard requirements - survey of methods requiring 1, 2, or more data points.}
+
+http://www.opengeospatial.org/standards/sfa (Simple Feature Access - Part 1: Common Architecture 1.2.0)
+
+\begin{table}
+\begin{center}
+\begin{tabular}{lcc}
+Section & 1 Geometry & 2 Geometries\\
+\hline
+6.1.2 (Geometry) & 16 & 15\\
+6.1.4 (Point) & 4 & 0\\
+6.1.6 (Curve) & 5 & 0\\
+6.1.7 (LineString, Line, LinearRing)& 2 & 0\\
+6.1.8 (MultiCurve) & 2 & 0\\
+6.1.10 (Surface) & 3 & 0\\
+6.1.11 (Polygon, Triangle) & 3 & 0\\
+6.1.12 (PolyhedralSurface) & 4 & 0\\
+6.1.13 (MultiSurface) & 3 & 0\\
+6.1.15 (Relational Operators) & 0 & 9\\
+\hline
+Total & 42 & 24\\
+\end{tabular}
+\caption{OGC Methods by Number of Required Geometries}
+\label{MethodCount}
+\end{center}
+\end{table}
+
+All operations must be performed as if they were part of a series of operations.
+
+1. Create a new record
+
+PostGIS: insert...
+Hadoop: map: emit all record giving them the same key (forcing one reduce); reduce emits all received records with the addition of one
+ClusterGIS: emits all records and the new one
+
+2. Read an existing record (by id)
+
+PostGIS: select ... where id =
+Hadoop: map: emit only the record with the correct id; reduce: identity
+ClusterGIS: emit only the record with the correct id;
+
+3. Update
+
+PostGIS: update....
+Hadoop: map: emit all records, updating the one with the correct id; reduce: identity
+ClusterGIS: emit all records updating the correct one
+
+4. Destroy
+
+PostGIS: delete ...
+Hadoop: map: emit all records except for the one with the correct id; reduce: identity
+ClusterGIS: emit all record except the the correct one
+
+5. Filter
+
+PostGIS: select...where
+Hadoop: map: emit only records matching the requested criteria; reduce: identity
+ClusterGIS: emit only records matching the requested criteria
+
+6. Find Nearest
+
+PostGIS: Crazy set of queries (nested would have been nice, but too slow)
+Hadoop: map: loop through secondary dataset emitting id of primary and secondary; reduce: identity
+ClusterGIS: loop through primary and secondary dataset, emitting the id of primary and secondary which match
+
+7. Chaining (Filter the datasets, then find the nearest in the filtered data)
+
+PostGIS: Modify crazy set of queries to use the filter
+Hadoop: filter secondary dataset on load; map: only search for nearest for filtered data, skip others; reduce: identity
+ClusterGIS: remove nodes in the datasets not matching the filter, find nearest as before
+
+\section{Dataset Description}
+
+\textbf{Full datasets; 34k employers, 1.2m parcels}
+
+\textbf{sub datasets, how to generate from full}
+
+\textbf{listing of datsets used}
+
+\section{Hardware setup}
+
+\textbf{Saguaro}
+
+\section{implementations}
+
+\subsection{PostGIS}
+
+\subsection{Hadoop Prototype}
+
+\subsection{ClusterGIS}

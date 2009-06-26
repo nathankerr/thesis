@@ -10,3 +10,6 @@
 *.swp
 *.out
 *.toc
+*.lof
+*.lot
+*.dcs

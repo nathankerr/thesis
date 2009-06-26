@@ -1,15 +1,6 @@
-% Body of Research
-%TODO: Introduction
-%TODO: Related Work
-%TODO: Requirements
-%TODO: Design
-%TODO: Experimental Setup
-%TODO: Results
-%TODO: Conclusion
+\chapter{INTRODUCTION}
 
-\chapter{Introduction}
-
-GIS processing is important
+\textbf{GIS processing is important}
 
 Geospatial (GIS) simulation and analysis are important processes
 to understanding and improving our environment, both urban and
@@ -31,7 +22,7 @@ geospatial analysis, processing, and simulation.
 
 \section{Current methods}
 
-Desktop GIS
+\textbf{Desktop GIS}
 
 Desktop GIS packages such as ArcGIS\cite{arcgis}, QuantumGIS\cite{qgis},
 and GRASS GIS\cite{grass} are commonly used for GIS processing and
@@ -41,7 +32,7 @@ run on.  Datasets can be too large for their memories and computations
 can take too long to be practical. The popular simulation package,
 UrbanSim\cite{urbansim} faces these same constraints.
 
-Database GIS
+\textbf{Database GIS}
 
 An alternative approach to using these desktop programs is to employ
 a geospatial database like PostGIS\cite{postgis}, ArcSDE\cite{arcsde}
@@ -60,7 +51,7 @@ of urban planning decisions.
 
 \section{Significance}
 
-Limitations of single processor implementations
+\textbf{Limitations of single processor implementations}
 
 GIS data has become easier to gather in recent years with the
 proliferation on low cost GPS devices. The availability of these
@@ -78,7 +69,7 @@ reduce the time required to complete the processing.
 
 \section{Attempted solutions}
 
-Parallel DB
+\textbf{Parallel DB}
 
 One method of using multiple computers to perform the required
 processing is the use of parallel databases\cite{hpdb}. Parallel
@@ -144,7 +135,7 @@ sometimes faster than utilizing a computer's local disk for storage
 while also enabling processing to spread across the available compute
 resources based entirely on the process' grain size.
 
-Parallel GRASS
+\textbf{Parallel GRASS}
 
 Current desktop approaches to GIS processing such as ArcGIS are
 unable to make use of the multi-machine processing environment that
@@ -157,7 +148,7 @@ all participants access a shared data repository or filesystem. The
 geometries are portioned between the various nodes. Operations are done
 on the subsets, and the results are merged to produce the final result.
 
-Problems with desktop programs on clusters
+\textbf{Problems with desktop programs on clusters}
 
 While the method used to extend GRASS GIS will in fact speed up GIS
 processing, it has two flaws. First, GRASS is designed to be used in an
@@ -167,13 +158,13 @@ it in or out of the environment.
 
 \section{Needed solution, cluster programming model}
 
-batch
+\textbf{batch}
 
-mpi
+\textbf{mpi}
 
-scalable architecture
+\textbf{scalable} architecture
 
-spmd
+\textbf{spmd}
 
 A good cluster based GIS processing environment needs to be separate from
 a graphical user interface so that it does not incur additional overhead
@@ -187,7 +178,7 @@ course, the environment should be able to execute all the standard
 geospatial operations as defined by the Open Geospatial Consortium in
 their Simple Features\cite{ogc-sf} standard.
 
-Thesis statement goes here
+\textbf{Thesis statement goes here}
 
 This thesis will evaluate a novel method of processing geospatial data,
 called PGIS, which treats datasets as an atomic unit (as opposed to
@@ -213,7 +204,7 @@ After the data is distributed, a user defined operation is executed. This operat
 from the primary dataset, creating a new dataset or modifying the existing one. This is also where the secondary dataset can
 be referenced to perform operations like nearest neighbor. After the user defined operation is completed, either the modified primary dataset or a newly created dataset is saved.
 
-How this document goes about supporting the thesis statement.
+\textbf{How this document goes about supporting the thesis statement.}
 
 PGIS will be evaluated for speedup and scaleup, using
 equivalent operations executed in PostGIS as a reference. Speedup
@@ -234,239 +225,3 @@ feature of one dataset for each record of a dataset. This operation
 is the hardest for the database approach and shows the strength of the
 new approach. Full details for datasets and operations used will be given in
 the thesis.
-
-\chapter{Related Work}
-
-\section{Desktop GIS}
-
-ArcInfo, QuantumGIS, GRASS GIS
-
-Desktop GIS packages such as ArcGIS\cite{arcgis}, QuantumGIS\cite{qgis},
-and GRASS GIS\cite{grass} are commonly used for GIS processing and
-analysis. While these programs provide graphical interfaces to their
-GIS capabilities, their capabilities are limited by the computers they
-run on.  Datasets can be too large for their memories and computations
-can take too long to be practical. The popular simulation package,
-UrbanSim\cite{urbansim} faces these same constraints.
-
-\section{Database GIS}
-
-PostGIS, Oracle Spatial, Client-Server Paradise
-
-An alternative approach to using these desktop programs is to employ
-a geospatial database like PostGIS\cite{postgis}, ArcSDE\cite{arcsde}
-or Oracle Spatial\cite{oracle}. Geospatial databases allow centralized
-access to, and processing of, geospatial data through query languages
-such as SQL. As data is stored and managed by the database software,
-advanced database features such as indexes can be utilized to speedup
-data access and processing.
-
-PostGIS is utilized as the core component of the Urban
-Systems Frame-work\cite{usf} (USF) designed by the Digital
-Phoenix\cite{digitalphoenix} project group at Arizona State
-University. Digital Phoenix tries to integrate 3D visualization technology
-with simulated and gathered GIS data to better understand the impacts
-of urban planning decisions.
-
-\section{GIS libraries}
-
-JTS, GEOS
-
-\section{Parallel DB}
-
-One method of using multiple computers to perform the required
-processing is the use of parallel databases\cite{hpdb}. Parallel
-databases should be able to spread both data storage and
-processing across multiple computers transparently from the view
-of the SQL query programmer. Several commercial databases such as
-TeraData\cite{teradata} and Oracle\cite{oracle} provide support for this
-method of operation. Open source databases such as MySQL\cite{mysql}
-and PostgreSQL\cite{postgres} currently do not support this
-methodology. Parallel databases generally do not require a shared
-data repository or filesystem.
-
-Parallel database techniques have been used to build a scalable
-geospatial database system\cite{paradise,cs-paradise}. Data is spread
-between computers using round-robin, hash, or spatial partitioning. Because
-the data is able to be distributed between multiple computers, the
-processing is able to scale to larger datasets.
-
-When a query is processed across the database, a thread is created
-for each fragment of the data. Thus as the data grows larger, the
-processing capabilities of the system also increase. If a particular
-processing operation requires relatively less computation for each
-data record this is fine. However, after the amount of computation per
-data record increases beyond a certain point, which is dependent on the
-speed of the machine used, the processing operation can be sped up by
-utilizing more processors. Major factors in determining how much data
-should be processed on each machine, and therefore how the data should
-be spread between machines, are memory, computation, and communication
-overhead to move the data and computation to another machine. The ratio
-of computation to memory and commutation requirements is often referred
-to as grain size. Coarser grained processes have more computation per
-data record, while finer grained processes have little computation for
-each data record.
-
-Databases excel at working with indexed data while allowing multiple
-users to interact with the data in a concurrently safe manner through
-the use of atomic transactions. The requirements placed upon database
-systems to handle these situations slow down computations that don't
-utilize indexes or work on an entire dataset at once. The processing
-operations this research examines do not require these restrictions,
-and as such a more efficient system can be created.
-
-Using databases can also limit the reusability of computer resources
-to complete other processes. For example, a process could benefit from
-utilizing more processors, but the disks on those database nodes could
-already be fully utilized, thus making them unable to accommodate the
-computation as it is directly tied to data storage. This is only really
-an issue when trying to fully utilize hardware resources for different
-purposes.
-
-Many universities and research institutions already have significant
-investment in compute clusters. These clusters are groups of computer
-linked together with high speed network interconnects and high performance
-parallel filesystems such as Lustre\cite{lustre}. By separating compute
-and storage resources at the cost of a high speed network, compute
-clusters are able to separate computation from data storage.  %TODO:
-Compare to SAN approaches
-
-Parallel filesystems alleviate the problems of separating the data from
-the computer where the processing will be executed by spreading files
-across multiple network connected fileservers allowing access that is
-sometimes faster than utilizing a computer's local disk for storage
-while also enabling processing to spread across the available compute
-resources based entirely on the process' grain size.
-
-Paradise
-
-\section{Parallel GRASS}
-
-Other converted programs?
-
-\section{MRGIS MapReduce GIS}
-
-\chapter{Requirements}
-
-batch mode processing
-
-data distribution options
-
-standard geospatial operations
-
-scalable, high performance
-
-dataset centric
-
-A good cluster based GIS processing environment needs to be separate from
-a graphical user interface so that it does not incur additional overhead
-on the compute nodes and so that it can interact well with the generally
-batch-scheduled environment of a cluster. In addition, it must be able to
-distribute data between all the nodes used such that a single node does
-not become a limiting factor in the environment's scalability. A variety
-of data distribution models should also be available so that the data
-is distributed in a manner consistent with the required processing. Of
-course, the environment should be able to execute all the standard
-geospatial operations as defined by the Open Geospatial Consortium in
-their Simple Features\cite{ogc-sf} standard.
-
-\section{easy to use to form new operations}
-
-Sample program:
-
-initClusterGIS
-
-loadData (distributed/replicated)
-
-process (user code here)
-
-saveData (distributed/replicated)
-
-finalizeClusterGIS
-
-\chapter{Design/Implementation}
-
-How to fulfill requirements
-
-Architecture of solution
-
-Split dataset across tasks (MPI I/O)
-
-Each task works on their own part
-
-MPI to communicate if needed
-
-\chapter{Experimental Setup/Design}
-
-How to show how well requirements were filled
-
-Some of the needed research has already been completed. After determining the query set and creating the PostGIS implementation of it, the processing environment was prototyped in Hadoop\cite{hadoop}, an opensource implementation of Google's MapReduce\cite{mapreduce} framework. MapReduce works by utilizing two user defined function, map and reduce. For each record of the primary dataset the map function is called. This process is made parallel by splitting the data up among several computers and running the individual map functions on those computers. After the map function is complete, the resulting set of data is passed to several reduce functions. Each instance of the reduce function receives all the data from the resulting dataset associated with the same key. The lessons learned from this prototyping phase will be applied to the MPI implementation.
-
-\section{Operation set}
-
-These operations are representative of problem space.
-
-Data access based: parallelization is based off data decomp, so operations are too.
-
-OGC standard requirements - survey of methods requiring 1, 2, or more data points.
-
-\section{Dataset Description}
-
-Full datasets; 34k employers, 1.2m parcels
-
-sub datasets, how to generate from full
-
-listing of datsets used
-
-\section{Hardware setup}
-
-Saguaro
-
-\section{implementations}
-
-\subsection{PostGIS}
-
-\subsection{Hadoop Prototype}
-
-\subsection{ClusterGIS}
-
-\chapter{Results}
-
-\section{Performance Analysis}
-
-vary procs, maintain data
-
-vary data, maintain procs
-
-vary data, vary procs
-
-\section{Comparisons}
-
-PostGIS as baseline
-
-PostGIS to Hadoop
-
-Hadoop to ClusterGIS
-
-PostGIS to ClusterGIS
-
-\chapter{Recommendations}
-
-Synthesis
-
-\section{Applicable Problem Spaces}
-Analysis of problem types that are good/bad for this approach
-
-\chapter{Conclusion}
-
-By simplifying the requirements to handle process GIS operations in parallel, the cost to implementing parallel solutions will decrease, enabling more parallel processing methods to be created. This parallel methods will be able to take advantage of the increased processing powers made available through compute clusters.
-
-Another benefit of this research is a classification of geospatial operations based on data access requirements and a sample set of queries to evaluate the efficiency of a parallel GIS processing implementation.
-
-\section{Future Work}
-
-additional decomposition methods, combined with alternative MPI communicators
-
-addition of preprocessing methods (indexing, etc)
-
-chunking of replicated dataset
