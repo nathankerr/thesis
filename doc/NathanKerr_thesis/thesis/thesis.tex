@@ -17,17 +17,20 @@
 
 \begin{document} 
 
+%%%%%%%%%%%%%%%%%%%%%
 % Preliminary Matters
-%Title page
-%Approval page
-%Abstract
-%Dedication (optional)
-%Acknowledgments (optional)
-%Table of contents
-%List of tables (if tables appear in document)
-%List of figures (if figures appear in document)
-%Other lists (e.g., nomenclature, definitions, glossary of terms, etc.)
-%Preface (optional; must be less than 10 pages)
+%%%%%%%%%%%%%%%%%%%%%
+% Title page
+% Approval page
+% Abstract
+% Dedication (optional)
+% Acknowledgments (optional)
+% Table of contents
+% List of tables (if tables appear in document)
+% List of figures (if figures appear in document)
+% Other lists (e.g., nomenclature, definitions, glossary of terms, etc.)
+% Preface (optional; must be less than 10 pages)
+
 \pagenumbering{roman}
 \pagestyle{plain}
 \fancyhf{}
@@ -40,14 +43,38 @@
 \addtolength\topmargin{40pt}
 \addtolength\textheight{-40pt}
 
+%%%%%%%%%%%%%%%%%%
 % Body of Research
-%TODO: Introduction
-%TODO: Related Work
-%TODO: Requirements
-%TODO: Design
-%TODO: Experimental Setup
-%TODO: Results
-%TODO: Conclusion
+%%%%%%%%%%%%%%%%%%
+% TODO: Introduction
+% TODO: Related Work
+% TODO: Requirements
+% TODO: Design
+% TODO: Experimental Setup
+% TODO: Results
+% TODO: Conclusion
+
+% Adjust heading formatting
+\makeatletter
+%\@startsection {NAME}{LEVEL}{INDENT}{BEFORESKIP}{AFTERSKIP}{STYLE}
+\renewcommand\chapter{\@startsection{chapter}{1}{\z@}%
+	{0ex}%
+	{2.3ex \@plus.2ex}%
+	{CHAPTER \normalfont\centering\thispagestyle{plain}}
+}
+\renewcommand\section{\@startsection{section}{2}{\z@}%
+	{-3.5ex \@plus -1ex \@minus -.2ex}%
+	{2.3ex \@plus.2ex}%
+	{\normalfont}
+}
+\renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
+	{-3.5ex \@plus -1ex \@minus -.2ex}%
+	{2.3ex \@plus.2ex}%
+	{\normalfont}
+}
+\makeatother
+
+% Setup pagenumbering
 \pagenumbering{arabic}
 % No page numbers on chapter beginnings
 \fancypagestyle{plain}{%
@@ -72,11 +99,14 @@
 \include{conclusion}
 \include{body}
 
+%%%%%%%%%%%%%
 % Back Matter
-%TODO: Notes (if you have elected to group them at the end of the document)
-%TODO: References (AKA “Bibliography” or “Works Cited”)
-%TODO: Appendices
-%TODO: Biographical sketch (optional)
+%%%%%%%%%%%%%
+% TODO: Notes (if you have elected to group them at the end of the document)
+% TODO: References (AKA “Bibliography” or “Works Cited”)
+% TODO: Appendices
+% TODO: Biographical sketch (optional)
+
 \include{back}
 
 \end{document}
