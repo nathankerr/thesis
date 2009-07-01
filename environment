@@ -2,7 +2,7 @@
 
 use gcc-openmpi-1.2.7
 
-export PGIS=/home/alaster/projects/pgis
+export PGIS=/home/alaster/projects/clustergis
 export PGIS_SOFTWARE=$PGIS/software
 
 export POSTGIS=$PGIS/experiments/postgis
