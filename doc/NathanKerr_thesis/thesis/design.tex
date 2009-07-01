@@ -1,11 +1,37 @@
 \chapter{DESIGN}
 
-\textbf{How to fulfill requirements}
+How fulfill requirements
 
-\textbf{Architecture of solution}
+Dataset centric (no need for record level locking, etc.)
 
-\textbf{Split dataset across tasks (MPI I/O)}
+Data parallel for speed/scaleup
 
-\textbf{Each task works on their own part}
+Batch mode processing
 
-\textbf{MPI to communicate if needed}
+\section{HadoopGIS}
+
+Uses JTS
+
+Map/Reduce
+
+``Communication'' only possible in Reduce
+
+Multiple Map/Reduce phases
+
+How to use more than one dataset
+
+Limited dataset distribution models
+
+\section{ClusterGIS}
+
+Uses GEOS
+
+Split using MPI-IO
+
+Communicate using MPI, possibility for different distributions
+
+How a basic program works
+
+How to use more than one dataset
+
+Datasets could be distributed in any way imaginable. 
