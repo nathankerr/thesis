@@ -152,48 +152,10 @@ by utilizing multiple processors. Scalability describes the program's
 ability to operation on various numbers of processors utilizing various
 amounts of data.
 
-\section{ClusterGIS}
-\textbf{Thesis statement goes here}
+\section{Cluster based approaches to GIS}
+% Thesis statement goes here
 
-Evaluate two dataset centric approaches to processing large geospatial datasets on clusters.
+This thesis implements and evaluates two parallel, dataset centric approaches to processing large geospatial datasets on clusters. The first approach, called HadoopGIS, uses the Hadoop\cite{hadoop} map/reduce framework. The second approach, ClusterGIS, uses the more traditional approach to programming for clusters, MPI. Both approaches provide the geospatial operations required by the Open Geospatial Consortium's Simple Features\cite{ogc-sf} standard. By applying data parallel programming methods and dispensing with record centric processing methods, both these methods create a fairly easy environment to program in while providing significant speedup and scaleup.
 
-A good cluster based GIS processing environment needs to be separate from
-a graphical user interface so that it does not incur additional overhead
-on the compute nodes and so that it can interact well with the generally
-batch-scheduled environment of a cluster. In addition, it must be able to
-distribute data between all the nodes used such that a single node does
-not become a limiting factor in the environment's scalability. A variety
-of data distribution models should also be available so that the data
-is distributed in a manner consistent with the required processing. Of
-course, the environment should be able to execute all the standard
-geospatial operations as defined by the Open Geospatial Consortium in
-their Simple Features\cite{ogc-sf} standard.
-
-This thesis will evaluate a novel method of processing geospatial data,
-called PGIS, which treats datasets as an atomic unit (as opposed to
-databases where records are atomic). By dispensing with the requirements
-dictated by record level atomicity, software complexity is reduced
-significantly allowing for a simpler implementations with less overhead.
-
-The first step in PGIS is to distribute the data between the computers
-participating in the operation. PGIS is a data parallel system, meaning
-that a dataset can be split up onto multiple computers and the operations
-on the data require little if any data on another computer. I will refer
-to this dataset as the primary dataset. For some operations, a secondary
-dataset is required in its entirety. For instance if the operation is
-to find the nearest record to a given georeferenced point. If both the
-primary and secondary datasets were spatially distributed between the
-computers as described in \cite{paradise} additional preprocessing would
-be needed. The limitations of having the entire secondary dataset on each
-computer are increased memory footprint and number of records that have
-to be looked at. While PGIS does not implement a spatial distribution
-method, one could be added in future work.
-
-After the data is distributed, a user defined operation is executed. This
-operation should iterate over the subset of records from the primary
-dataset, creating a new dataset or modifying the existing one. This is
-also where the secondary dataset can be referenced to perform operations
-like nearest neighbor. After the user defined operation is completed,
-either the modified primary dataset or a newly created dataset is saved.
-
-\textbf{How this document goes about supporting the thesis statement.}
+% How does this document support 
+This document first discusses related works in GIS processing and parallization. These related works are used to form the requirements of a good cluster based implementation. These requirements are then transferred into the design of HadoopGIS and ClusterGIS. After the implementation design discussion is concluded, the evaluation method is discussed in the experimental setup. From the results of the experiments, the performance of the implementations are evaluated and analyzed in the results section. Then I provide some recommendations and conclusions.
