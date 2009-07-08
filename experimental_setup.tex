@@ -2,15 +2,35 @@
 
 \textbf{How to show how well requirements were filled}
 
-Some of the needed research has already been completed. After determining the query set and creating the PostGIS implementation of it, the processing environment was prototyped in Hadoop\cite{hadoop}, an opensource implementation of Google's MapReduce\cite{mapreduce} framework. MapReduce works by utilizing two user defined function, map and reduce. For each record of the primary dataset the map function is called. This process is made parallel by splitting the data up among several computers and running the individual map functions on those computers. After the map function is complete, the resulting set of data is passed to several reduce functions. Each instance of the reduce function receives all the data from the resulting dataset associated with the same key. The lessons learned from this prototyping phase will be applied to the MPI implementation.
+Some of the needed research has already been completed. After determining
+the query set and creating the PostGIS implementation of it, the
+processing environment was prototyped in Hadoop\cite{hadoop}, an opensource
+implementation of Google's MapReduce\cite{mapreduce} framework. MapReduce works
+by utilizing two user defined function, map and reduce. For each record
+of the primary dataset the map function is called. This process is made
+parallel by splitting the data up among several computers and running
+the individual map functions on those computers. After the map function
+is complete, the resulting set of data is passed to several reduce
+functions. Each instance of the reduce function receives all the data from
+the resulting dataset associated with the same key. The lessons learned
+from this prototyping phase will be applied to the MPI implementation.
 
-\section{Operation set}
+\section{Standard Geospatial Operations}
 
-\textbf{These operations are representative of problem space.}
+Used JTS, GEOS.
 
-\textbf{Data access based: parallelization is based off data decomp, so operations are too.}
+\section{Batch Mode Processing}
 
-\textbf{OGC standard requirements - survey of methods requiring 1, 2, or more data points.}
+Method of execution
+
+\section{Scalability}
+
+\subsection{Operation set}
+
+Assuming OGC-SFS compliance (Because of using JTS and GEOS),
+operations come down to data interaction. How to get data where
+it belongs. Differences between record-centric and dataset-centric
+processing methods.
 
 http://www.opengeospatial.org/standards/sfa (Simple Feature Access - Part 1: Common Architecture 1.2.0)
 
@@ -39,55 +59,52 @@ Total & 42 & 24\\
 
 All operations must be performed as if they were part of a series of operations.
 
-1. Create a new record
+\subsubsection{Create}
 
-PostGIS: insert...
-Hadoop: map: emit all record giving them the same key (forcing one reduce); reduce emits all received records with the addition of one
-ClusterGIS: emits all records and the new one
+Adds a new record to an existing dataset, serial id needs to be calculated.
 
-2. Read an existing record (by id)
+Compares record-centric to dataset-centric. What gets written? Mutability of dataset?
 
-PostGIS: select ... where id =
-Hadoop: map: emit only the record with the correct id; reduce: identity
-ClusterGIS: emit only the record with the correct id;
+\subsubsection{Read}
 
-3. Update
+Reads an existing record (by id)
 
-PostGIS: update....
-Hadoop: map: emit all records, updating the one with the correct id; reduce: identity
-ClusterGIS: emit all records updating the correct one
+Compares record-centric to dataset-centric access times.
 
-4. Destroy
+\subsubsection{Update}
 
-PostGIS: delete ...
-Hadoop: map: emit all records except for the one with the correct id; reduce: identity
-ClusterGIS: emit all record except the correct one
+Updates an attribute of a record
 
-5. Filter
+Compares record-centric to dataset-centric. What gets written? Mutability of dataset?
 
-PostGIS: select...where
-Hadoop: map: emit only records matching the requested criteria; reduce: identity
-ClusterGIS: emit only records matching the requested criteria
+\subsubsection{Destroy}
 
-6. Find Nearest
+Removes a record from the dataset.
 
-PostGIS: Crazy set of queries (nested would have been nice, but too slow)
-Hadoop: map: loop through secondary dataset emitting id of primary and secondary; reduce: identity
-ClusterGIS: loop through primary and secondary dataset, emitting the id of primary and secondary which match
+Compares record-centric to dataset-centric. What gets written? Mutability of dataset?
 
-7. Chaining (Filter the datasets, then find the nearest in the filtered data)
+\subsubsection{Filter}
 
-PostGIS: Modify crazy set of queries to use the filter
-Hadoop: filter secondary dataset on load; map: only search for nearest for filtered data, skip others; reduce: identity
-ClusterGIS: remove nodes in the datasets not matching the filter, find nearest as before
+Apply a geospatial operation across the entire dataset - should be better for dataset-centric methods.
 
-\section{Dataset Description}
+\subsubsection{Nearest}
 
-\textbf{Full datasets; 34k employers, 1.2m parcels}
+Find the nearest feature in a secondary dataset for every feature in the primary dataset.
 
-\textbf{sub datasets, how to generate from full}
+\subsubsection{Chaining}
 
-Operations 1-5: Use parcels
+Filter the datasets, then find the nearest in the filtered data
+
+Can we reuse data without pushing it to disk?
+
+\subsection{Dataset Description}
+
+Full datasets; 34k employers, 1.2m parcels
+
+sub datasets, how to generate from full
+
+Operations 1-5:Use parcels 
+
 1 record
 10 records
 100 records
@@ -97,6 +114,7 @@ Operations 1-5: Use parcels
 1,000,000 records
 1.2M records (full dataset)
 
+
 Operations 6-7: Employers and Parcels
 
 1 sq mile
@@ -105,16 +123,142 @@ Operations 6-7: Employers and Parcels
 ...
 full
 
-\textbf{listing of datsets used}
+\subsection{Required Runs}
 
-\section{Hardware setup}
+\section{Execution Environment}
 
-\textbf{Saguaro}
+Description of Saguaro (common execute environment)
 
-\section{implementations}
+CentOS 5.3 based
 
-\subsection{PostGIS}
+Moab/Torque scheduler
 
-\subsection{Hadoop Prototype}
+GigE/Inifiband network
 
-\subsection{ClusterGIS}
+Lustre version, options
+
+\section{PostGIS Implementation}
+
+PostgreSQL 8.4
+
+PostGIS 1.3....
+
+Full or chunk of code per operation, description of how the operation was accomplished
+
+All operations must be performed as if they were part of a series of operations.
+
+\subsection{Create}
+
+insert...
+
+\subsection{Read}
+
+select ... where id =
+
+\subsection{Update}
+
+update....
+
+\subsection{Destroy}
+
+delete ...
+
+\subsection{Filter}
+
+select...where
+
+\subsection{Nearest}
+
+Crazy set of queries (nested would have been nice, but too slow)
+
+\subsection{Chaining}
+
+Modify crazy set of queries to use the filter
+
+\section{HadoopGIS Implementation}
+
+Hadoop 0.20.0
+
+HOD on Saguaro
+
+JTS ...
+
+JDK ...
+
+Full or chunk of code per operation, description of how the operation was accomplished
+
+All operations must be performed as if they were part of a series of operations.
+
+\subsection{Create}
+
+map: emit all record giving them the same key (forcing one reduce); reduce emits all received records with the addition of one
+
+\subsection{Read}
+
+map: emit only the record with the correct id; reduce: identity
+
+\subsection{Update}
+
+map: emit all records, updating the one with the correct id; reduce: identity
+
+\subsection{Destroy}
+
+map: emit all records except for the one with the correct id; reduce: identity
+
+\subsection{Filter}
+
+map: emit only records matching the requested criteria; reduce: identity
+
+\subsection{Nearest}
+
+map: loop through secondary dataset emitting id of primary and secondary; reduce: identity
+
+\subsection{Chaining}
+
+(Filter the datasets, then find the nearest in the filtered data)
+
+filter secondary dataset on load; map: only search for nearest for filtered data, skip others; reduce: identity
+
+\section{ClusterGIS}
+
+Intel compiler 10....
+
+MVAPICH 1.0.1
+
+IB backend
+
+Lustre
+
+Full or chunk of code per operation, description of how the operation was accomplished
+
+All operations must be performed as if they were part of a series of operations.
+
+\subsection{Create}
+
+emits all records and the new one
+
+\subsection{Read}
+
+emit only the record with the correct id;
+
+\subsection{Update}
+
+emit all records updating the correct one
+
+\subsection{Destroy}
+
+emit all record except the correct one
+
+\subsection{Filter}
+
+emit only records matching the requested criteria
+
+\subsection{Nearest}
+
+loop through primary and secondary dataset, emitting the id of primary and secondary which match
+
+\subsection{Chaining}
+
+(Filter the datasets, then find the nearest in the filtered data)
+
+remove nodes in the datasets not matching the filter, find nearest as before
