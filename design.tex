@@ -2,11 +2,15 @@
 
 How fulfill requirements
 
-Dataset centric (no need for record level locking, etc.)
+- Operation set (OGC-SFS)
 
-Data parallel for speed/scaleup
+- Batch Mode Processing
 
-Batch mode processing
+- Scalability Provided by:
+
+-- Dataset centric (no need for record level locking, etc.) A good cluster based GIS processing environment needs to be separate from a graphical user interface so that it does not incur additional overhead on the compute nodes and so that it can interact well with the generally batch-scheduled environment of a cluster. In addition, it must be able to distribute data between all the nodes used such that a single node does not become a limiting factor in the environment's scalability. A variety of data distribution models should also be available so that the data is distributed in a manner consistent with the required processing. Of course, the environment should be able to execute all the standard geospatial operations as defined by the Open Geospatial Consortium in their Simple Features\cite{ogc-sf} standard.
+
+-- Data parallel for speed/scaleup, different distribution models possible?
 
 \section{HadoopGIS}
 
@@ -14,7 +18,7 @@ Uses JTS
 
 Map/Reduce
 
-``Communication'' only possible in Reduce
+“Communication” only possible in Reduce
 
 Multiple Map/Reduce phases
 
@@ -34,4 +38,4 @@ How a basic program works
 
 How to use more than one dataset
 
-Datasets could be distributed in any way imaginable. 
+Datasets could be distributed in any way imaginable.
