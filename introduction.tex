@@ -1,161 +1,162 @@
 \chapter{INTRODUCTION}
 
-%GIS processing is important
+% GIS processing is important, but data grows and computation time is too long
 
-Geographic information systems (GIS) were designed to describe aspects of
-the world around us.  GIS data is made up of geometries such as points
-or a polygons at certain longitudes, latitudes, and altitudes along
-with related descriptive information such as a land use type. GIS data
-can be used to represent a large range of real-world objects such as
-road or power networks, building locations, or natural features such as
-lakes and rivers.  Utilizing GIS data is one method toward processing,
-analyzing, and simulating real-world systems. One consumer application
-of GIS are the GPS based car navigation systems common today.
+Geographic Information Systems (GIS) were designed to model aspects of
+the world around us. From roads to temperature, GIS data can be used to
+represent a large range of real-world objects, allowing for sophisticated
+analysis and processing. Data is usually stored as raster or vector
+data. Raster data represents the world as a grid, which each grid cell
+containing attributes associated with that area. The grid is georeferenced
+and has a specific resolution, which is the amount of space each grid
+cell represents. Vector data is comprised of a set of geometries such
+as points, lines, or polygons that are georeferenced. Popular forms
+of georeferencing include latitude and longitude, zip codes, and street
+addresses.
 
-Larger scale GIS applications also exist in areas such as city planning.
-City planners use GIS to study road networks, zoning issues, and
-to simulate population growth. As cities and metropolises grow, the
-amount of data required to represent these areas also increases. As the
-amount of data increases, so does the processing power required to complete the
-geospatial analysis, processing, and simulation.
+GIS analysis and simulation are used to understand and develop the
+environment around us. A common use of GIS data is found in the GPS
+based car navigation systems common today. City planners will use GIS
+data in applications such as population growth models, land use planning,
+and traffic management.
 
-Geospatial (GIS) simulation and analysis are important processes
-to understanding and improving our environment, both urban and
-natural. 
+% Data growth (with examples) leads to long runtime or inability to
+% process due to memory or processor limitations.
 
-\section{Current Methods}
+The amount of data to be processed increases as populations grow,
+communities become more complex, or the size of the processing area
+grows. In the year 2000, Maricopa County, Arizona, mapped 1.2 million
+parcels of land in its 9,224 square miles of land. Each parcel of
+land is represented as a georeferenced polygon along with various
+attribute data such as a unique parcel id, ownership information, and
+zoning codes. Parcels of land is just one layer of data that is kept
+for Maricopa County. Other layers include roadways, railways, rivers,
+schools, voting districts, etc.
 
-%Desktop GIS
+When the data required to complete some GIS processing grows beyond the
+memory available to a single processor, the processing method must be
+adapted to fit within that limitation. A common method is to not load
+the entire dataset into memory, but to read it off disk as needed and not
+keep what is not. This method works well if the data is only needed once,
+as reading from disk is slow.
 
-Desktop GIS packages such as ArcGIS\cite{arcgis}, QuantumGIS\cite{qgis},
-and GRASS GIS\cite{grass} are commonly used for GIS processing and
-analysis. While these programs provide graphical interfaces to their
-GIS capabilities, their capabilities are limited by the computers they
-run on.  Datasets can be too large for their memories and computations
-can take too long to be practical. The popular urban simulation package,
-UrbanSim\cite{urbansim} faces these same constraints.
+One application, which is looked at in more detail later, associates
+businesses with parcels of land (the data was geocoded differently). The
+algorithm is quite simple: for each business, find the nearest parcel of
+land with a compatible zoning code. In Maricopa County in the year 2000,
+there were 34,302 businesses and 1,218,130 parcels of land. While these
+particular datasets fit into memory today, they did not just a few years
+ago. Given increased parcel density, or a larger area of land, the memory
+capabilities of a standard computer are quickly reached. While there are
+specially made computers with extraordinarily large amounts of memory,
+they are also extraordinarily expensive.
 
-%Database GIS
+In addition to memory limitations, the processor also limits the
+processing that can be done. In this case 41,784,295,260 comparisons
+between businesses and parcels is made. If a computer is able to make one
+million comparisons per second, the processing will take approximately 11
+hours, 37 minutes. A factor increase in speed to ten million comparisons
+per second reduces the time to 1 hour 10 minutes. If only there was a
+single computer that would perform 100 billion of these comparisons per
+second, then the processing would be done in less than half a second!
 
-An alternative approach to using these desktop programs is to employ
-a geospatial database like PostGIS\cite{postgis}, ArcSDE\cite{arcsde}
-or Oracle Spatial\cite{oracle}. Geospatial databases allow centralized
-access to, and processing of, geospatial data through query languages
-such as SQL. As data is stored and managed by the database software,
-advanced database features such as indexes can be utilized to speedup
-data access and processing.
+As an infinitely fast computer with infinite memory does not exist,
+more effort is required to perform this processing in a reasonable time.
 
-PostGIS is utilized as the core component of the Urban
-Systems Frame-work\cite{usf} (USF) designed by the Digital
-Phoenix\cite{digitalphoenix} project group at Arizona State
-University. Digital Phoenix tries to integrate 3D visualization technology
-with simulated and gathered GIS data to better understand the impacts
-of urban planning decisions.
+\section{Parallel computation methods}
 
-\section{Limitations}
+One method of increasing memory capacity and processing capabilities
+is to use multiple computers that are inter-connected. By spreading out
+the data and processing work, using multiple computers can significantly
+reduce the time required to complete the processing as well as increase
+the size of data that can be accommodated. There are two main models of
+parallel computation, data parallel and task parallel.
 
-%Limitations of single processor implementations
+% Spread data between computers, increasing memory capabilities
 
-GIS data has become easier to gather in recent years with the
-proliferation on low cost GPS devices. The availability of these
-devices significantly reduces the cost of data collection, moving
-it from a government funded service to the capabilities of private
-companies and individuals even to the point of open source style maps
-such as OpenStreetMap\cite{openstreetmap}.
+Data parallelism is gained by spreading a dataset across multiple
+computers. For example, assuming the 1.2 million parcels of land in
+Maricopa County take 1.2GB of RAM, and the available computers have
+0.5GB RAM each, three computers can be used to have the entire dataset
+in memory. A purely data parallel program would then consist of one of
+the computers performing all the processing with the other computers
+providing access to the dataset in memory.
 
-With the reduced cost of data
-collection, the amount of data has grown significantly. As datasets grow
-and the associated processing becomes more sophisticated, the limitations
-of programs that only work on a single computer are felt through long
-processing times and inability to work with the required data. Thus a
-method of utilizing multiple computers to complete the required processing
-is needed to increase the size of the data that can be processed and
-reduce the time required to complete the processing.
+% More computers = more processors = doing more at one time
 
-\section{Attempted solutions}
+Task parallelism is gained by spreading computation across multiple
+computers. For example, if the 34,302 businesses to be processed were
+split up between 10 computers, each machine would only need to process
+3,430.2 businesses. A purely task parallel program does not need to
+interact with any of the other computers, and as such the processing
+will be approximately 10 times as fast as running on a single computer,
+assuming setup times are negligible.
 
-Attempts have been made to overcome the limitations of single machine
-implementations. Of primary interest are those extending current methods
-to use multiple computers.
+Many parallel programs are both data parallel and task parallel. By
+spreading out both the data and the computation, programs can take full
+advantage of the increased memory and processing capabilities of the
+computers used.
 
-\subsection{Parallel Databases}
+\section{Challenges with Parallel GIS Processing}
 
-One method of using multiple computers to perform the required
-processing is the use of parallel databases\cite{hpdb}. Parallel
-databases should be able to spread both data storage and processing
-across multiple computers transparently from the view of the SQL query
-programmer. Parallel database techniques have been used to build a
-scalable geospatial database system\cite{paradise,cs-paradise}.
+% Overview, full definitions in requirements section
 
-Data is spread between computers using round-robin, hash, or spatial
-partitioning. Because the data is able to be distributed between multiple
-computers, the processing is able to scale to larger datasets. When a
-query is processed across the database, a thread is created for each
-fragment of the data. Thus as the data grows larger, the processing
-capabilities of the system also increase.
+Programming for multiple machines is not the easiest of tasks. A common
+paradigm is Single Program, Multiple Data\cite{spmd} (SPMD), uses a
+single program that is run on all the computers included in the parallel
+computations where each instance of the program operates on different
+data, for example a different set of businesses. This paradigm allows
+for both task and data parallelism while not being extremely complex,
+assuming all program instances follow roughly the same algorithm.
 
-Databases excel at working with indexed data while allowing multiple
-users to interact with the data in a concurrently safe manner through
-the use of atomic transactions. The requirements placed upon database
-systems to handle these situations slow down computations that don't
-utilize indexes or work on an entire dataset at once. The processing
-operations this research examines do not require these restrictions,
-and as such a more efficient system can be created.
+% data distribution - record split, size split, geographically split - quads, by number of records, how to handle overlaps?
 
-\section{Problems with Desktop Programs on Clusters}
+Distributing geospatial data between the compute tasks can be accomplished
+in several ways. Simply splitting the dataset up by the number of
+records it has seems simple, however geometries are not all the same
+size, so reading in just the correct records becomes difficult without
+preprocessing the data or redistributing records after they are read
+in from disk. Splitting the dataset by size is a reasonable approach,
+just as long as the records on the boundaries are kept whole. Both these
+methods can be used with any record based dataset, geospatial datasets
+can also be split up geographically. With a geographic split there are
+still many questions to be answered such as how to handle records that
+overlap multiple areas, should the dataset be divided into a grid,
+or approximately even sized clusters of records?
 
-Current desktop approaches to GIS processing such as ArcGIS are
-unable to make use of the multi-machine processing environment that
-compute clusters provide. While reworking these programs to utilize
-these extended resources is possible, it is non-trivial. GRASS GIS was
-reworked\cite{pgrass} to use its collaboration features to distribute
-sub-queries among computers. The method described in this paper utilizes
-multiple instances of GRASS in a master-slave configuration where
-all participants access a shared data repository or filesystem. The
-geometries are portioned between the various nodes. Operations are done
-on the subsets, and the results are merged to produce the final result.
+The purpose of distributing data is to fit in the memory capabilities of
+the individual computers while providing the data required for efficient
+processing. Of course this becomes more interesting when more than one
+dataset is required and they have different requirements.
 
-While the method used to extend GRASS GIS will in fact speed up GIS
-processing, it has two flaws. First, GRASS is designed to be used in an
-interactive mode rather than a batch or script driven approach.  Second,
-the entire set of data used must still fit on a single computer to move
-it in or out of the environment.
+% Speedup s(n) = t(n)/t(1)
+% efficiency e(n) = s(n)/n
 
-\section{Cluster Programming Model}
+The efficiency of a parallel implementation 
 
-Many universities and research institutions already have significant
-investment in compute clusters. These clusters are groups of computer
-linked together with high speed network interconnects and high performance
-parallel filesystems such as Lustre\cite{lustre}.
+% Scalability
+% strong scaling = how the solution time varies with the number of processors for a fixed total problem size
+% weak scaling = how the solution time varies with the number of processors for a fixed problem size per processor
 
-% batch
+% Programmability/Flexibility
 
-Cluster access is a valuable resource, and is treated as such. To maximize
-usage, cluster resources are allocated through batch queuing systems. In
-general, interactive access is not allowed. Therefore, programs that
-run on clusters need to be able to work without user input at the time
-of execution.
+\section {Alternative Approaches to Parallel GIS Processing}
 
-% mpi
+% Thesis: implement and evaluate.
+This thesis implements and evaluates two parallel, dataset centric approaches
+to processing large geospatial datasets on clusters. The first approach,
+called HadoopGIS, uses the Hadoop\cite{hadoop} map/reduce framework. The
+second approach, ClusterGIS, uses the more traditional approach to programming
+for clusters, MPI. Both approaches provide the geospatial operations required
+by the Open Geospatial Consortium's Simple Features\cite{ogc-sf} standard. By
+applying data parallel programming methods and dispensing with record centric
+processing methods, both these methods create a fairly easy environment to
+program in while providing significant speedup and scaleup.
 
-Programs that run on clusters require a method of utilizing the computers
-allocated. A common method in use today is message passing using MPI. MPI
-is a standard with various different implementations, one of which is
-installed on most clusters. Moving from one MPI implementation to another
-usually just requires recompiling the program.
+% Map/Reduce with Hadoop
 
-% scalable architecture
+% Traditional Cluster: MPI
 
-Cluster based programs can be evaluated in terms of speedup and
-scalability. Speedup is the amount of extra processing power gained
-by utilizing multiple processors. Scalability describes the program's
-ability to operation on various numbers of processors utilizing various
-amounts of data.
-
-\section{Cluster based approaches to GIS}
-% Thesis statement goes here
-
-This thesis implements and evaluates two parallel, dataset centric approaches to processing large geospatial datasets on clusters. The first approach, called HadoopGIS, uses the Hadoop\cite{hadoop} map/reduce framework. The second approach, ClusterGIS, uses the more traditional approach to programming for clusters, MPI. Both approaches provide the geospatial operations required by the Open Geospatial Consortium's Simple Features\cite{ogc-sf} standard. By applying data parallel programming methods and dispensing with record centric processing methods, both these methods create a fairly easy environment to program in while providing significant speedup and scaleup.
-
-% How does this document support 
-This document first discusses related works in GIS processing and parallization. These related works are used to form the requirements of a good cluster based implementation. These requirements are then transferred into the design of HadoopGIS and ClusterGIS. After the implementation design discussion is concluded, the evaluation method is discussed in the experimental setup. From the results of the experiments, the performance of the implementations are evaluated and analyzed in the results section. Then I provide some recommendations and conclusions.
+% What has been done/what is lacking. What is needed to constitute a good
+% approach. Design of the two approaches. How to evaluate approaches.
+% Evaluation. Conclusion.
