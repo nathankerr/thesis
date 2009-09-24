@@ -14,6 +14,9 @@ as points, lines, or polygons that are georeferenced. Popular forms
 of georeferencing include latitude and longitude, zip codes, and street
 addresses.
 
+The implementations used in this thesis only deal with vector data,
+though the principles discussed can be applied to other data types.
+
 GIS analysis and simulation are used to understand and develop the
 environment around us. A common use of GIS data is found in the GPS
 based car navigation systems common today. City planners will use GIS
@@ -63,41 +66,12 @@ second, then the processing would be done in less than half a second!
 As an infinitely fast computer with infinite memory does not exist,
 more effort is required to perform this processing in a reasonable time.
 
-\section{Parallel computation methods}
+\section{Parallel GIS Processing}
 
-One method of increasing memory capacity and processing capabilities
-is to use multiple computers that are inter-connected. By spreading out
-the data and processing work, using multiple computers can significantly
-reduce the time required to complete the processing as well as increase
-the size of data that can be accommodated. There are two main models of
-parallel computation, data parallel and task parallel.
-
-% Spread data between computers, increasing memory capabilities
-
-Data parallelism is gained by spreading a dataset across multiple
-computers. For example, assuming the 1.2 million parcels of land in
-Maricopa County take 1.2GB of RAM, and the available computers have
-0.5GB RAM each, three computers can be used to have the entire dataset
-in memory. A purely data parallel program would then consist of one of
-the computers performing all the processing with the other computers
-providing access to the dataset in memory.
-
-% More computers = more processors = doing more at one time
-
-Task parallelism is gained by spreading computation across multiple
-computers. For example, if the 34,302 businesses to be processed were
-split up between 10 computers, each machine would only need to process
-3,430.2 businesses. A purely task parallel program does not need to
-interact with any of the other computers, and as such the processing
-will be approximately 10 times as fast as running on a single computer,
-assuming setup times are negligible.
-
-Many parallel programs are both data parallel and task parallel. By
-spreading out both the data and the computation, programs can take full
-advantage of the increased memory and processing capabilities of the
-computers used.
-
-\section{Challenges with Parallel GIS Processing}
+Using multiple interconnected computers together to complete the required
+GIS processing allows for increased memory capabilities along with
+increased computation power. Processing algorithms must be reworked to
+allow for this collaboration between computers.
 
 % Overview, full definitions in requirements section
 
@@ -105,29 +79,37 @@ Programming for multiple machines is not the easiest of tasks. A common
 paradigm is Single Program, Multiple Data\cite{spmd} (SPMD), uses a
 single program that is run on all the computers included in the parallel
 computations where each instance of the program operates on different
-data, for example a different set of businesses. This paradigm allows
-for both task and data parallelism while not being extremely complex,
-assuming all program instances follow roughly the same algorithm.
+data, for example a different set of businesses. This paradigm simplifies
+parallel algorithm complexity while providing enough power to increase
+memory capability and computation power.
 
 % data distribution - record split, size split, geographically split - quads, by number of records, how to handle overlaps?
 
-Distributing geospatial data between the compute tasks can be accomplished
-in several ways. Simply splitting the dataset up by the number of
-records it has seems simple, however geometries are not all the same
-size, so reading in just the correct records becomes difficult without
-preprocessing the data or redistributing records after they are read
-in from disk. Splitting the dataset by size is a reasonable approach,
-just as long as the records on the boundaries are kept whole. Both these
-methods can be used with any record based dataset, geospatial datasets
-can also be split up geographically. With a geographic split there are
-still many questions to be answered such as how to handle records that
-overlap multiple areas, should the dataset be divided into a grid,
-or approximately even sized clusters of records?
+The first step in working with an SPMD program is splitting the data. GIS
+data can be split in several different ways. The specific data splitting
+method used is dependent on what data is needed on what machine. As GIS
+vector data is based on a record that contains a geometry with associated
+attributes, one method that can be used is to evenly distribute the
+records among the participating machines. Another method takes into
+account the varying size of geometries in memory by splitting the data
+up by size while taking into account record boundaries. Another class of
+data distribution is to geographically split up the dataset, for instance
+into quadrants with each machine having responsibility for one or more
+quadrants. This method is more complicated in the setup required and the
+exceptions that need to be handled such as how to handle geometries that
+span more than one quadrant.
 
-The purpose of distributing data is to fit in the memory capabilities of
-the individual computers while providing the data required for efficient
-processing. Of course this becomes more interesting when more than one
-dataset is required and they have different requirements.
+After the data is distributed, the processing methodology often needs to be adjusted because access to the full dataset at once is no longer possible. Combined with the data distribution, these two additions are needed for a parallel implementation, but not the serial case. This is the overhead required by the parallel case.
+
+In an ideal world, any process that ran in eight seconds on one machine would run in one second on eight machines. The measurement of how well a parallel program performs is called Speedup.
+
+\[
+speedup(n) = time(n)/time(1)
+\]
+
+% Measuring capabilities of parallel version
+
+Once the
 
 % Speedup s(n) = t(n)/t(1)
 % efficiency e(n) = s(n)/n
