@@ -1,18 +1,39 @@
 \chapter{RELATED WORK}
 
-\section{Current Methods}
+This thesis applies parallel processing techniques to the field of
+GIS processing. I will first look at the state of GIS processing, then
+Parallel Processing in general, then parallel GIS processing.
 
-%Desktop GIS
+\section{GIS Processing}
 
-Desktop GIS packages such as ArcGIS\cite{arcgis}, QuantumGIS\cite{qgis}, and
-GRASS GIS\cite{grass} are commonly used for GIS processing and analysis. While
-these programs provide graphical interfaces to their GIS capabilities, their
-capabilities are limited by the computers they run on. Datasets can be too
-large for their memories and computations can take too long to be practical.
-The popular urban simulation package, UrbanSim\cite{urbansim} faces these same
-constraints.
+Geographic Information Systems (GIS)\cite{gis} have been in use since the
+1960's with the Canada Geographic Information System (CGIS)\cite{cgis}
+and then moving from the mainframes to current desktop applications like
+ESRI's ArcGIS\cite{arcgis} product, which began development in the 1980's.
 
-%Database GIS
+In general, there are two types of GIS data: raster and vector. Raster
+data is a set of cells, such as pixels in a picture, that have one or
+more attributes (e.g., temperature, humidity, elevation). Each attribute
+covers the entire area of the pixel. The entire raster dataset is
+spatially located and states how much area is covered by each cell.
+
+Vector data is comprised of spatially referenced geometric objects such
+as points, lines, and polygons. Each object represents something in the
+real world, and has associated attributes.
+
+Most GIS processing systems are able to handle both raster and vector
+data sources.
+
+\subsection{Desktop GIS}
+
+Desktop GIS packages such as ArcGIS\cite{arcgis}, QuantumGIS\cite{qgis},
+and GRASS GIS\cite{grass} are commonly used for GIS processing and
+analysis. While these programs provide graphical interfaces to their GIS
+capabilities, their capabilities are limited by the computers they run
+on. Datasets can be too large for their memories and computations can
+take too long to be practical.  
+
+\subsection{Database GIS}
 
 An alternative approach to using these desktop programs is to employ a
 geospatial database like PostGIS\cite{postgis}, ArcSDE\cite{arcsde} or Oracle
@@ -28,7 +49,106 @@ Digital Phoenix tries to integrate 3D visualization technology with simulated
 and gathered GIS data to better understand the impacts of urban planning
 decisions.
 
-\section{Attempted solutions}
+\subsection{GIS Simulation and Analysis}
+
+UrbanSim
+
+The popular urban simulation package,
+UrbanSim\cite{urbansim} faces these same constraints.
+
+
+GeoDa
+
+PySal
+
+\subsection{GIS Libraries}
+
+The Open Geospatial Consortium (OGC) defined a core set of geospatial
+processing operations in their Simple Features\cite{ogc-sf}
+standard. These core operations allow for most geospatial processing
+needs. One of the main libraries that provides these operations and
+related data types is the Java Topology Suite\cite{jts} (JTS). Though
+written in Java, the JTS has been used as the basis for ports into other
+languages. The Geometry Engine, Open Source (GEOS) library is a C++
+port of the JTS that also provides a C interface. PostGIS is implemented
+using the GEOS library. The NetTopologySuite\cite{nts} (NTS) is a port
+of the JTS into .NET.
+
+As quality libraries are available for a variety of languages, there
+is no need to re-implement the functionality they provide. This thesis
+makes direct use of the JTS and GEOS libraries.
+
+\section{Parallel Processing}
+
+\subsection{Serial and Parallel Shared-Memory Applications}
+
+Computer programs are executed by processors. The simplest of programs
+is made up of a series of operations that are executed in order by
+the processor. As this type of application is comprised by a series
+of operations it is known as a serial program. Serial programs are not
+able to take advantage of more than one processor. To utilize more than
+one processor at a time, a set of serial programs that can communicate
+with each other is required. Each serial program in this set is referred
+to as a thread. Thus multi-threaded programs can utilize more than one
+processing core. The simplest method of communication between threads is
+to share a common section of memory. Therefore a parallel shared-memory
+application could utilize at most the number of processors able to be
+connected to a single section of memory.
+
+Both serial and parallel shared-memory applications are limited to
+a single computer, where computer means a group of processors that
+are connected to the same memory. Most modern computers provide this
+capability.
+
+\begin{figure}
+	%TODO
+	\label{shared-memory}
+	\caption{Shared-Memory Machine Architecture}
+\end{figure}
+
+\subsection{Parallel Distributed-Memory Applications}
+
+To overcome the limitations of a single computer, the more scalable
+architecture of a parallel distributed-memory machine was created. The
+basic unit of this architecture is a processing element (PE) comprised
+of one or more processors couple with memory. In other words, a PE is
+a shared-memory machine. The PEs are interconnected using some sort
+of networking technology. This architecture scales as well as the
+interconnect does. Common interconnect technologies in use today are
+Gigabit-Ethernet and InfiniBand. Clusters are parallel distributed-memory
+machines.
+
+\begin{figure}
+	%TODO
+	\label{distributed-memory}
+	\caption{Distributed-Memory Machine Architecture}
+\end{figure}
+
+For a program to run on a parallel distributed-memory machine, it must
+be able to work with multiple thread of operation where communication
+between the threads goes over the interconnect. For the purposes of
+discussion, threads running on different PEs are called tasks.
+
+The main task in designing a parallel program is figuring out how to
+split up the work between tasks. One method is to split up the processing
+between tasks. Each task would generally have the same data and perform
+variations of an operation on the data; for instance, running multiple
+scenarios. This methodology is called Task Parallel. An example of task
+parallelism is simulating the effects of various weather patterns on
+an urban environment. Each task would have a copy of the environment
+and run its variety of weather on it. The capability of executing each
+scenario is limited to the capabilities of a single processing element,
+but many scenarios can be executed at the same time.
+
+Data Parallel methods split the data up between tasks an perform the
+same, or similar, operations on each piece of data. To calculate the
+effects of a weather pattern on an urban environment, the environment
+would first be divided between the tasks with each task responsible for
+one part of the environment. Each task would then calculate the effects
+of the weather on its section of the environment, communicating with the
+other PEs as needed to share information related to edge conditions, etc.
+
+\section{Parallel GIS Processing}
 
 Attempts have been made to overcome the limitations of single machine
 implementations. Of primary interest are those extending current methods to
@@ -58,7 +178,7 @@ entire dataset at once. The processing operations this research examines do
 not require these restrictions, and as such a more efficient system can be
 created.
 
-\section{Problems with Desktop Programs on Clusters}
+\subsection{Problems with Desktop Programs on Clusters}
 
 Current desktop approaches to GIS processing such as ArcGIS are unable to make
 use of the multi-machine processing environment that compute clusters provide.
@@ -76,49 +196,6 @@ processing, it has two flaws. First, GRASS is designed to be used in an
 interactive mode rather than a batch or script driven approach. Second, the
 entire set of data used must still fit on a single computer to move it in or
 out of the environment.
-
-
-
-
-GIS processing is not new, and a large body of work exists to drawn from. Here I discuss a few aspects of that body of work that are most applicable to this thesis. I start with the programmer's view of GIS - libraries. Then I move to serial and parallel shared-memory programs. Then I move to work done on parallel, distributed memory implementations. The main goal of parallel applications is to make use of multiple processors to complete the required processing more quickly. In short, the processors must work together to complete a single processing operation.
-
-\section{GIS libraries}
-
-The Open Geospatial Consortium (OGC) defined a core set of geospatial processing operations in their Simple Features\cite{ogc-sf} standard. These core operations allow for most geospatial processing needs. One of the main libraries that provides these operations and related data types is the Java Topology Suite\cite{jts} (JTS). Though written in Java, the JTS has been used as the basis for ports into other languages. The Geometry Engine, Open Source (GEOS) library is a C++ port of the JTS that also provides a C interface. PostGIS is implemented using the GEOS library. The NetTopologySuite\cite{nts} (NTS) is a port of the JTS into .NET.
-
-As quality libraries are available for a variety of languages, there is no need to re-implement the functionality they provide. This thesis makes direct use of the JTS and GEOS libraries.
-
-\section{Serial and Parallel Shared-Memory Applications}
-
-Computer programs are executed by processors. The simplest of programs is made up of a series of operations that are executed in order by the processor. As this type of application is comprised by a series of operations it is known as a serial program. Serial programs are not able to take advantage of more than one processor. To utilize more than one processor at a time, a set of serial programs that can communicate with each other is required. Each serial program in this set is referred to as a thread. Thus multi-threaded programs can utilize more than one processing core. The simplest method of communication between threads is to share a common section of memory. Therefore a parallel shared-memory application could utilize at most the number of processors able to be connected to a single section of memory.
-
-Both serial and parallel shared-memory applications are limited to a single computer, where computer means a group of processors that are connected to the same memory. Most modern computers provide this capability.
-
-\begin{figure}
-	%TODO
-	\label{shared-memory}
-	\caption{Shared-Memory Machine Architecture}
-\end{figure}
-
-The wide variety of desktop GIS processing applications such as ESRI's ArcGIS\cite{arcgis}, QuantumGIS\cite{qgis} and GRASS GIS\cite{grass} work on shared memory machines. While these programs provide GIS processing capabilities and graphical user interfaces, they are limited to working on a shared memory. Thus they are limited to a single computer's memory and processing capabilities.
-
-Geospatial databases such as PostGIS\cite{postgis} and ArcSDE\cite{arcsde} also work on shared-memory machines, but with the intent of sharing the processing capabilities of the machine they run on. Because of my work on the Urban Systems Framework\cite{usf} (USF), I am most familiar with PostGIS. PostGIS is able to execute multiple queries at one time, but no single query uses more than one thread. Even if these databases could utilize all the processing capabilities of the computer to execute one query, they would still be limited to a single machine.
-
-\section{Parallel Distributed-Memory Applications}
-
-To overcome the limitations of a single computer, the more scalable architecture of a parallel distributed-memory machine was created. The basic unit of this architecture is a processing element (PE) comprised of one or more processors couple with memory. In other words, a PE is a shared-memory machine. The PEs are interconnected using some sort of networking technology. This architecture scales as well as the interconnect does. Common interconnect technologies in use today are Gigabit-Ethernet and InfiniBand. Clusters are parallel distributed-memory machines.
-
-\begin{figure}
-	%TODO
-	\label{distributed-memory}
-	\caption{Distributed-Memory Machine Architecture}
-\end{figure}
-
-For a program to run on a parallel distributed-memory machine, it must be able to work with multiple thread of operation where communication between the threads goes over the interconnect. For the purposes of discussion, threads running on different PEs are called tasks.
-
-The main task in designing a parallel program is figuring out how to split up the work between tasks. One method is to split up the processing between tasks. Each task would generally have the same data and perform variations of an operation on the data; for instance, running multiple scenarios. This methodology is called Task Parallel. An example of task parallelism is simulating the effects of various weather patterns on an urban environment. Each task would have a copy of the environment and run its variety of weather on it. The capability of executing each scenario is limited to the capabilities of a single processing element, but many scenarios can be executed at the same time. 
-
-Data Parallel methods split the data up between tasks an perform the same, or similar, operations on each piece of data. To calculate the effects of a weather pattern on an urban environment, the environment would first be divided between the tasks with each task responsible for one part of the environment. Each task would then calculate the effects of the weather on its section of the environment, communicating with the other PEs as needed to share information related to edge conditions, etc.
 
 \subsection{Parallel Databases}
 
