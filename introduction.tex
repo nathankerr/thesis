@@ -99,26 +99,34 @@ quadrants. This method is more complicated in the setup required and the
 exceptions that need to be handled such as how to handle geometries that
 span more than one quadrant.
 
-After the data is distributed, the processing methodology often needs to be adjusted because access to the full dataset at once is no longer possible. Combined with the data distribution, these two additions are needed for a parallel implementation, but not the serial case. This is the overhead required by the parallel case.
+After the data is distributed, the processing methodology often needs
+to be adjusted because access to the full dataset at once is no longer
+possible. Combined with the data distribution, these two additions are
+needed for a parallel implementation, but not the serial case. This is
+the overhead required by the parallel case.
 
-In an ideal world, any process that ran in eight seconds on one machine would run in one second on eight machines. The measurement of how well a parallel program performs is called Speedup.
+Parallel performance is measured through speedup:
 
-\[
-speedup(n) = time(n)/time(1)
-\]
+\begin{equation}
+\label{speedup}
+\mbox{speedup}(n) = \mbox{time}(n)/\mbox{time}(1)
+\end{equation}
 
-% Measuring capabilities of parallel version
+which compares the execution time of the process on $n$ processors to
+the execution time on $1$ processor. Ideal speedup is $n$. The quality
+of speedup gained is efficiency:
 
-Once the
+\begin{equation}
+\label{efficiency}
+\mbox{efficiency}(n) = \mbox{speedup}(n)/n
+\end{equation}
 
-% Speedup s(n) = t(n)/t(1)
-% efficiency e(n) = s(n)/n
+Ideal efficiency is $1$.
 
-The efficiency of a parallel implementation 
-
-% Scalability
-% strong scaling = how the solution time varies with the number of processors for a fixed total problem size
-% weak scaling = how the solution time varies with the number of processors for a fixed problem size per processor
+The scalability of a parallel solution can be seen by graphing speedup
+by number of processors used. The best realistic case is to have linear
+scalability, meaning that speedup is directly proportional to the number
+of processing elements used.
 
 % Programmability/Flexibility
 
@@ -137,8 +145,44 @@ program in while providing significant speedup and scaleup.
 
 % Map/Reduce with Hadoop
 
+HadoopGIS adds GIS capabilities to the Hadoop map/reduce framework. Hadoop
+is based on Google's MapReduce\cite{mapreduce}. Map reduce defines a
+two-phase method to working with data. The first phase, map, applies
+a function to every record in a data set. The map function can output
+one or more key-value pairs. Map is an inherently parallel process,
+as no record is need to process any other record.
+
+After the map phase, the generated key-value pairs are aggregated by
+key and passed to reduce processes, one reduce process per key. There
+are generally many fewer reduce operations as compared to map
+operations. Reduce operations are inherently serial, as the operation
+must have access to all the key-value pairs associated with the key
+being processed.
+
 % Traditional Cluster: MPI
+
+ClusterGIS is a library of functions based on MPI\cite{mpi} and
+the GEOS\cite{geos} library. MPI is a message passing interface
+standard that allows multiple computers to collaborate on solving a
+problem by passing messages between themselves. GEOS is an open source
+geometry engine that handles the geometric calculations required by GIS
+processing. The combination of MPI and GEOS creates a cluster based,
+parallel GIS processing environment.
+
+MPI has become the standard way of programming for clusters. Because
+ClusterGIS harnesses the power of MPI, a wide variety of parallel
+algorithms and configurations can be made, while maintaining the ability
+to execute on most clusters.
 
 % What has been done/what is lacking. What is needed to constitute a good
 % approach. Design of the two approaches. How to evaluate approaches.
 % Evaluation. Conclusion.
+
+The rest of this thesis is organized as follows: Chapter 2 explores
+related efforts in GIS processing. Chapter 3 then defines the specific
+requirements needed for a good parallel GIS processing engine. Chapter
+4 details the design choices for HadoopGIS and ClusterGIS. Chapter 5
+defines a set of tests and list individual results. Chapter 6 evaluates
+the two implementations by comparing performance results against the
+requirements defined in chapter 3. Chapter 8 summarizes conclusions
+drawn from the evaluation.
