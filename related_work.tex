@@ -33,14 +33,22 @@ capabilities, their capabilities are limited by the computers they run
 on. Datasets can be too large for their memories and computations can
 take too long to be practical.  
 
+Desktop packages are often supplemented with a database component such as
+ArcSDE\cite{arcsde} or PostGIS\cite{postgis} which acts as a centralized
+repository for GIS data which can be shared between a workgroup. It is
+important to note that the database is generally used for storage and
+sharing, not for computation. Computation is performed by the desktop
+package.
+
 \subsection{Database GIS}
 
-An alternative approach to using these desktop programs is to employ a
-geospatial database like PostGIS\cite{postgis}, ArcSDE\cite{arcsde} or Oracle
-Spatial\cite{oracle}. Geospatial databases allow centralized access to, and
-processing of, geospatial data through query languages such as SQL. As data is
-stored and managed by the database software, advanced database features such
-as indexes can be utilized to speedup data access and processing.
+An alternative to performing GIS processing in a desktop program like
+ArcGIS, is to employ a geospatial database like PostGIS\cite{postgis},
+ArcSDE\cite{arcsde}, or Oracle Spatial\cite{oracle}. Geospatial databases
+allow centralized access to, and processing of, geospatial data through
+query languages such as SQL. As data is stored and managed by the database
+software, advanced database features such as indexes can be utilized to
+speedup data access and processing.
 
 PostGIS is utilized as the core component of the Urban Systems
 Frame-work\cite{usf} (USF) designed by the Digital
@@ -51,15 +59,13 @@ decisions.
 
 \subsection{GIS Simulation and Analysis}
 
-UrbanSim
+GIS simulation and analysis can also be done using more specialized
+environments. UrbanSim\cite{urbansim} is a popular simulation tool for
+growth models.
 
-The popular urban simulation package,
-UrbanSim\cite{urbansim} faces these same constraints.
-
-
-GeoDa
-
-PySal
+GeoDa\cite{geoda} is a spatial analysis tool that includes spatial
+regressions. PySal\cite{pysal} is a python library that builds on the
+work done with GeoDa.
 
 \subsection{GIS Libraries}
 
@@ -100,12 +106,6 @@ a single computer, where computer means a group of processors that
 are connected to the same memory. Most modern computers provide this
 capability.
 
-\begin{figure}
-	%TODO
-	\label{shared-memory}
-	\caption{Shared-Memory Machine Architecture}
-\end{figure}
-
 \subsection{Parallel Distributed-Memory Applications}
 
 To overcome the limitations of a single computer, the more scalable
@@ -117,12 +117,6 @@ of networking technology. This architecture scales as well as the
 interconnect does. Common interconnect technologies in use today are
 Gigabit-Ethernet and InfiniBand. Clusters are parallel distributed-memory
 machines.
-
-\begin{figure}
-	%TODO
-	\label{distributed-memory}
-	\caption{Distributed-Memory Machine Architecture}
-\end{figure}
 
 For a program to run on a parallel distributed-memory machine, it must
 be able to work with multiple thread of operation where communication
@@ -148,61 +142,116 @@ one part of the environment. Each task would then calculate the effects
 of the weather on its section of the environment, communicating with the
 other PEs as needed to share information related to edge conditions, etc.
 
+\subsection{Message Passing Interface}
+
+The Message Passing Interface (MPI) standard has become the normal way
+of programming parallel distributed-memory applications. MPI works
+by starting processing tasks on each of the PEs alloted to the MPI
+process. These tasks are then able to send and receive messages between
+themselves allowing for inter-task communication.
+
+As MPI defines a simple paradigm for inter-task communication,
+any parallelism in the application must be explicitly specified and
+programmed. Thus MPI programming is not simple or easy, though it is
+not without benefits.
+
+MPI libraries are able to utilize advanced network layers such as
+InfiniBand without changes to the application, except for recompilation
+against the library. This design allows for advances in technology to
+be passed onto parallel application with little effort.
+
+MPI is also able to take advantage of parallel filesystems such as
+Lustre\cite{lustre}.  Parallel filesystems spread file data between
+several file servers. Client programs are then able to access each part
+of the file in parallel, speeding file reading and writing while enabling
+each task to read or write a portion of data while not conflicting with
+the other tasks in the same MPI process.
+
+MPI is generally deployed on clusters, making programs that are based
+on MPI able to run on a variety of machines.
+
+\subsection{Map Reduce}
+
+Map reduce is a functional programming idiom that has recently
+become popular due to Google's extensive use first described in a
+2004 paper\cite{mapreduce}. While Google's MapReduce environment is
+proprietary, the concepts and idea have passed into the opensource
+Hadoop\cite{hadoop} framework developed by the Apache Software
+Foundatation\cite{apache} with major support by Yahoo! and
+Cloudera\cite{hadoop-support}.
+
+Map reduce is relatively simple to program for. The programmer only
+needs to supply two functions: map and reduce. The map function takes
+as its input a record of the input data, record splitting is handled
+by the framework, and outputs zero or more key-value pairs. The reduce
+function takes a key and a set of values associated with that key and
+outputs zero or more key-value pairs.
+
+Unlike MPI, parallelism is handled by the map-reduce framework which
+loads a portion of the entire input dataset on each of the machines
+participating processing elements, splits the data into records,
+executes the map function on each record, aggregates all the key-value
+pairs produced by the map functions and runs the reduce function on each
+unique key, passing the associated values along. At last the output from
+the mappers is collected into the final output of the program. Parallel
+operations are done implicitly, and therefore do not need to be created
+by the programmer.
+
+Map reduce was designed on the assumptions that disk is cheap, networking
+is expensive, and that large systems can be built with inexpensive
+hardware, as long as no piece of hardware in indispensable. With these
+restrictions map reduce makes use of a distributed file system that
+replicates data between several of these inexpensive computers. Map reduce
+tasks are then ran on one of the computers that has the block of data it
+needs. The blocking used to spread files on the distributed file system
+are also used as the basis for parallelizing the map reduce process.
+
+The map reduce process works in two phases, map and reduce. In the map
+phase the input data is split, usually automatically, into records. Each
+record is processed individually by the map function.  The map function
+takes a record as input and outputs zero or more key-value pairs. The
+map process is inherently parallel and is executed where a copy of the
+data is (the program is moved to the data).
+
+The resulting key-value pairs are aggregated by the map reduce framework
+by key and passed to the reduce function, which has access to all the
+key-value pairs associated with its key. The reduce function then outputs
+zero or more key-value pairs, which are the output of the entire map
+reduce job.
+
 \section{Parallel GIS Processing}
 
 Attempts have been made to overcome the limitations of single machine
 implementations. Of primary interest are those extending current methods to
 use multiple computers.
 
-\subsection{Parallel Databases}
-
-One method of using multiple computers to perform the required processing is
-the use of parallel databases\cite{hpdb}. Parallel databases should be able to
-spread both data storage and processing across multiple computers
-transparently from the view of the SQL query programmer. Parallel database
-techniques have been used to build a scalable geospatial database
-system\cite{paradise,cs-paradise}.
-
-Data is spread between computers using round-robin, hash, or spatial
-partitioning. Because the data is able to be distributed between multiple
-computers, the processing is able to scale to larger datasets. When a query is
-processed across the database, a thread is created for each fragment of the
-data. Thus as the data grows larger, the processing capabilities of the system
-also increase.
-
-Databases excel at working with indexed data while allowing multiple users to
-interact with the data in a concurrently safe manner through the use of atomic
-transactions. The requirements placed upon database systems to handle these
-situations slow down computations that don't utilize indexes or work on an
-entire dataset at once. The processing operations this research examines do
-not require these restrictions, and as such a more efficient system can be
-created.
-
 \subsection{Problems with Desktop Programs on Clusters}
 
 Current desktop approaches to GIS processing such as ArcGIS are unable to make
 use of the multi-machine processing environment that compute clusters provide.
 While reworking these programs to utilize these extended resources is
-possible, it is non-trivial. GRASS GIS was reworked\cite{pgrass} to use its
-collaboration features to distribute sub-queries among computers. The method
-described in this paper utilizes multiple instances of GRASS in a master-slave
-configuration where all participants access a shared data repository or
-filesystem. The geometries are portioned between the various nodes. Operations
-are done on the subsets, and the results are merged to produce the final
-result.
+possible, it is non-trivial. 
+
+GRASS GIS was reworked\cite{pgrass} to use its collaboration features
+to distribute sub-queries among computers. The method described in this
+paper utilizes multiple instances of GRASS in a master-slave configuration
+where all participants access a shared data repository or filesystem. The
+geometries are portioned between the various nodes. Operations are done
+on the subsets, and the results are merged to produce the final result.
 
 While the method used to extend GRASS GIS will in fact speed up GIS
 processing, it has two flaws. First, GRASS is designed to be used in an
-interactive mode rather than a batch or script driven approach. Second, the
-entire set of data used must still fit on a single computer to move it in or
-out of the environment.
+interactive mode rather than a batch or script driven approach.  Second,
+the entire set of data used must still fit on a single computer to move
+it in or out of the environment.
 
 \subsection{Parallel Databases}
 
-Parallel databases such as TeraData\cite{teradata} and Oracle\cite{oracle} use data parallel methods. Paradise\cite{paradise, cs-paradise} spreads data 
-between computers using round-robin, hash, or spatial partitioning. Because
-the data is able to be distributed between multiple computers, the
-processing is able to scale to larger datasets.
+Parallel databases such as TeraData\cite{teradata} and Oracle\cite{oracle}
+use data parallel methods. Paradise\cite{paradise, cs-paradise}
+spreads data between computers using round-robin, hash, or spatial
+partitioning. Because the data is able to be distributed between multiple
+computers, the processing is able to scale to larger datasets.
 
 When a query is processed across the database, a task is created
 for each fragment of the data. Thus as the data grows larger, the
@@ -235,25 +284,28 @@ parallel filesystems such as Lustre\cite{lustre}. By separating compute
 and storage resources at the cost of a high speed network, compute
 clusters are able to separate computation from data storage.
 
-Parallel filesystems allow the data to be separated from
-the computer where the processing will be executed by spreading files
-across multiple network connected fileservers allowing access that
-can be faster than utilizing a computer's local disk for storage
-while also enabling processing to spread across the available compute
-resources based entirely on the process' grain size.
+Parallel filesystems allow the data to be separated from the computer
+where the processing will be executed by spreading files across
+multiple network connected fileservers allowing access that can be
+faster than utilizing a computer's local disk for storage while also
+enabling processing to spread across the available compute resources
+based entirely on the process' grain size.
 
-\subsection{Parallel GRASS GIS}
+\subsection{Problems with Current Parallel Approaches}
 
-GRASS GIS was
-reworked\cite{pgrass} to use its collaboration features to distribute
-sub-queries among computers. The method described in this paper utilizes
-multiple instances of GRASS in a master-slave configuration where
-all participants access a shared data repository or filesystem. The
-geometries are portioned between the various nodes. Operations are done
-on the subsets, and the results are merged to produce the final result.
+While desktop GIS programs are relatively easy to use, their current
+implementations are fundamentally unable to make use of parallel
+computation resources. The attempt to use GRASS was not entirely
+successful due to its lack of a non-interactive mode and inability to
+work on datasets larger than could be handled by a single computer.
 
-While the method used to extend GRASS GIS will in fact speed up GIS
-processing, it has two flaws. First, GRASS is designed to be used in an
-interactive mode rather than a batch or script driven approach.  Second,
-the entire set of data used must still fit on a single computer to move
-it in or out of the environment.
+Parallel databases require dedicated resources and expertise to be
+useful. Even so, database are limited in their ability to work with a
+large range of process granularity as data redistribution is expensive
+in terms of rebuilding indexes and configuration changes. Furthermore
+optimizing SQL often requires knowledge of the data distribution and
+configuration of the database.  Most companies that use databases as a
+core technology have dedicated staff to manage these systems.
+
+Chapter 3 details the requirements of a good parallel approach to GIS
+processing.
