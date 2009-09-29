@@ -1,53 +1,103 @@
 \chapter{REQUIREMENTS}
 
-The chapter on related work teaches us what is needed for a good parallel GIS processing engine. Some of these requirements are derived from what makes good cluster based software, such as batch mode processing and scalability. This chapter defines the requirements and describes how to determine if an implementation meets them or not.
+Chapter 2 related the current state of parallel GIS processing, from which
+the limitations of current approaches can be seen. From the capabilities
+and limitations of current approaches, the requirements of a good parallel
+GIS processing engine can be defined. Some of these requirements are
+derived from what makes good cluster based software, such as batch mode
+processing and scalability.
+
+The main requirements of a parallel GIS processing engine are that is
+supports standard geospatial operations, can be executed in a batch
+environment, makes effective use of the additional resources provided
+by the cluster environment, and is not too hard to use.
 
 \section{Standard Geospatial Operations}
 
-Any GIS processing application must have at least a core set of GIS processing operations.
+Any GIS processing application must have at least a core set of GIS
+processing operations.  Without the capability to perform the required
+processing, such an engine would be useless. The Open Geospatial
+Consortium\cite{ogc} (OGC) defines a set of such operations in their Simple
+Features\cite{ogc-sf} standard.
 
-The Open Geospatial Consortium (OGC) defines a set of such operations in their Simple Features\cite{ogc-sf} standard.
+The Open Geospatial Consortium, Inc. (OGC) is a non-profit, international,
+voluntary consensus standards organization that is leading the development
+of standards for geospatial and location based services\cite{ogc}. The
+OGC maintains a variety of standards that support GIS processing such
+as cataloging, KML, WMS, and others.
 
-What is OGC?
+The most important standard for this thesis is the Simple Features
+Standard\cite{ogc-sfs} (SFS). The SFS defines ways of storing and
+processing data including defining the Well Known Text (WKT) and Well
+Known Binary (KWB) representations of geospatial data. Along with
+data formats, a set of operations for working with geospatial data
+are specified.
 
-History of SFS (Part 1 and various part 2s)
+The OGC SFS is just a standard, and so it needs to be implemented.
+The main opensource library implementing the standard is the Java
+Topology Suite\cite{jts} (JTS).  While the JTS is implemented in Java,
+it has been ported to other languages. For example PostGIS uses the C/C++
+GEOS library\cite{geos}.
 
-What does the SFS require (data, access)?
-
-JTS, GEOS are open implementations of SFS-SQL
-
-Measured by: yes or no
+Compliance to this requirement can be tested by checking an independent
+implementation against the standard, or assumed thought the use of a
+compliant implimentation such as the JTS or GEOS libraries, assuming
+full access to the library functionality is allowed.
 
 \section{Batch Mode Processing}
 
-Measured by: yes or no
+As many clusters only allow non-interactive, or batch, processing modes,
+the parallel GIS processing engine must fit this criteria.
+
+To be compliant with this requirement, an implementation must support
+at least the standard geospatial operations while in batch mode.
 
 \section{Scalable}
 
-Goal: Decrease processing time while using resources effectively.
+The goal of a scalable application is utilize the resources given
+it effectively. There are two aspects to scalability: capacity and
+speedup. Capacity scalability means that an implementation is able to
+solve a bigger problem than would otherwise be possible using a single
+machine. Speedup measures the impact of using more resources as compared
+to not using them.
 
-vary procs, same data
+Speedup is measured by comparing the processing time on a specific number
+of processors ($n$) to the processing time on a single processor:
 
-vary data, same procs
+\[
+\mbox{speedup}(n) = t(n)/t(1)
+\]
 
-vary data, vary procs
+To see how scalable an application is, a speedup plot is generated which
+shows ideal speedup for the application based on a serial run. Figure
+\ref{example_speedup} shows a sample speedup graph with three speedup
+lines plotted. The Ideal Speedup line shows what the ideal speedup would
+look like on the graph enabling easy comparison of the other line(s). The
+80\% efficiency line shows an application that has achieved linear
+speedup. This application scales very well. The diminishing returns
+line shows an application that increases speedup to a point around 256
+processors, at which time adding more resources actually increases the
+program runtime. This limitation could occur because of limited data
+size or some other concern.
 
-Measured by: speedup, scaleup
+\begin{figure}
+	\label{example_speedup}
+	\caption{Example Speedup Graph}
+	\includegraphics{speedup.eps}
+\end{figure}
+
+Graphs like this will be used throughout this thesis to evaluate scalability.
 
 \section{Ease of Use}
 
-Urban scientists != computer programmers, ease of use
+The last requirement is the most ambiguous: ease of use. The main thing
+to think of here is that most people doing GIS processing are interested
+in the results of the processing and would like the method to obtain
+those results to be as easy as possible. In addition, most GIS processors
+are not computer scientists, and so if a programmable interface is the
+point of interaction, it must be as easy to use as possible so that the
+learning curve is not excessive.
 
-subjective measure, but needs to be discussed.
-
-Sample program:
-
-initClusterGIS
-
-loadData (distributed/replicated)
-
-process (user code here)
-
-saveData (distributed/replicated)
-
-finalizeClusterGIS
+Ease of use is a subjective measure. No user studies will be performed
+here, but it is a point of discussion that is important in evaluating
+a GIS processing engine implementation.

@@ -1,0 +1,11 @@
+set data style linespoints
+set xtics(8,16,32,64,128,256,512,1024)
+set ytics(8,16,32,64,128,256,512,1024)
+set logscale
+set xlabel 'Number of Processors (Log Scale)'
+set ylabel 'Speedup (Log Scale)'
+set xrange [8:1024]
+l(x) = x
+e(x) = 0.8*x
+
+plot l(x) title 'Ideal Speedup', e(x) title '80% efficiency', 'speedup.gplot' using 1:2 title 'diminishing returns'
