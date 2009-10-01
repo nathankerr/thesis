@@ -1,0 +1,3 @@
+[submodule "clusterGIS"]
+	path = clusterGIS
+	url = git@github.com:nathankerr/clusterGIS.git

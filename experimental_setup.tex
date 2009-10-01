@@ -1,38 +1,62 @@
 \chapter{EXPERIMENTAL SETUP}
 
-\textbf{How to show how well requirements were filled}
-
-Some of the needed research has already been completed. After determining
-the query set and creating the PostGIS implementation of it, the
-processing environment was prototyped in Hadoop\cite{hadoop}, an opensource
-implementation of Google's MapReduce\cite{mapreduce} framework. MapReduce works
-by utilizing two user defined function, map and reduce. For each record
-of the primary dataset the map function is called. This process is made
-parallel by splitting the data up among several computers and running
-the individual map functions on those computers. After the map function
-is complete, the resulting set of data is passed to several reduce
-functions. Each instance of the reduce function receives all the data from
-the resulting dataset associated with the same key. The lessons learned
-from this prototyping phase will be applied to the MPI implementation.
+Chapter 3 defined the requirements for a good parallel GIS processing
+engine. Chapter 4 discussed the designs used in hadoopGIS and
+clusterGIS. Given these requirements and designs, the implementations
+can now be evaluated and compared against each other. As both these
+implementations are experimental, PostGIS will be used as a reference
+point to represent current methods. As such, it will also be evaluated
+as much as possible in the same manner as hadoopGIS and clusterGIS.
 
 \section{Standard Geospatial Operations}
 
-Used JTS, GEOS.
+The first requirement is that an implementation can perform a set of
+standard geospatial operations.  Allowing full access to a compliant
+geospatial library fulfills this requirement a priori.  PostGIS uses,
+and in fact developed, the GEOS library. HadoopGIS makes use of JTS,
+from which the GEOS library was ported. ClusterGIS uses the GEOS library.
+
+All three implementations fulfill this requirement, no further
+experimentation is needed.
 
 \section{Batch Mode Processing}
 
-Method of execution
+Batch mode operation is essential to running operations on a cluster.
+
+PostGIS extends the PostgreSQL database. PostgreSQL can be accessed
+through many different methods including programming interfaces in
+C and other languages, or through the provided command line client,
+``psql''. This client can be used interactively, or a sql script can be
+passed to it. That leaves the problem of the server. Either a dedicated
+server can be used, or a script can be written to create a server as
+needed to do the processing. This thesis sets a PostgreSQL server up as
+needed. PostGIS can perform batch mode processing.
+
+Hadoop executes user jobs from a command line interface. The only
+hindrance for Hadoop to batch mode processing is the same as PostGIS:
+Hadoop is designed to have a persistent server environment setup. Projects
+like Hadoop on Demand allow a Hadoop environment to be created as
+needed. This thesis accomplishes a similar solution through a custom
+designed script.  With this setup, HadoopGIS is capable of batch mode
+processing.
+
+ClusterGIS only operates in a batch mode, there is no interactive mode.
 
 \section{Scalability}
 
+The first two requirements did not require any experimentation to
+evaluate. Scalability requires experimentation.
+
+Verification of operations will be done by comparing output of each
+operation for HadoopGIS and ClusterGIS with the output from a PostGIS
+reference implementation.
+
+As HadoopGIS and ClusterGIS are processing engines, scalability depends
+on the individual processing that is done. To achieve this, a set of
+processing operations is defined. After the operations are discussed in
+general, specific details for each implementation are discussed.
+
 \subsection{Operation set}
-
-Assuming OGC-SFS compliance (Because of using JTS and GEOS),
-operations come down to data interaction. How to get data where
-it belongs. Differences between record-centric and dataset-centric
-processing methods.
-
-http://www.opengeospatial.org/standards/sfa (Simple Feature Access - Part 1: Common Architecture 1.2.0)
 
 \begin{table}
 \begin{center}
@@ -57,75 +81,142 @@ Total & 42 & 24\\
 \end{center}
 \end{table}
 
-All operations must be performed as if they were part of a series of operations.
+One of the main tasks in parallelizing an algorithm is solving the
+problem of data access. HadoopGIS and clusterGIS split up the data that
+is being processed between different computers. The OGC SFS standard
+defines the operations that need to be supported. Table \ref{MethodCount}
+shows a count of the number of operations in each section of the standard
+that defines operations along with the number of geometries required to
+execute that operation. One geometry is required for 42 of the operations,
+while 24 operations require two. There are no operations that require
+more than two geometries.
+
+The problem faced by HadoopGIS and ClusterGIS then is to get the data
+required to perform the geospatial operations required by what ever
+processing is required. The operations defined here are meant to be
+representative of what actual processing requirements would demand.
+The first four operations deal with individual record access. The
+following three operations deal with getting the data needed for a
+geospatial operation where it is needed.
+
+Specific details on the datasets follow the operation descriptions.
+For now all that is needed to know is that there are two datasets,
+one of 34 thousand employers and one of 1.2 million parcels of land.
 
 \subsubsection{Create}
 
-Adds a new record to an existing dataset, serial id needs to be calculated.
+The create operation adds a new record to an existing
+dataset. Adding a record is the basic operation required to build a new
+dataset. Record-centric systems merely add a record to the record store,
+while dataset-centric systems output a new dataset that contains the data
+of the input dataset with the new record included in it.  Expected output
+is the original dataset with the addition of a single record.
 
-Compares record-centric to dataset-centric. What gets written? Mutability of dataset?
+The create operation implementations add a parcel of land to the parcels
+dataset.
 
 \subsubsection{Read}
 
-Reads an existing record (by id)
+The read operation extracts a single record from a dataset based on a
+unique identifier.  Record-centric systems are able to employ indexes and
+other methods to quickly locate a record whereas dataset-centric systems
+must scan an entire dataset to produce the single record. Expected output
+is a single record.
 
-Compares record-centric to dataset-centric access times.
+The read operation extracts a parcel from the parcels dataset.
 
 \subsubsection{Update}
 
-Updates an attribute of a record
+The update operation finds a single record from a dataset and changes
+some attribute of the record.  Record-centric systems are able to employ
+indexes to locate and modify the record. Dataset-centric systems generate
+a new dataset with the changed record. Expected output is a dataset that
+contains all the records from the input dataset with exception that the
+specified record has been changed in the specified manner.
 
-Compares record-centric to dataset-centric. What gets written? Mutability of dataset?
+The update operation changes the land use code for a parcel in the
+parcels dataset.
 
 \subsubsection{Destroy}
 
-Removes a record from the dataset.
+The destroy operation finds and removes a record from a
+dataset. Record-centric systems are able to find the record to be
+removed and then removing it from the record store. Dataset-centric
+systems generate a new dataset without the specified record. Expected
+output is a dataset with all the records from the input dataset except
+for the one that was removed.
 
-Compares record-centric to dataset-centric. What gets written? Mutability of dataset?
+The destroy operation removes a parcel from the parcels dataset.
 
 \subsubsection{Filter}
 
-Apply a geospatial operation across the entire dataset - should be better for dataset-centric methods.
+The filter operation removes all records that don't fulfill a certain
+requirement, in this case all the records that don't intersect with
+a defined geometry. Record-centric systems do not have much of an
+advantage here as indexing the results of some geospatial operation
+is not usually worth the indexing cost, so both the record-centric and
+dataset-centric systems must scan the entire dataset. Expected output
+is a dataset containing all of the records from the input dataset that
+fulfill the filtering requirements.
+
+The filter operation removes all parcels of land that don't overlap a
+defined region in the parcels dataset.
 
 \subsubsection{Nearest}
 
-Find the nearest feature in a secondary dataset for every feature in the primary dataset.
+The nearest operation is derived from an actual processing operation
+required for the Digital Phoenix Project\cite{digitalphoenix}. This
+operation uses two datasets. The first is a set of points representing
+employers in the Phoenix metro-area. The second is a set of polygons
+representing parcels of land in the same area. Digital Phoenix needed
+to match the employer with the parcel of land where the business
+should be. Thus the operation is for each employer, find the nearest
+parcel of land with a compatible zoning code. The datasets used in this
+thesis have been simplified to make this matching appear more straight
+forward. Expected output is a list of employer ids with associated
+parcel ids.
+
+The nearest operation uses both the employers and parcels datasets.
 
 \subsubsection{Chaining}
 
-Filter the datasets, then find the nearest in the filtered data
+The chaining operation combines the filter and nearest operations with
+the intent of showing how multiple operations can be performed one after
+the other. This operation is an obvious optimization of the nearest
+operation in that it first removes all residential parcels before running
+the nearest operation on the remaining parcels. As employers cannot (in
+this simplified world) exist on residential parcels, and since residential
+parcels make up a large portion of the entire parcel dataset, the number
+of distances calculated for each employer will be significantly decreased
+thus decreasing processing time. Expected output is the same as for the
+nearest operation.
 
-Can we reuse data without pushing it to disk?
+The chaining operation uses both the employers and parcels datasets.
 
 \subsection{Dataset Description}
 
-Full datasets; 34k employers, 1.2m parcels
+Two datasets are used in evaluating these operations. The first is a
+set of employers where each record contains an employer id, the place
+where the employer is located represented as a point, and the business
+classification: commercial, industrial, or governmental. The employer
+dataset contains 34,302 records.
 
-sub datasets, how to generate from full
+The second dataset is a set of parcels where each record contains a parcel
+id, a multipolygon representing the parcel coverage, and a land use code:
+residential, commercial, industrial, or governmental. The parcel dataset
+contains 1,218,130 records.
 
-Operations 1-5:Use parcels 
-
-1 record
-10 records
-100 records
-1,000 records
-10,000 records
-100,000 records
-1,000,000 records
-1.2M records (full dataset)
-
-
-Operations 6-7: Employers and Parcels
-
-1 sq mile
-10 sq mile
-100 sq mile
-...
-full
-
-\subsection{Required Runs}
+Both datasets use R, C, I, and G to represent residential, commercial,
+industrial, and governmental use codes. These datasets are simplified
+versions of real datasets for Maricopa County, Arizona. The datasets
+were simplified by adding the simplified land use code attribute and
+removing the other attributes not used in these operations.
 
 \section{Execution Environment}
+
+All operations will be executed on ASU's Saguaro cluster. The Saguaro cluster is comprised of several
+generations of hardware. To simplify comparisons, all operations will be executed on similar hardware
+with similar interconnects.
 
 Description of Saguaro (common execute environment)
 
@@ -220,22 +311,35 @@ map: loop through secondary dataset emitting id of primary and secondary; reduce
 filter secondary dataset on load; map: only search for nearest for filtered data, skip others; reduce: identity
 
 \section{ClusterGIS}
+\lstset{language=C}
 
-Intel compiler 10....
+ClusterGIS was compiled with the Intel C Compiler (icc) 10.1 20080312
+against MVAPICH 1.0.1.  MVAPICH makes use of the DDR InfiniBand network
+connection for communication. Dataset storage is done on Lustre, which
+is connected through the same InifiBand connections.
 
-MVAPICH 1.0.1
-
-IB backend
-
-Lustre
-
-Full or chunk of code per operation, description of how the operation was accomplished
-
-All operations must be performed as if they were part of a series of operations.
+The specific implementation of each operation is discussed below. The
+main block of code is included and discussed. Full code listings are
+available in the appendix.
 
 \subsection{Create}
 
-emits all records and the new one
+The create operation is quite simple. First the dataset is loaded in a
+distributed manner across all the tasks included in the operation. One
+task then adds a record after which the dataset is written to disk.
+
+The record addition code is as follows:
+
+\begin{lstlisting}[firstnumber=1]
+record = clusterGIS_Create_record_from_csv("97123897,POINT(0 0),C\n",
+	&start);
+record->next = dataset->data;
+dataset->data = record;
+\end{lstlisting}
+
+Lines 1-2 create the record using the clusterGIS\_Create\_record\_from\_csv 
+
+
 
 \subsection{Read}
 
