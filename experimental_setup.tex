@@ -1,4 +1,4 @@
-\chapter{EXPERIMENTAL SETUP}
+\chapter{EXPERIMENTAL SETUP AND RESULTS}
 
 Chapter 3 defined the requirements for a good parallel GIS processing
 engine. Chapter 4 discussed the designs used in hadoopGIS and
@@ -339,30 +339,73 @@ dataset->data = record;
 
 Lines 1-2 create the record using the clusterGIS\_Create\_record\_from\_csv 
 
+\begin{figure}
+	\label{clusterGIS-create}
+	\caption{Speedup for clusterGIS create}
+	\includegraphics{clusterGIS-create.eps}
+\end{figure}
 
 
 \subsection{Read}
 
 emit only the record with the correct id;
 
+\begin{figure}
+	\label{clusterGIS-read}
+	\caption{Speedup for clusterGIS read}
+	\includegraphics{clusterGIS-read.eps}
+\end{figure}
+
+
 \subsection{Update}
 
 emit all records updating the correct one
+
+\begin{figure}
+	\label{clusterGIS-update}
+	\caption{Speedup for clusterGIS update}
+	\includegraphics{clusterGIS-update.eps}
+\end{figure}
 
 \subsection{Destroy}
 
 emit all record except the correct one
 
+\begin{figure}
+	\label{clusterGIS-delete}
+	\caption{Speedup for clusterGIS delete}
+	\includegraphics{clusterGIS-delete.eps}
+\end{figure}
+
 \subsection{Filter}
 
 emit only records matching the requested criteria
 
+\begin{figure}
+	\label{clusterGIS-filter}
+	\caption{Speedup for clusterGIS filter}
+	\includegraphics{clusterGIS-filter.eps}
+\end{figure}
+
 \subsection{Nearest}
 
 loop through primary and secondary dataset, emitting the id of primary and secondary which match
+
+\begin{figure}
+	\label{clusterGIS-nearest}
+	\caption{Speedup for clusterGIS nearest}
+	\includegraphics{clusterGIS-nearest.eps}
+\end{figure}
 
 \subsection{Chaining}
 
 (Filter the datasets, then find the nearest in the filtered data)
 
 remove nodes in the datasets not matching the filter, find nearest as before
+
+\begin{figure}
+	\label{clusterGIS-chained}
+	\caption{Speedup for clusterGIS chained}
+	\includegraphics{clusterGIS-chained.eps}
+\end{figure}
+

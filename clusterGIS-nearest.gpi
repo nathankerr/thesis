@@ -1,0 +1,10 @@
+set style data linespoints
+set logscale
+set xtics (1,8,16,32,64,128,256,512,1024)
+set ytics (1,8,16,32,64,128,256,512,1024)
+set xlabel 'Number of Processors (Log Scale)'
+set ylabel 'Speedup (Log Scale)'
+set xrange [1:1024]
+set yrange [1:1024]
+l(x) = x
+plot l(x) title 'Ideal Speedup', 'clusterGIS-nearest.gplot' using 1:4 title 'clusterGIS nearest'
