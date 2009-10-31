@@ -1,46 +1,35 @@
 \chapter{DESIGN}
 
-This thesis implements and evaluates two approaches to a parallel GIS processing engine: hadoopGIS and clusterGIS. HadoopGIS is based on the Hadoop map-reduce framework. ClusterGIS uses MPI. This chapter
-discusses how the two implementations were designed to fulfill the requirements in Chapter 3. First
-design choices common to both implementations will be discussed, then the specifics of each implementation
-will be detailed.
+To discover the differences between using message passing and map reduce as methods for parallel GIS processing, this thesis implements two environments for manipulating GIS data. The first approach, hadoopGIS, is based the Hadoop map-reduce framework. The second, clusterGIS, uses MPI. Both implementations build on these existing technologies and utilize standards compliant geospatial libraries. The main work is combining the underlying parallel technology with geospatial processing capabilities in a way that works for that paradigm.
 
-How fulfill requirements
-
-- Operation set (OGC-SFS)
-
-- Batch Mode Processing
-
-- Scalability Provided by:
-
--- Dataset centric (no need for record level locking, etc.) A good cluster based GIS processing environment needs to be separate from a graphical user interface so that it does not incur additional overhead on the compute nodes and so that it can interact well with the generally batch-scheduled environment of a cluster. In addition, it must be able to distribute data between all the nodes used such that a single node does not become a limiting factor in the environment's scalability. A variety of data distribution models should also be available so that the data is distributed in a manner consistent with the required processing. Of course, the environment should be able to execute all the standard geospatial operations as defined by the Open Geospatial Consortium in their Simple Features\cite{ogc-sf} standard.
-
--- Data parallel for speed/scaleup, different distribution models possible?
+One point of simplification made for both implementations is supporting only one file format. Both hadoopGIS and clusterGIS use CSV formatted data with geospatial data stored in the Well Known Text (WKT)\cite{wkt} format. HadoopGIS adds an additional file which stores the column names, one on each line. ClusterGIS just uses column numbers.
 
 \section{HadoopGIS}
 
-Uses JTS
+Hadoop\cite{hadoop} is an open source map-reduce framework developed in Java. The Java Topology Suite (JTS)\cite{jts} is used for geospatial processing.
 
-Map/Reduce
+Map reduce is basically a two phase solution for parallel computing. The first phase applies a function, map, to each record in the input dataset. This phase is inherently parallel as each call to map is completely independent, requiring no more data than just the record that only it is responsible for. The second phase, reduce, is inherently not parallel. Some parallelization is given by Hadoop in this phase by limiting a reduce function from seeing all the data produced by the map function to only the data produced with the same key (each output being in the form of a key-value pair). Because of this limitation, reduce has some parallelism, but much much less than in map.
 
-“Communication” only possible in Reduce
+Hadoop itself is comprised of two major parts: a distributed filesystem, and a parallel execution engine. The filesystem, Hadoop Distributed Filesystem (HDFS), splits files into blocks which are then spread among the participating computers. Blocks can be automatically replicated, such that the loss of any participating computer will not cause data loss. The execution engine is friendly with HDFS, in that it knows where file blocks, and there replicas, are located and can place computation on the same computer that contains the data. The idea here is that data is larger than the program and that therefore moving the program to the data will improve efficiency. Hadoop may also start additional computation tasks that replication the computation being done elsewhere on one of the replicated blocks.
 
-Multiple Map/Reduce phases
+Basic Hadoop programs require three parts. The first part is some startup code that tells Hadoop which input files to use, and which map and reduce functions to execute.  The Hadoop environment will look at the inputs and decide on the number of mappers to create. Each mapper is responsible for channeling the data from a file block to the map function, and then taking that output and passing it onto the reducers. The number of mappers used is based on two criteria. Each file will get a mapper. If a file consists of more than one block of data, a mapper will be created for each additional block. This process is meant to be done automatically, but has real-world effects on program performance.
 
-How to use more than one dataset
+The main idea on integrating GIS processing into Hadoop was to create a GIS datatype that could pass through the map and reduce phases like any other Hadoop datatype. In practical terms there are three boundaries where more work was required than just create a plain old java object.
 
-Limited dataset distribution models
+The first gap to overcome is getting data into the mappers. Hadoop uses two classes in addition to the core GIS class to load data from HDFS blocks. The process starts with GISInputFormat which uses GISRecordReader. GISRecordReader is responsible for extracting the records from a file block. In this case, GISRecordReader wraps the Hadoop supplied LineRecordReader, which manages to solve the problem of connecting lines in a file split between blocks. In this phase the geospatial data is converted from WKT to a Geometry object provided by the Java Topology Suite.
+
+To bridge the gap between mappers and reducers, Hadoop created an interface called Writable. The GIS class implements writable by providing functions that serialize the object state into a byte stream, and reconstitute an object from that byte stream.
+
+The last gap to cross is taking data from the reducers and putting it back on HDFS. The process here is nearly a mirror image of loading data, except that the data is being written. The process starts with GISOutputFormat which utilizes GISRecordWriter. GISRecordWrite converts the GIS object back into CSV format and sends the resulting byte stream through the supplied DataOutputStream.
+
+This design builds upon the basic architecture of Hadoop and adds as little as possible to get a GIS datatype to work in the environment. The user of this new functionality has access to the full power of both Hadoop's task and data management which allows for parallel processing, and the capabilities of a JTS geometry object which implements all the standard geospatial operations. All of this is done for the user by them stating that the input data should use the GISInputFormat and outputed data uses the GISOutputFormat.
+
+This enhancement does not solve one of Hadoop's problems. That is the use of a secondary dataset. The map function only is provided with one record. The framework expects most computation that requires access to more than just one record to be accomplished in the reduce phase. There is provision, however, to load extra data when a mapper is created. These limitation will be discussed further in the experimental setup and results section of this thesis.
 
 \section{ClusterGIS}
 
-Uses GEOS
+ClusterGIS is library that handles the basic functionality required to do GIS processing using MPI. ClusterGIS utilized the GEOS library for geospatial functionality.
 
-Split using MPI-IO
+MPI is based on the idea groups of cooperating tasks can collaborate on some computation by passing messages among themselves. These messages allow for coordination and communication. ClusterGIS builds on these basic capabilities
 
-Communicate using MPI, possibility for different distributions
-
-How a basic program works
-
-How to use more than one dataset
-
-Datasets could be distributed in any way imaginable.
+The first problem clusterGIS solves is distributing the records in a dataset among the participating tasks. The end
