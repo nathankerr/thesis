@@ -1,0 +1,7 @@
+set style data linespoints
+set logscale
+set xtics (1,8,16,32,64,128,256,512,1024)
+set xlabel 'Number of Processors (Log Scale)'
+set ylabel 'Excution Time in Seconds (Log Scale)'
+set xrange [1:1024]
+plot 'PostGIS-create.gplot' using 1:2 title 'Ideal PostGIS', 'clusterGIS-create.gplot' using 1:2 title 'clusterGIS'
