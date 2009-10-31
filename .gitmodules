@@ -1,3 +1,6 @@
 [submodule "clusterGIS"]
 	path = clusterGIS
 	url = git@github.com:nathankerr/clusterGIS.git
+[submodule "hadoopGIS"]
+	path = hadoopGIS
+	url = git@github.com:nathankerr/hadoopGIS.git
