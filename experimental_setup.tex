@@ -11,8 +11,8 @@ as much as possible in the same manner as hadoopGIS and clusterGIS.
 \section{Standard Geospatial Operations}
 
 The first requirement is that an implementation can perform a set of
-standard geospatial operations.  Allowing full access to a compliant
-geospatial library fulfills this requirement a priori.  PostGIS uses,
+standard geospatial operations. Allowing full access to a compliant
+geospatial library fulfills this requirement a priori. PostGIS uses,
 and in fact developed, the GEOS library. HadoopGIS makes use of JTS,
 from which the GEOS library was ported. ClusterGIS uses the GEOS library.
 
@@ -45,7 +45,9 @@ ClusterGIS only operates in a batch mode, there is no interactive mode.
 \section{Scalability}
 
 The first two requirements did not require any experimentation to
-evaluate. Scalability requires experimentation.
+evaluate. Scalability requires experimentation. This section details the
+experiments and specific implementation details. Chapter 6 presents and
+discusses the results of these experiments.
 
 Verification of operations will be done by comparing output of each
 operation for HadoopGIS and ClusterGIS with the output from a PostGIS
@@ -216,27 +218,18 @@ removing the other attributes not used in these operations.
 
 All operations will be executed on ASU's Saguaro cluster. The Saguaro cluster is comprised of several
 generations of hardware. To simplify comparisons, all operations will be executed on similar hardware
-with similar interconnects.
+with similar network interconnects, using the one most natural for use.
 
-Description of Saguaro (common execute environment)
-
-CentOS 5.3 based
-
-Moab/Torque scheduler
-
-GigE/Inifiband network
-
-Lustre version, options
+Saguaro is a CentOS 5.3 based cluster running on Intel Xeon processors. Each node used in these experiments
+has two harpertown processors each with four cores running at 2.83GHz and has 16GB of RAM. In addition each node has one gigabit ethernet connection and one DDR InfiniBand connection. The shared filesystem for these experiments is Luster 1.6.6 accessed through the InifiniBand connection.
 
 \section{PostGIS Implementation}
 
-PostgreSQL 8.4
+The PostGIS experiments were ran using PostgreSQL 8.4.1 and PostGIS 1.3. Both pieces of software were compiled for these tests and used default options.
 
-PostGIS 1.3....
+Each of the following operations was executed on a freshly setup PostGIS instance, running on local disk with default options. Data was loaded, indexed, and vacuumed before the experiment was executed. Runtimes were gathered by using the linux `time' command.
 
-Full or chunk of code per operation, description of how the operation was accomplished
-
-All operations must be performed as if they were part of a series of operations.
+Full SQL statements for each operation are listed below.
 
 \subsection{Create}
 
@@ -268,17 +261,11 @@ Modify crazy set of queries to use the filter
 
 \section{HadoopGIS Implementation}
 
-Hadoop 0.20.0
+The hadoopGIS experiments were executed using Hadoop 0.19.0, data was accessed on an HDFS running on the same nodes off local disk. Internode communication was accomplished through Gigabit Ethernet.
 
-HOD on Saguaro
+Default values were mostly used. Changes were made to increase the number of mappers per node to 8, increasing the memory available to each JVM, and altering the HDFS block size to produce the desired number of mappers.
 
-JTS ...
-
-JDK ...
-
-Full or chunk of code per operation, description of how the operation was accomplished
-
-All operations must be performed as if they were part of a series of operations.
+Core algorithm details are described below. Full listings are available in the appendix.
 
 \subsection{Create}
 
