@@ -1,19 +1,61 @@
-\chapter{RESULTS COMPARISON}
+\chapter{RESULTS}
 
-\section{Performance Analysis}
+PostGIS data will be expanded as though it had ideal speedup
 
-\textbf{vary procs, maintain data}
+\section{Record Operations}
 
-\textbf{vary data, maintain procs}
+\subsection{Create}
+\begin{figure}
+	\label{create-time}
+	\caption{Create Execution Time}
+	\includegraphics{create-time.eps}
+\end{figure}
+\begin{figure}
+	\label{create-speedup}
+	\caption{Create Speedup}
+	\includegraphics{create-speedup.eps}
+\end{figure}
 
-\textbf{vary data, vary procs}
+\subsection{Read}
+\begin{figure}
+	\label{read}
+	\caption{Read Speedup}
+	\includegraphics{read.eps}
+\end{figure}
 
-\section{Comparisons}
+\subsection{Update}
+\begin{figure}
+	\label{update}
+	\caption{Update Speedup}
+	\includegraphics{update.eps}
+\end{figure}
 
-\textbf{PostGIS as baseline}
+\subsection{Delete}
+\begin{figure}
+	\label{delete}
+	\caption{Delete Speedup}
+	\includegraphics{delete.eps}
+\end{figure}
 
-\textbf{PostGIS to Hadoop}
+\section{Dataset Operations}
+\subsection{Filter}
+\begin{figure}
+	\label{filter}
+	\caption{Filter Speedup}
+	\includegraphics{filter.eps}
+\end{figure}
 
-\textbf{Hadoop to ClusterGIS}
+\subsection{Nearest}
+\begin{figure}
+	\label{nearest}
+	\caption{Nearest Speedup}
+	\includegraphics{nearest.eps}
+\end{figure}
 
-\textbf{PostGIS to ClusterGIS}
+\subsection{Chained}
+\begin{figure}
+	\label{chained}
+	\caption{Chained Speedup}
+	\includegraphics{chained.eps}
+\end{figure}
+
