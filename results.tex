@@ -1,13 +1,25 @@
 \chapter{RESULTS}
 
+This chapter contains the results and analysis of the experiments
+previously described. The results have been grouped into two major areas:
+record level operations and dataset level operations. It is expected
+that PostGIS will outperform hadoopGIS and clusterGIS in the record
+level operations. HadoopGIS and clusterGIS should outperform PostGIS on
+dataset level operations.
+
+Speedup for each 
+
 % FIXME: Results
 
 PostGIS data will be expanded as though it had ideal speedup
 
 \section{Record Operations}
 
+PostGIS is expected to outperform hadoopGIS and clusterGIS
+
 \subsection{Create}
 
+% TODO: Fix time for hadoop
 \begin{table}
 \begin{center}
 \begin{tabular}{lcc}
@@ -17,10 +29,11 @@ PostGIS & 0.012 & 1\\
 hadoopGIS & 4 & 0\\
 clusterGIS & 6.160 & 128\\
 \end{tabular}
-\caption{Fastest execution time for create operation}
+\caption{Fastest Execution Time for Create Operation}
 \label{create-time}
 \end{center}
 \end{table}
+
 \begin{figure}
 	\label{create-speedup}
 	\caption{Create Speedup}
@@ -28,6 +41,22 @@ clusterGIS & 6.160 & 128\\
 \end{figure}
 
 \subsection{Read}
+
+% TODO: Fix time for hadoop
+\begin{table}
+\begin{center}
+\begin{tabular}{lcc}
+Implementation & Time (seconds) & Processor Cores\\
+\hline
+PostGIS & 0.023 & 1\\
+hadoopGIS & 4 & 0\\
+clusterGIS & 2.015 & 16\\
+\end{tabular}
+\caption{Fastest Execution Time for Read Operation}
+\label{read-time}
+\end{center}
+\end{table}
+
 \begin{figure}
 	\label{read}
 	\caption{Read Speedup}
@@ -35,6 +64,22 @@ clusterGIS & 6.160 & 128\\
 \end{figure}
 
 \subsection{Update}
+
+% TODO: Fix time for hadoop
+\begin{table}
+\begin{center}
+\begin{tabular}{lcc}
+Implementation & Time (seconds) & Processor Cores\\
+\hline
+PostGIS & 0.006 & 1\\
+hadoopGIS & 4 & 0\\
+clusterGIS & 6.433 & 16\\
+\end{tabular}
+\caption{Fastest Execution Time for Update Operation}
+\label{update-time}
+\end{center}
+\end{table}
+
 \begin{figure}
 	\label{update}
 	\caption{Update Speedup}
@@ -42,6 +87,22 @@ clusterGIS & 6.160 & 128\\
 \end{figure}
 
 \subsection{Delete}
+
+% TODO: Fix time for hadoop
+\begin{table}
+\begin{center}
+\begin{tabular}{lcc}
+Implementation & Time (seconds) & Processor Cores\\
+\hline
+PostGIS & 0.006 & 1\\
+hadoopGIS & 4 & 0\\
+clusterGIS & 6.353 & 128\\
+\end{tabular}
+\caption{Fastest Execution Time for Delete Operation}
+\label{delete-time}
+\end{center}
+\end{table}
+
 \begin{figure}
 	\label{delete}
 	\caption{Delete Speedup}
@@ -49,7 +110,26 @@ clusterGIS & 6.160 & 128\\
 \end{figure}
 
 \section{Dataset Operations}
+
+hadoopGIS and clusterGIS are expected to outperform PostGIS.
+
 \subsection{Filter}
+
+% TODO: Fix time for postgis, hadoop
+\begin{table}
+\begin{center}
+\begin{tabular}{lcc}
+Implementation & Time (seconds) & Processor Cores\\
+\hline
+PostGIS & 0.006 & 1\\
+hadoopGIS & 4 & 0\\
+clusterGIS & 2.957 & 128\\
+\end{tabular}
+\caption{Fastest Execution Time for Filter Operation}
+\label{filter-time}
+\end{center}
+\end{table}
+
 \begin{figure}
 	\label{filter}
 	\caption{Filter Speedup}
@@ -57,6 +137,22 @@ clusterGIS & 6.160 & 128\\
 \end{figure}
 
 \subsection{Nearest}
+
+% TODO: Fix time for postgis, hadoop
+\begin{table}
+\begin{center}
+\begin{tabular}{lcc}
+Implementation & Time (seconds) & Processor Cores\\
+\hline
+PostGIS & 0.006 & 1\\
+hadoopGIS & 4 & 0\\
+clusterGIS & 328.695 & 512\\
+\end{tabular}
+\caption{Fastest Execution Time for Nearest Operation}
+\label{nearest-time}
+\end{center}
+\end{table}
+
 \begin{figure}
 	\label{nearest}
 	\caption{Nearest Speedup}
@@ -64,6 +160,22 @@ clusterGIS & 6.160 & 128\\
 \end{figure}
 
 \subsection{Chained}
+
+% TODO: Fix time for postgis, hadoop (used number from clovertown run)
+\begin{table}
+\begin{center}
+\begin{tabular}{lcc}
+Implementation & Time (seconds) & Processor Cores\\
+\hline
+PostGIS & 0.006 & 1\\
+hadoopGIS & 87621.129 & 0\\
+clusterGIS & 181.691 & 512\\
+\end{tabular}
+\caption{Fastest Execution Time for Chained Operation}
+\label{chained-time}
+\end{center}
+\end{table}
+
 \begin{figure}
 	\label{chained}
 	\caption{Chained Speedup}

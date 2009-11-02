@@ -216,18 +216,29 @@ removing the other attributes not used in these operations.
 
 \section{Execution Environment}
 
-All operations will be executed on ASU's Saguaro cluster. The Saguaro cluster is comprised of several
-generations of hardware. To simplify comparisons, all operations will be executed on similar hardware
-with similar network interconnects, using the one most natural for use.
+All operations will be executed on ASU's Saguaro cluster. The Saguaro
+cluster is comprised of several generations of hardware. To simplify
+comparisons, all operations will be executed on similar hardware with
+similar network interconnects, using the one most natural for use.
 
-Saguaro is a CentOS 5.3 based cluster running on Intel Xeon processors. Each node used in these experiments
-has two harpertown processors each with four cores running at 2.83GHz and has 16GB of RAM. In addition each node has one gigabit ethernet connection and one DDR InfiniBand connection. The shared filesystem for these experiments is Luster 1.6.6 accessed through the InifiniBand connection.
+Saguaro is a CentOS 5.3 based cluster running on Intel Xeon
+processors. Each node used in these experiments has two harpertown
+processors each with four cores running at 2.83GHz and has 16GB of
+RAM. In addition each node has one gigabit ethernet connection and one
+DDR InfiniBand connection. The shared filesystem for these experiments
+is Luster 1.6.6 accessed through the InifiniBand connection.
 
 \section{PostGIS Implementation}
 
-The PostGIS experiments were ran using PostgreSQL 8.4.1 and PostGIS 1.3. Both pieces of software were compiled for these tests and used default options.
+The PostGIS experiments were ran using PostgreSQL 8.4.1 and PostGIS
+1.3. Both pieces of software were compiled for these tests and used
+default options.
 
-Each of the following operations was executed on a freshly setup PostGIS instance, running on local disk with default options. Data was loaded, indexed, and vacuumed before the experiment was executed. Runtimes were gathered by using the linux `time' command. When a query's result did not modify an existing table, its results were stored into another table.
+Each of the following operations was executed on a freshly setup PostGIS
+instance, running on local disk with default options. Data was loaded,
+indexed, and vacuumed before the experiment was executed. Runtimes were
+gathered by using the linux `time' command. When a query's result did
+not modify an existing table, its results were stored into another table.
 
 Full SQL statements for each operation are listed below.
 
@@ -282,15 +293,27 @@ and parcels.id in (
 
 \section{HadoopGIS Implementation}
 
-The hadoopGIS experiments were executed using Hadoop 0.19.0, data was accessed on an HDFS running on the same nodes off local disk. Internode communication was accomplished through Gigabit Ethernet.
+The hadoopGIS experiments were executed using Hadoop 0.19.0, data was
+accessed on an HDFS running on the same nodes off local disk. Internode
+communication was accomplished through Gigabit Ethernet.
 
-Default values were mostly used. Changes were made to increase the number of mappers per node to 8, increasing the memory available to each JVM, and altering the HDFS block size to produce the desired number of mappers.
+Default values were mostly used. Changes were made to increase the number
+of mappers per node to 8, increasing the memory available to each JVM,
+and altering the HDFS block size to produce the desired number of mappers.
 
-Core algorithm details are described below. In all cases the reduce function is an identity function where all input is passed through as output. Full listings are available in the appendix.
+Core algorithm details are described below. In all cases the reduce
+function is an identity function where all input is passed through as
+output. Full listings are available in the appendix.
 
 \subsection{Create}
 
-The Hadoop architecture makes it difficult to arbitrarily output a record. The processing method is fully dependent on the input records. Since it was not possible to add a record to the output dataset without relying on some input, like is possible for PostGIS and clusterGIS, this operation creates the new record when triggered by a record that already exists in the dataset. The resulting map function is as follows:
+The Hadoop architecture makes it difficult to arbitrarily output
+a record. The processing method is fully dependent on the input
+records. Since it was not possible to add a record to the output
+dataset without relying on some input, like is possible for PostGIS and
+clusterGIS, this operation creates the new record when triggered by a
+record that already exists in the dataset. The resulting map function
+is as follows:
 
 \begin{lstlisting}[language=]
 if(key == 1008130) {
@@ -325,7 +348,10 @@ if(!key.equals(new LongWritable(1008130))) {
 
 \subsection{Filter}
 
-To keep from recreating the geometry filtered against, the geometry is created in the configure method which is ran at the creation of the mapper. It is made available as a Geometry object named box and used as follows:
+To keep from recreating the geometry filtered against, the geometry is
+created in the configure method which is ran at the creation of the
+mapper. It is made available as a Geometry object named box and used
+as follows:
 
 \begin{lstlisting}[language=]
 if(value.geometry.intersects(box)) {
@@ -335,7 +361,16 @@ if(value.geometry.intersects(box)) {
 
 \subsection{Nearest}
 
-The nearest operation uses the employers dataset as input for the map functions. As the operations compares every employer against every parcel, the parcel dataset is loaded in its entirety in the configure method (ran when creating each mapper). This way of using a secondary dataset is not optimal, but it is the only method allowed in the map-reduce framework. Being forced to include a full copy of the parcels dataset increases the memory requirement for each mapper, thus limited the number of mappers that can be ran on a single machine and the maximum size of the parcel dataset. The clusterGIS implementation presents a solution for this problem that is possible in MPI but not Hadoop.
+The nearest operation uses the employers dataset as input for the map
+functions. As the operations compares every employer against every parcel,
+the parcel dataset is loaded in its entirety in the configure method
+(ran when creating each mapper). This way of using a secondary dataset
+is not optimal, but it is the only method allowed in the map-reduce
+framework. Being forced to include a full copy of the parcels dataset
+increases the memory requirement for each mapper, thus limited the number
+of mappers that can be ran on a single machine and the maximum size of
+the parcel dataset. The clusterGIS implementation presents a solution
+for this problem that is possible in MPI but not Hadoop.
 
 Even with that problem, the resulting map function is quite simple:
 
@@ -362,7 +397,11 @@ output.collect(key, lngClosestParcel);
 
 \subsection{Chaining}
 
-The chaining operation reduces the memory problems encountered in the nearest operation implementation by removing all residential parcels. This optimization works for this specific problem but cannot be generally applied. As the parcel dataset loading is done in the configure method, there is no change to the map function:
+The chaining operation reduces the memory problems encountered in the
+nearest operation implementation by removing all residential parcels. This
+optimization works for this specific problem but cannot be generally
+applied. As the parcel dataset loading is done in the configure method,
+there is no change to the map function:
 
 \begin{lstlisting}[language=]
 double minDistance = Double.MAX_VALUE, currDistance;
@@ -393,11 +432,18 @@ against MVAPICH 1.0.1.  MVAPICH makes use of the DDR InfiniBand network
 connection for communication. Dataset storage is done on Lustre, which
 is connected through the same InifiBand connections.
 
-The specific main portion of each operations algorithm is show below. Dataset loading and writing is accomplished using the distributed method including all tasks in the operation unless otherwise stated. Full code listings are available in the appendix.
+The specific main portion of each operations algorithm is show
+below. Dataset loading and writing is accomplished using the distributed
+method including all tasks in the operation unless otherwise stated. Full
+code listings are available in the appendix.
 
 \subsection{Create}
 
-Unlike the hadoopGIS create operation, it is easy to arbitrarily add a record using clusterGIS. In this case the first tasks creates a new record using a helper function provided by clusterGIS and then inserts it into its local dataset. When the dataset is written collectively, the new record is included.
+Unlike the hadoopGIS create operation, it is easy to arbitrarily add
+a record using clusterGIS. In this case the first tasks creates a new
+record using a helper function provided by clusterGIS and then inserts
+it into its local dataset. When the dataset is written collectively,
+the new record is included.
 
 \begin{lstlisting}[language=]
 if(rank == 0) {
@@ -410,7 +456,8 @@ if(rank == 0) {
 
 \subsection{Read}
 
-The hardest part of the read operation is removing records from the dataset. This example shows how to accomplish this.
+The hardest part of the read operation is removing records from the
+dataset. This example shows how to accomplish this.
 
 \begin{lstlisting}[language=]
 record = dataset->data;
@@ -492,7 +539,17 @@ while(record != NULL) {
 
 \subsection{Nearest}
 
-Upto this point, all the operations for clusterGIS have only had to work on one dataset. The nearest and chained operations work on two. Unlike hadoopGIS, clusterGIS is able to split up both datasets between participating tasks. The tested implementation places a full copy of the parcels dataset on each computer, which has eight tasks running on it, where each of those tasks has the same set of employers. This means that each task will find the closest parcel for each employer of the parcels that it has (i.e., a local minimum). The tasks sharing the same employers then talk amongst themselves to determine the globally nearest parcel. This communication is done through MPI's reduce mechanism. The employer id now associated parcel id are added to the output dataset.
+Upto this point, all the operations for clusterGIS have only had
+to work on one dataset. The nearest and chained operations work on
+two. Unlike hadoopGIS, clusterGIS is able to split up both datasets
+between participating tasks. The tested implementation places a full copy
+of the parcels dataset on each computer, which has eight tasks running on
+it, where each of those tasks has the same set of employers. This means
+that each task will find the closest parcel for each employer of the
+parcels that it has (i.e., a local minimum). The tasks sharing the same
+employers then talk amongst themselves to determine the globally nearest
+parcel. This communication is done through MPI's reduce mechanism. The
+employer id now associated parcel id are added to the output dataset.
 
 \begin{lstlisting}[language=]
 /* Find the min distance */
@@ -536,7 +593,9 @@ while(employer != NULL) {
 
 \subsection{Chaining}
 
-The chaining operation works in a similar manner to the nearest operation except that it filters out all residential parcels before searching for the nearest parcel.
+The chaining operation works in a similar manner to the nearest operation
+except that it filters out all residential parcels before searching for
+the nearest parcel.
 
 \begin{lstlisting}[language=]
 /* remove all residential parcels */
