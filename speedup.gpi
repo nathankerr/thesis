@@ -4,7 +4,7 @@ set ytics(8,16,32,64,128,256,512,1024)
 set logscale
 set xlabel 'Number of Processors (Log Scale)'
 set ylabel 'Speedup (Log Scale)'
-set xrange [8:1024]
+set xrange [8:512]
 l(x) = x
 e(x) = 0.8*x
 

@@ -7,11 +7,20 @@ PostGIS data will be expanded as though it had ideal speedup
 \section{Record Operations}
 
 \subsection{Create}
-\begin{figure}
-	\label{create-time}
-	\caption{Create Execution Time}
-	\includegraphics{create-time.eps}
-\end{figure}
+
+\begin{table}
+\begin{center}
+\begin{tabular}{lcc}
+Implementation & Time (seconds) & Processor Cores\\
+\hline
+PostGIS & 0.012 & 1\\
+hadoopGIS & 4 & 0\\
+clusterGIS & 6.160 & 128\\
+\end{tabular}
+\caption{Fastest execution time for create operation}
+\label{create-time}
+\end{center}
+\end{table}
 \begin{figure}
 	\label{create-speedup}
 	\caption{Create Speedup}
