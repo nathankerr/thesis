@@ -1,4 +1,4 @@
-\chapter{EXPERIMENTAL SETUP AND RESULTS}
+\chapter{EXPERIMENTAL SETUP}
 
 Chapter 3 defined the requirements for a good parallel GIS processing
 engine. Chapter 4 discussed the designs used in hadoopGIS and
@@ -227,39 +227,58 @@ has two harpertown processors each with four cores running at 2.83GHz and has 16
 
 The PostGIS experiments were ran using PostgreSQL 8.4.1 and PostGIS 1.3. Both pieces of software were compiled for these tests and used default options.
 
-Each of the following operations was executed on a freshly setup PostGIS instance, running on local disk with default options. Data was loaded, indexed, and vacuumed before the experiment was executed. Runtimes were gathered by using the linux `time' command.
+Each of the following operations was executed on a freshly setup PostGIS instance, running on local disk with default options. Data was loaded, indexed, and vacuumed before the experiment was executed. Runtimes were gathered by using the linux `time' command. When a query's result did not modify an existing table, its results were stored into another table.
 
 Full SQL statements for each operation are listed below.
 
-% FIXME: PostGIS operations
-
 \subsection{Create}
-
-insert...
+\begin{lstlisting}[language=]
+insert into parcels values (97123897, ST_GeomFromText('POLYGON((-112.0859375 33.4349975585938,-112.0859375 33.4675445556641,-112.059799194336 33.4675445556641,-112.059799194336 33.4349975585938,-112.0859375 33.4349975585938))', 4326), 'C');
+\end{lstlisting}
 
 \subsection{Read}
-
-select ... where id =
+\begin{lstlisting}[language=]
+create table output as select * from parcels where id = 1008130;
+\end{lstlisting}
 
 \subsection{Update}
-
-update....
+\begin{lstlisting}[language=]
+update parcels set devtype = 'C' where id = 1008130;
+\end{lstlisting}
 
 \subsection{Destroy}
-
-delete ...
+\begin{lstlisting}[language=]
+delete from parcels where id = 1008130;
+\end{lstlisting}
 
 \subsection{Filter}
-
-select...where
+\begin{lstlisting}[language=]
+create table output as
+select * from parcels, (select ST_GeomFromText('') as the_geom) as box
+where ST_Intersects(parcels.the_geom, box.the_geom);
+\end{lstlisting}
 
 \subsection{Nearest}
-
-Crazy set of queries (nested would have been nice, but too slow)
+\begin{lstlisting}[language=]
+create table output as
+select employers.id as employer_id, parcels.id as parcel_id
+from employers, parcels
+where parcels.devtype = employers.devtype
+and parcels.id in (
+        select id from parcels where devtype = employers.devtype order by distance(employers.the_geom, the_geom) limit 1
+);
+\end{lstlisting}
 
 \subsection{Chaining}
-
-Modify crazy set of queries to use the filter
+\begin{lstlisting}[language=]
+create table output as
+select employers.id as employer_id, parcels.id as parcel_id
+from employers, parcels
+where employers.devtype <> 'R' and parcels.devtype = employers.devtype
+and parcels.id in (
+        select id from parcels where devtype = employers.devtype order by distance(employers.the_geom, the_geom) limit 1
+);
+\end{lstlisting}
 
 \section{HadoopGIS Implementation}
 
@@ -267,39 +286,104 @@ The hadoopGIS experiments were executed using Hadoop 0.19.0, data was accessed o
 
 Default values were mostly used. Changes were made to increase the number of mappers per node to 8, increasing the memory available to each JVM, and altering the HDFS block size to produce the desired number of mappers.
 
-Core algorithm details are described below. Full listings are available in the appendix.
-
-% FIXME: HadoopGIS Operation stubbs and explanations
+Core algorithm details are described below. In all cases the reduce function is an identity function where all input is passed through as output. Full listings are available in the appendix.
 
 \subsection{Create}
 
-map: emit all record giving them the same key (forcing one reduce); reduce emits all received records with the addition of one
+The Hadoop architecture makes it difficult to arbitrarily output a record. The processing method is fully dependent on the input records. Since it was not possible to add a record to the output dataset without relying on some input, like is possible for PostGIS and clusterGIS, this operation creates the new record when triggered by a record that already exists in the dataset. The resulting map function is as follows:
+
+\begin{lstlisting}[language=]
+if(key == 1008130) {
+        GIS created = new GIS();
+        GIS.update("\"97123897\",\"POLYGON((-112.0859375 33.4349975585938,-112.0859375 33.4675445556641,-112.059799194336 33.4675445556641,-112.059799194336 33.4349975585938,-112.0859375 33.4349975585938))\",\"C\"");
+        output.collect(new LongWritable(new Integer(97123897)), created);
+}
+output.collect(key, value);
+\end{lstlisting}
 
 \subsection{Read}
-
-map: emit only the record with the correct id; reduce: identity
+\begin{lstlisting}[language=]
+if(key.equals(new LongWritable(1008130))) {
+        output.collect(key, value);
+}
+\end{lstlisting}
 
 \subsection{Update}
-
-map: emit all records, updating the one with the correct id; reduce: identity
+\begin{lstlisting}[language=]
+if(key.equals(new LongWritable(1008130))) {
+        value.attributes.put("devtype", "C");
+}
+output.collect(key, value);
+\end{lstlisting}
 
 \subsection{Destroy}
-
-map: emit all records except for the one with the correct id; reduce: identity
+\begin{lstlisting}[language=]
+if(!key.equals(new LongWritable(1008130))) {
+        output.collect(key, value);
+}
+\end{lstlisting}
 
 \subsection{Filter}
 
-map: emit only records matching the requested criteria; reduce: identity
+To keep from recreating the geometry filtered against, the geometry is created in the configure method which is ran at the creation of the mapper. It is made available as a Geometry object named box and used as follows:
+
+\begin{lstlisting}[language=]
+if(value.geometry.intersects(box)) {
+        output.collect(key, value);
+}
+\end{lstlisting}
 
 \subsection{Nearest}
 
-map: loop through secondary dataset emitting id of primary and secondary; reduce: identity
+The nearest operation uses the employers dataset as input for the map functions. As the operations compares every employer against every parcel, the parcel dataset is loaded in its entirety in the configure method (ran when creating each mapper). This way of using a secondary dataset is not optimal, but it is the only method allowed in the map-reduce framework. Being forced to include a full copy of the parcels dataset increases the memory requirement for each mapper, thus limited the number of mappers that can be ran on a single machine and the maximum size of the parcel dataset. The clusterGIS implementation presents a solution for this problem that is possible in MPI but not Hadoop.
+
+Even with that problem, the resulting map function is quite simple:
+
+\begin{lstlisting}[language=]
+double minDistance = Double.MAX_VALUE, currDistance;
+int closestParcel = -1;
+
+Iterator it = parcels.iterator();
+while (it.hasNext())
+{
+        GIS parcel = (GIS) it.next();
+
+        currDistance = value.geometry.distance(parcel.geometry);
+        if (currDistance < minDistance)
+        {
+                minDistance = currDistance;
+                closestParcel = new Integer(parcel.attributes.get("id"));
+        }
+}
+
+LongWritable lngClosestParcel = new LongWritable (closestParcel);
+output.collect(key, lngClosestParcel);
+\end{lstlisting}
 
 \subsection{Chaining}
 
-(Filter the datasets, then find the nearest in the filtered data)
+The chaining operation reduces the memory problems encountered in the nearest operation implementation by removing all residential parcels. This optimization works for this specific problem but cannot be generally applied. As the parcel dataset loading is done in the configure method, there is no change to the map function:
 
-filter secondary dataset on load; map: only search for nearest for filtered data, skip others; reduce: identity
+\begin{lstlisting}[language=]
+double minDistance = Double.MAX_VALUE, currDistance;
+int closestParcel = -1;
+
+Iterator it = parcels.iterator();
+while (it.hasNext())
+{
+        GIS parcel = (GIS) it.next();
+
+        currDistance = value.geometry.distance(parcel.geometry);
+        if (currDistance < minDistance)
+        {
+                minDistance = currDistance;
+                closestParcel = new Integer(parcel.attributes.get("id"));
+        }
+}
+
+LongWritable lngClosestParcel = new LongWritable (closestParcel);
+output.collect(key, lngClosestParcel);
+\end{lstlisting}
 
 \section{ClusterGIS Implementation}
 \lstset{language=C}
@@ -309,52 +393,201 @@ against MVAPICH 1.0.1.  MVAPICH makes use of the DDR InfiniBand network
 connection for communication. Dataset storage is done on Lustre, which
 is connected through the same InifiBand connections.
 
-The specific implementation of each operation is discussed below. The
-main block of code is included and discussed. Full code listings are
-available in the appendix.
-
-
-% FIXME: clusterGIS operations stubbs and explanations
+The specific main portion of each operations algorithm is show below. Dataset loading and writing is accomplished using the distributed method including all tasks in the operation unless otherwise stated. Full code listings are available in the appendix.
 
 \subsection{Create}
 
-The create operation is quite simple. First the dataset is loaded in a
-distributed manner across all the tasks included in the operation. One
-task then adds a record after which the dataset is written to disk.
+Unlike the hadoopGIS create operation, it is easy to arbitrarily add a record using clusterGIS. In this case the first tasks creates a new record using a helper function provided by clusterGIS and then inserts it into its local dataset. When the dataset is written collectively, the new record is included.
 
-The record addition code is as follows:
-
-\begin{lstlisting}[firstnumber=1]
-record = clusterGIS_Create_record_from_csv("97123897,POINT(0 0),C\n",
-	&start);
-record->next = dataset->data;
-dataset->data = record;
+\begin{lstlisting}[language=]
+if(rank == 0) {
+        int start = 0;
+        record = clusterGIS_Create_record_from_csv("97123897,POINT(0 0),C\n", &start);
+        record->next = dataset->data;
+        dataset->data = record;
+}
 \end{lstlisting}
-
-Lines 1-2 create the record using the clusterGIS\_Create\_record\_from\_csv 
 
 \subsection{Read}
 
-emit only the record with the correct id;
+The hardest part of the read operation is removing records from the dataset. This example shows how to accomplish this.
+
+\begin{lstlisting}[language=]
+record = dataset->data;
+head = &(dataset->data);
+/* keep records that match the criteria, otherwise delete them */
+while(record != NULL) {
+        if(atoi(record->data[0]) == 1008130) {
+                head = &(record->next);
+                record = record->next;
+        } else {
+                *head = record->next;
+                clusterGIS_Free_record(record);
+                record = *head;
+        }
+}
+\end{lstlisting}
 
 \subsection{Update}
-
-emit all records updating the correct one
+\begin{lstlisting}[language=]
+record = dataset->data;
+/* keep records that match the criteria, otherwise delete them */
+while(record != NULL) {
+        if(atoi(record->data[0]) == 1008130) {
+                record->data[2] = "C";
+        }
+        record = record->next;
+}
+\end{lstlisting}
 
 \subsection{Destroy}
-
-emit all record except the correct one
+\begin{lstlisting}[language=]
+record = dataset->data;
+head = &(dataset->data);
+/* keep records that match the criteria, otherwise delete them */
+while(record != NULL) {
+        if(atoi(record->data[0]) == 1008130) {
+                *head = record->next;
+                clusterGIS_Free_record(record);
+                record = *head;
+        } else {
+                head = &(record->next);
+                record = record->next;
+        }
+}
+\end{lstlisting}
 
 \subsection{Filter}
+\begin{lstlisting}[language=]
+box = GEOSWKTReader_read(reader, "POLYGON((-112.0859375 33.4349975585938,-112.0859375 33.4675445556641,-112.059799194336 33.4675445556641,-112.059799194336 33.4349975585938,-112.0859375 33.4349975585938))");
 
-emit only records matching the requested criteria
+record = dataset->data;
+head = &(dataset->data);
+/* keep records that match the criteria, otherwise delete them */
+while(record != NULL) {
+        char intersects;
+
+        /*record_geometry = GEOSWKTReader_read(reader, record->data[1]);
+        if(record_geometry == NULL) {
+                fprintf(stderr, "%d: parse error\n", rank);
+                MPI_Abort(MPI_COMM_WORLD, 2);
+        }*/
+
+        intersects = GEOSIntersects(record->geometry, box);
+        if(intersects == 2) {
+                fprintf(stderr, "%d: error with overlap function\n", rank);
+                MPI_Abort(MPI_COMM_WORLD, 2);
+        }
+
+        if(intersects == 1) { /* record overlaps with box */
+                head = &(record->next);
+                record = record->next;
+        } else { /* no overlap */
+                *head = record->next;
+                clusterGIS_Free_record(record);
+                record = *head;
+        }
+}
+\end{lstlisting}
 
 \subsection{Nearest}
 
-loop through primary and secondary dataset, emitting the id of primary and secondary which match
+Upto this point, all the operations for clusterGIS have only had to work on one dataset. The nearest and chained operations work on two. Unlike hadoopGIS, clusterGIS is able to split up both datasets between participating tasks. The tested implementation places a full copy of the parcels dataset on each computer, which has eight tasks running on it, where each of those tasks has the same set of employers. This means that each task will find the closest parcel for each employer of the parcels that it has (i.e., a local minimum). The tasks sharing the same employers then talk amongst themselves to determine the globally nearest parcel. This communication is done through MPI's reduce mechanism. The employer id now associated parcel id are added to the output dataset.
+
+\begin{lstlisting}[language=]
+/* Find the min distance */
+employer = employers->data;
+min = malloc(sizeof(double)*2);
+global_min = malloc(sizeof(double)*2);
+output_csv = malloc(sizeof(char)*128);
+output = clusterGIS_Create_dataset();
+while(employer != NULL) {
+
+        /* find the local min */
+        parcel = parcels->data;
+        GEOSDistance(employer->geometry, parcel->geometry, &min_distance);
+        min_distance_parcel = parcel;
+        while(parcel != NULL) {
+                if(strncmp(employer->data[2], parcel->data[2], 1) == 0) {
+                        GEOSDistance(employer->geometry, parcel->geometry, &distance);
+                        if(distance < min_distance) {
+                                min_distance = distance;
+                                min_distance_parcel = parcel;
+                        }
+                }
+                parcel = parcel->next;
+        }
+
+        /* find the global min */
+        min[0] = atoi(min_distance_parcel->data[0]);
+        min[1] = min_distance;
+        MPI_Allreduce(min, global_min, 2, MPI_DOUBLE, min_distance_op, parcels_comm);
+
+        /* Add the min to the output dataset */
+        sprintf(output_csv, "\"%s\",\"%d\"\n", employer->data[0], (int) global_min[0]);
+        start = 0;
+        output_record = clusterGIS_Create_record_from_csv(output_csv, &start);
+        output_record->next = output->data;
+        output->data = output_record;
+
+        employer = employer->next;
+}
+\end{lstlisting}
 
 \subsection{Chaining}
 
-(Filter the datasets, then find the nearest in the filtered data)
+The chaining operation works in a similar manner to the nearest operation except that it filters out all residential parcels before searching for the nearest parcel.
 
-remove nodes in the datasets not matching the filter, find nearest as before
+\begin{lstlisting}[language=]
+/* remove all residential parcels */
+parcel = parcels->data;
+head = &(parcels->data);
+while(parcel != NULL) {
+        if(strncmp(parcel->data[2], "R", 1) == 0) {
+                head = &(parcel->next);
+                parcel = parcel->next;
+        } else {
+                *head = parcel->next;
+                clusterGIS_Free_record(parcel);
+                parcel = *head;
+        }
+}
+
+/* Find the min distance */
+employer = employers->data;
+min = malloc(sizeof(double)*2);
+global_min = malloc(sizeof(double)*2);
+output_csv = malloc(sizeof(char)*128);
+output = clusterGIS_Create_dataset();
+while(employer != NULL) {
+
+        /* find the local min */
+        parcel = parcels->data;
+        GEOSDistance(employer->geometry, parcel->geometry, &min_distance);
+        min_distance_parcel = parcel;
+        while(parcel != NULL) {
+                if(strncmp(employer->data[2], parcel->data[2], 1) == 0) {
+                        GEOSDistance(employer->geometry, parcel->geometry, &distance);
+                        if(distance < min_distance) {
+                                min_distance = distance;
+                                min_distance_parcel = parcel;
+                        }
+                }
+                parcel = parcel->next;
+        }
+
+        /* find the global min */
+        min[0] = atoi(min_distance_parcel->data[0]);
+        min[1] = min_distance;
+        MPI_Allreduce(min, global_min, 2, MPI_DOUBLE, min_distance_op, parcels_comm);
+
+        /* Add the min to the output dataset using front insertion*/
+        sprintf(output_csv, "\"%s\",\"%d\"\n", employer->data[0], (int) global_min[0]);
+        start = 0;
+        output_record = clusterGIS_Create_record_from_csv(output_csv, &start);
+        output_record->next = output->data;
+        output->data = output_record;
+
+        employer = employer->next;
+}
+\end{lstlisting}

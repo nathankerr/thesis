@@ -28,10 +28,18 @@ This enhancement does not solve one of Hadoop's problems. That is the use of a s
 
 \section{ClusterGIS}
 
-% FIXME: ClusterGIS Design
+ClusterGIS makes use of MPI to manage communication between multiple tasks and the GEOS library to provide the required geospatial operations.
 
-ClusterGIS is library that handles the basic functionality required to do GIS processing using MPI. ClusterGIS utilized the GEOS library for geospatial functionality.
+The main task allotted to the clusterGIS library is to load one or more geospatial datasets in such a way that the GIS records are distributed between participating tasks. MPI tasks are grouped into communicators. By passing a specific communicator to a helper function, the tasks participating in the processing done by that function can be limited. MPI provides a default communication, MPI\_COMM\_WORLD, which contains all the tasks controlled by the MPI runtime.
 
-MPI is based on the idea groups of cooperating tasks can collaborate on some computation by passing messages among themselves. These messages allow for coordination and communication. ClusterGIS builds on these basic capabilities
+Datasets can be loaded into participating tasks from a file by calling one of the clusterGIS load functions. Two main load functions exist: distributed and replicated. The replicated load function makes a copy the dataset on each task. The distributed load function splits the datasets's records among the participating tasks. The split is currently done byte-wise, meaning that each task is responsible for the records contained within a range of bytes in the source file. Records that overlap these boundaries are handled by each task dropping the first partial record and completed the final partial record. In this way no records are lost and the splitting process only requires a single complete read of the dataset with the addition of the overlapping sections.
 
-The first problem clusterGIS solves is distributing the records in a dataset among the participating tasks. The end
+Both the load functions take advantage of MPI-I/O. MPI-I/O is a collective I/O interface which optimizes how the data in a file is read from disk by communicating between the tasks participating in the collective operation. As disks are slow, this collaboration allows for decreased read time. MPI-I/O is also used for the write functions.
+
+No matter if the load was distributed or replicated, the resulting local dataset is stored as a linked list. Each node in the linked list has an array containing the columns of the represented record. There is also a pointer for the geometry of the record. After the load, the geometry has not yet been created. ClusterGIS provides a function that will create all the geometries for a dataset.
+
+After the data is loaded and the geometries created, the user can now proceed with the desired processing activities taking advantage of the full power of both MPI and GEOS.
+
+When the user is ready to save a dataset, the write functions of clusterGIS are available. Like the load functions, the write functions come in distributed and replicated varieties. The replicated write function will write just one complete copy of the dataset out (each task has its own copy, but only one will be written to disk). The distributed write function writes all of the records for all of the participating tasks into one file.
+
+The main idea of clusterGIS is to provide a few essential library functions that handle some of the basic, yet tricky, functions that a parallel program must implement. With these provided functions, the user can easily get to writing the more interesting and relevant parts of the processing program.
