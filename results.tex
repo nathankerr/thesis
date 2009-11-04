@@ -1,21 +1,18 @@
 \chapter{RESULTS}
 
-This chapter contains the results and analysis of the experiments
-previously described. The results have been grouped into two major areas:
-record level operations and dataset level operations. It is expected
-that PostGIS will outperform hadoopGIS and clusterGIS in the record
-level operations. HadoopGIS and clusterGIS should outperform PostGIS on
-dataset level operations.
+The main purpose of pursuing parallel methods for GIS processing is to overcome the limitations of GIS processing using desktop applications. This thesis uses PostGIS, the GIS extension for the PostgreSQL relational database, to represent the capabilities of more traditional GIS processing applications.
 
-Speedup for each 
+Given the capabilities and sophistication of a relational database, record level operations performed in PostGIS are expected to outperform the simpler algorithms used in hadoopGIS and clusterGIS. While there are not limitations against using similarly sophisticated algorithms in the parallel implementations, this thesis attempts to show what can be done with relatively simple and naive algorithms, such as could be created by people not possessing computer science degrees.
 
-% FIXME: Results
+On the other hand, hadoopGIS and clusterGIS should outperform PostGIS in operations requiring access to entire datasets. This is expected because unless the dataset level operation can be done entirely using indexes, which in the operations selected here is not the case, PostGIS is forced to work with every record in the dataset; leaving it to a basic serial algorithm. HadoopGIS and clusterGIS attempt to 
 
-PostGIS data will be expanded as though it had ideal speedup
+This chapter evaluates these assumptions and compares the relative performance and scalability of hadoopGIS and clusterGIS by first discussing characteristics of the record level operation experiments and then the dataset level operations. After these assumptions are evaluated, some remarks will be made on the ease of using each of these three environments for GIS processing.
 
-\section{Record Operations}
+\section{Record Level Operations}
 
-PostGIS is expected to outperform hadoopGIS and clusterGIS
+The classic operations to determine ability to perform record level operations are to create a new record, read an existing record, update an existing record, and delete an existing record from a dataset. Of these four operations, create, update, and delete exhibited similar performance characteristics in both PostGIS and the parallel implementations. Read performance in the parallel implementations was markedly different.
+
+As performance characteristics were clustered in this manner, the create operation will be used to represent the performance of the create, update, and delete operations. The read operation will represent itself.
 
 \subsection{Create}
 
@@ -35,10 +32,22 @@ clusterGIS & 6.160 & 128\\
 \end{table}
 
 \begin{figure}
-	\label{create-speedup}
-	\caption{Create Speedup}
-	\includegraphics{create-speedup.eps}
+        \label{create-speedup}
+        \caption{Create Speedup}
+        \includegraphics{create-speedup.eps}
 \end{figure}
+
+The create operation inserts a record into a dataset. In the case of PostGIS, an existing dataset is mutated to include the new record. HadoopGIS and clusterGIS, as they work on the dataset level, each create a new dataset including all the records from the original dataset and the new record.
+
+Table \ref{create-time} lists the fastest times that were executed in the series of tests along with the number of processors used. PostGIS is markedly faster than either of the parallel implementations. This is largely due to the fact that PostGIS is not required to both read and write the entire dataset, but only has to add the single record, confirm that the record does not violate any constraints of the dataset, and update any indexes. Even with the additional meta-work required, the significant difference between execution times allows for a large amount of additional work to be performed.
+
+This number is for the addition of one record to a dataset. The parallel implementations have a large amount of overhead in reading and writing an entire dataset of 1.2 million records. Assuming that creating additional records was free, meaning each additional record added 0.000 seconds to the execution time, one would have to create 514 records using the faster of the parallel implementations, clusterGIS, to amortize the overhead.
+
+Figure \ref{create-speedup} shows how hadoopGIS and clusterGIS perform with the addition of more computers. While the raw speed of hadoopGIS and clusterGIS differ greatly as shown in Table \ref{create-time}, the speedup graph helps us to ignore the differences in implementations of these these two technologies and see how additional resources can improve performance.
+
+Both implementations are limited by I/O. Neither implementation has much computation to do, as they just read the data in and then write it back out with the additional record.
+
+As was expected, PostGIS is able to outperform hadoopGIS and clusterGIS in creating records. While not tested, it appears that at least 514 records would have to be created in order to give the parallel implementations a chance of outperforming PostGIS.
 
 \subsection{Read}
 
@@ -58,60 +67,22 @@ clusterGIS & 2.015 & 16\\
 \end{table}
 
 \begin{figure}
-	\label{read}
-	\caption{Read Speedup}
-	\includegraphics{read.eps}
+        \label{read}
+        \caption{Read Speedup}
+        \includegraphics{read.eps}
 \end{figure}
 
-\subsection{Update}
+The read operation is similar to the create operation for the parallel implementations in that the entire dataset must be read in. The difference is that only one record must be written to disk. PostGIS is able to use an index to quickly locate the requested record and then read just that data from disk and then output it to a new table. Table \ref{read-time} shows PostGIS to still be the fastest, as compared to the create operation, but that the parallel implementations are significantly faster even with the increased computation requirement of checking every single record to see if it was the record.
 
-% TODO: Fix time for hadoop
-\begin{table}
-\begin{center}
-\begin{tabular}{lcc}
-Implementation & Time (seconds) & Processor Cores\\
-\hline
-PostGIS & 0.006 & 1\\
-hadoopGIS & 4 & 0\\
-clusterGIS & 6.433 & 16\\
-\end{tabular}
-\caption{Fastest Execution Time for Update Operation}
-\label{update-time}
-\end{center}
-\end{table}
+The speedup shown in figure \ref{read-speedup} is higher than for the create operation due to the decreased I/O and slightly increased computation requirements. While the operations are still I/O bound, the difference is significant. Also note the point of diminishing returns is met much more quickly, at 16 cores for the clusterGIS implementation, than for the create operation. All of the experimental runs for clusterGIS have a peak at 16 cores, which indicates the datasize, distribution of data blocks on the Lustre filesystem setup, and network setup somehow have the best setup for redistributing the data.
 
-\begin{figure}
-	\label{update}
-	\caption{Update Speedup}
-	\includegraphics{update.eps}
-\end{figure}
-
-\subsection{Delete}
-
-% TODO: Fix time for hadoop
-\begin{table}
-\begin{center}
-\begin{tabular}{lcc}
-Implementation & Time (seconds) & Processor Cores\\
-\hline
-PostGIS & 0.006 & 1\\
-hadoopGIS & 4 & 0\\
-clusterGIS & 6.353 & 128\\
-\end{tabular}
-\caption{Fastest Execution Time for Delete Operation}
-\label{delete-time}
-\end{center}
-\end{table}
-
-\begin{figure}
-	\label{delete}
-	\caption{Delete Speedup}
-	\includegraphics{delete.eps}
-\end{figure}
+As expected, PostGIS is able to outperform hadoopGIS and clusterGIS in reading a single record from a dataset while using less resources. This is once again due to more sophisticated algorithms, data storage methods, and indexes. Again it is not unreasonable that such methods could be used to increase the performance of the parallel implementations.
 
 \section{Dataset Operations}
 
-hadoopGIS and clusterGIS are expected to outperform PostGIS.
+Now that basic performance and capabilities for record level operations have been established, and have been shown to be weaknesses for both parallel implementations, at least with the current naive and simple algorithms used, we come to the operations where the parallel implementations are expected to outperform PostGIS. These operations utilize entire datasets, first by filtering a dataset using a geometric computation, and then by utilizing two datasets in their entirety.
+
+A scaling issue in hadoopGIS for the second dataset was encountered while running the nearest and chained operations. As a result, only the chained operation is show here with a description of the issue and how the clusterGIS implementation solves the same problem. ClusterGIS exhibits a similar speedup line for both the nearest and chained operations, and it is therefore assumed that if more memory were available that the hadoopGIS implementation's speedup would be similar to that of the chained operation. As such, only the chained operation is discussed here.
 
 \subsection{Filter}
 
@@ -121,7 +92,7 @@ hadoopGIS and clusterGIS are expected to outperform PostGIS.
 \begin{tabular}{lcc}
 Implementation & Time (seconds) & Processor Cores\\
 \hline
-PostGIS & 0.006 & 1\\
+PostGIS & 0.000 & 1\\
 hadoopGIS & 4 & 0\\
 clusterGIS & 2.957 & 128\\
 \end{tabular}
@@ -136,28 +107,13 @@ clusterGIS & 2.957 & 128\\
 	\includegraphics{filter.eps}
 \end{figure}
 
-\subsection{Nearest}
+The algorithms used for the filter operation are quite similar to those used in the read operation, but that instead of doing a simple comparison of record ids, a geometric computation is required. The intersection operation was chosen to represent any generic geometric operation in that it cannot utilize indexes currently available in PostGIS.
 
-% TODO: Fix time for postgis, hadoop
-\begin{table}
-\begin{center}
-\begin{tabular}{lcc}
-Implementation & Time (seconds) & Processor Cores\\
-\hline
-PostGIS & 0.006 & 1\\
-hadoopGIS & 4 & 0\\
-clusterGIS & 328.695 & 512\\
-\end{tabular}
-\caption{Fastest Execution Time for Nearest Operation}
-\label{nearest-time}
-\end{center}
-\end{table}
+Comparing the execution times in table \ref{filter-time} to those of the read operation (table \ref{read-time}) we see that clusterGIS is able to absorb the additional computation requirements by adding more processing cores while only increasing computation time by one second. HadoopGIS performs in similar manner. PostGIS is the most hard hit by its inability to utilize additional resources, thus significantly increasing processing time.
 
-\begin{figure}
-	\label{nearest}
-	\caption{Nearest Speedup}
-	\includegraphics{nearest.eps}
-\end{figure}
+Speedup, as shown in figure \ref{filter-speedup} is much more near ideal speedup than the record level operations. The increased computation is able to offset the I/O requirements, reducing the effect of the I/O bottleneck and increasing efficiency.
+
+As more computation is required to process each record, the parallel implementations are able to utilize more and more resources to reduce total computation time. PostGIS's execution time can only increase when more computation is required per record.
 
 \subsection{Chained}
 
@@ -167,9 +123,9 @@ clusterGIS & 328.695 & 512\\
 \begin{tabular}{lcc}
 Implementation & Time (seconds) & Processor Cores\\
 \hline
-PostGIS & 0.006 & 1\\
+PostGIS & 198000.00 & 1\\
 hadoopGIS & 87621.129 & 0\\
-clusterGIS & 181.691 & 512\\
+clusterGIS & 41.995 & 1024\\
 \end{tabular}
 \caption{Fastest Execution Time for Chained Operation}
 \label{chained-time}
@@ -182,3 +138,18 @@ clusterGIS & 181.691 & 512\\
 	\includegraphics{chained.eps}
 \end{figure}
 
+Finding the nearest parcel for each employer is a fairly normal GIS question to ask. The fastest execution times shown in table \ref{chained-time}, however, show significant differences in the capabilities of each implementation. ClusterGIS by far outperforms the other implementations.
+
+A significant scaling problem was discovered the in architecture of the hadoopGIS implementation. The map reduce paradigm expects apply a map function to ever record in the input dataset. The nearest and chained operations require the use of a second dataset, the parcel dataset, to compare against for each employer. Therefore each execution of the map function requires full access to the parcel dataset. Hadoop provides the capability to load a copy of the parcel dataset into a mapper. Mappers are the part of the Hadoop architecture that executes the map functions. While the parcel dataset is not required to be read from disk for each map invocation, it is required to be available in the mapper. The problem comes in that the parcel dataset is quite large, with each mapper requiring 2.2 GB of RAM to store all the parcels except for residential parcels in memory. Because of the simplicity of the land use code matching this optimization was available for this case and was originally designed as the chained experiment.
+
+While 2.2GB of RAM is not really that much, the computers used have a total of 16GB of RAM that is shared between 8 cores. This averages to 2GB of RAM per core (assuming no memory utilization by the operating system), which is less than the 2.2GB required. As each mapper executes a single thread of computation, 2 processors cores on each machine are left idle because of this memory requirement.
+
+While it is possible to read in the entire parcel dataset for each map function, this is much slower due to the slow speed of disk as compared to memory. Another possible method to reduce memory usage, and thus increase the compute capabilities in this computation bound operation would be to read in the parcel data in chunks, finding local minimum distances for each employer in that chunk and then processing the next chunk and so on. This method could only be performed using the map-reduce paradigm by running multiple map-reduce processes. The first process would split the parcel dataset into manageable chunks, after which a process for each chunk would find local minimum for that chunk, and then a final process would reduce the local minimums to a global minimum. Such a process is possible to implement, but is somewhat unwieldily.
+
+The clusterGIS solution to this same scaling problem is to modify how the data is split. The implementation used creates blocks of eight MPI tasks. Each block has a full copy of the parcel dataset, with each task in the block having just a portion. Instead of dividing the employer dataset between all the tasks, the tasks in each block contain the same set of employers. The block size is tunable such that the block size can be adjusted allowing for a specific implementation to be optimized for memory usage and problem granularity. This implementation was not tuned for optimal performance, but for explainability in that each computer has a full copy of the parcel dataset and a subset of the employers where each task has the same employers.
+
+The speedup shown in figure \ref{chained-speedup} for clusterGIS is nearly linear for most of its run. The speedup starts to drop off starting at 256 cores, probably due to the small size of the employer dataset. At 1024 cores the employer dataset's 34,000 records are split into 128 sections. The increased work to split and the recombine the dataset starts to affect the granularity of the problem at that scale. A larger employer dataset or more computation per record would increase the number of cores required before this effect would be noticed. The performance is still impressive, converting each hour of execution time used by PostGIS into less than one second.
+
+Though hadoopGIS experiences a severe limitation on the size of the parcel dataset, it is also able to produce results more quickly than PostGIS while having a reasonable speedup line.
+
+As was expected, the parallel implementations are able to outperform PostGIS. Of the two, clusterGIS is able to scale computation capabilities along with the size of both datasets.

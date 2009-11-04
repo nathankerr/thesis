@@ -1,21 +1,29 @@
 \chapter{CONCLUSION}
 
-% FIXME: Conclusion
+This thesis evaluated two parallel GIS processing paradigms, map reduce and message passing by creating an implementation in each paradigm and then comparing the performance of each implementation.
 
-By simplifying the requirements to handle process GIS operations in
-parallel, the cost to implementing parallel solutions will decrease,
-enabling more parallel processing methods to be created. This parallel
-methods will be able to take advantage of the increased processing powers
-made available through compute clusters.
+The map reduce paradigm applies a map function to every record in a dataset and then reduces the output of those function calls to produce a final result. The Hadoop map reduce framework was extended to include support for GIS data creating the hadoopGIS implementation.
 
-Another benefit of this research is a classification of geospatial
-operations based on data access requirements and a sample set of queries
-to evaluate the efficiency of a parallel GIS processing implementation.
+The message passing paradigm uses a set of tasks that are able to communicate with each other by passing messages. The clusterGIS processing environment was created using MPI.
+
+A set of operations was developed to assist in the evaluation. Two major types of operations were made, record centric and dataset centric. The record centric operations only affected a single record in a dataset, while dataset centric operations worked on every record in one or more datasets. As these operations were performed in through the lens of geometric processing, and as the maximum number of geometries required by the basic geometric operations as defined by the Open Geospatial Consortiums's Simple Features standard\cite{ogc-sfs} is two, any operation could be accomplished if two datasets were available.
+
+Traditional serial GIS processing was represented by PostGIS, which extends the PostgreSQL relational database to be able to perform geospatial processing.
+
+As expected, PostGIS was able to perform the record-centric operations more quickly than either hadoopGIS or clusterGIS. This is due to the fact that both the parallel implementations must read in and then write out the entire dataset to affect any one record. It is possible that this overhead could be amortized should enough new records be created.
+
+The record centric operations formed two performance clusters. Creating, updating, and deleting records output basically the entire dataset. Reading records, on the other hand, significantly reduced the amount of data output, thereby increasing speedup.
+
+Dataset centric operations were performed more quickly by the parallel implementations, hadoopGIS and clusterGIS. In the filter operation, where a subset of the records was retrieved using a geometric operation, hadoopGIS and clusterGIS scaled similarly. Severe scalability problems were discovered in hadoopGIS when using more than one dataset. The secondary dataset is unable to be larger than available memory. ClusterGIS was able to solve this problem by distributing both datasets and combining the partial answers into the final answer.
+
+In terms of usability, PostGIS had the shortest implementations, with the next largest being clusterGIS and then hadoopGIS. PostGIS uses SQL and a relational database, both of which require specialized skills to utilize effectively. Though simple SQL statements can be written, getting performance out of the database requires knowledge of indexes and processing paths. Both hadoopGIS and clusterGIS are more explicit in how the processing is done, and therefore it is easier to see what is being done. ClusterGIS is more flexible is how processing can be accomplished, allowing for easier handling of additional datasets processing methods. HadoopGIS provides a fairly easy to understand processing method, but lacks the ability to work in ways that are not provided for in that processing method. The main example of this is its inability to scale on the secondary dataset as using a secondary dataset is not provided for in the map reduce paradigm.
+
+HadoopGIS and clusterGIS show that parallel GIS processing is possible and can afford significant decreases in processing time while using simple algorithms in cases where one or more datasets must be processed in their entirety. More sophisticated algorithms could be developed to provide greater benefits.
 
 \section{Future Work}
 
-\textbf{additional decomposition methods, combined with alternative MPI communicators}
+The operations created for this thesis provide examples of how to use hadoopGIS and clusterGIS. These examples can be used as building blocks to create programs that solve more complicated problems to to enable parallel simulation methods.
 
-\textbf{addition of preprocessing methods (indexing, etc)}
+The algorithms presented in this thesis were intentionally simplistic and naive. More advanced methods than just looping through the datasets such as using indexes have the potential to further improve the provided capabilities.
 
-\textbf{chunking of replicated dataset}
+Another improvement that can be made is the addition of alternate decomposition methods. These decomposition method used in this thesis was very simple and just split up the records between computers. More sophisticated decomposition methods such as a geospatial decomposition where record are distributed by locality would be beneficial for many processing methods.
