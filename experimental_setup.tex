@@ -265,7 +265,7 @@ delete from parcels where id = 1008130;
 \subsection{Filter}
 \begin{lstlisting}[language=]
 create table output as
-select * from parcels, (select ST_GeomFromText('') as the_geom) as box
+select parcels.* from parcels, (select ST_GeomFromText('POLYGON((-112.0859375 33.4349975585938,-112.0859375 33.4675445556641,-112.059799194336 33.4675445556641,-112.059799194336 33.4349975585938,-112.0859375 33.4349975585938))', 4326) as the_geom) as box
 where ST_Intersects(parcels.the_geom, box.the_geom);
 \end{lstlisting}
 
