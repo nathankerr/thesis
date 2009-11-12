@@ -67,6 +67,11 @@ GeoDa\cite{geoda} is a spatial analysis tool that includes spatial
 regressions. PySal\cite{pysal} is a python library that builds on the
 work done with GeoDa.
 
+These tools provide additional capabilities for GIS processing, but are
+limited to working on a single computer. As the data becomes larger and
+the analysis more complex, they become unable to perform the required
+processing in a reasonable time, if at all.
+
 \subsection{GIS Libraries}
 
 The Open Geospatial Consortium (OGC) defined a core set of geospatial
@@ -79,6 +84,11 @@ languages. The Geometry Engine, Open Source (GEOS) library is a C++
 port of the JTS that also provides a C interface. PostGIS is implemented
 using the GEOS library. The NetTopologySuite\cite{nts} (NTS) is a port
 of the JTS into .NET.
+
+The Simple Features standard and the libraries that support it have
+distilled the most important functions for GIS processing. The standard
+through the experience and discussion employed in the creation process,
+and the libraries by practical use in other projects and environments.
 
 As quality libraries are available for a variety of languages, there
 is no need to re-implement the functionality they provide. This thesis
@@ -108,24 +118,19 @@ capability.
 
 \subsection{Parallel Distributed-Memory Applications}
 
-To overcome the limitations of a single computer, the more scalable
-architecture of a parallel distributed-memory machine was created. The
-basic unit of this architecture is a processing element (PE) comprised
-of one or more processors couple with memory. In other words, a PE is
-a shared-memory machine. The PEs are interconnected using some sort
-of networking technology. This architecture scales as well as the
-interconnect does. Common interconnect technologies in use today are
-Gigabit-Ethernet and InfiniBand. Clusters are parallel distributed-memory
-machines.
+One method to overcome the limitations of a single computer is to use
+multiple computers. By providing a way for the computers to communicate,
+and therefore collaborate, with each other. By means of collaboration,
+the individual computers are able to act together to solve a single
+problem. While the participating computers can communicate, they do not
+have direct access to each other's memory. Thus the total memory available
+to the collection of processors is distributed between them, not shared.
 
-For a program to run on a parallel distributed-memory machine, it must
-be able to work with multiple thread of operation where communication
-between the threads goes over the interconnect. For the purposes of
-discussion, threads running on different PEs are called tasks.
-
-The main task in designing a parallel program is figuring out how to
-split up the work between tasks. One method is to split up the processing
-between tasks. Each task would generally have the same data and perform
+Because each computer only has direct access to its own memory, meaning
+that finding out what is in the memory of another computer is harder,
+the main task in designing a parallel program is figuring out how to
+split up the work between computers. One method is to split up the processing
+between computers. Each task would generally have the same data and perform
 variations of an operation on the data; for instance, running multiple
 scenarios. This methodology is called Task Parallel. An example of task
 parallelism is simulating the effects of various weather patterns on
@@ -134,19 +139,19 @@ and run its variety of weather on it. The capability of executing each
 scenario is limited to the capabilities of a single processing element,
 but many scenarios can be executed at the same time.
 
-Data Parallel methods split the data up between tasks an perform the
+Data Parallel methods split the data up between computers and perform the
 same, or similar, operations on each piece of data. To calculate the
 effects of a weather pattern on an urban environment, the environment
 would first be divided between the tasks with each task responsible for
 one part of the environment. Each task would then calculate the effects
 of the weather on its section of the environment, communicating with the
-other PEs as needed to share information related to edge conditions, etc.
+other computers as needed to share information related to edge conditions, etc.
 
 \subsection{Message Passing Interface}
 
-The Message Passing Interface (MPI) standard has become the normal way
+The Message Passing Interface\cite{mpi} (MPI) standard has become the normal way
 of programming parallel distributed-memory applications. MPI works
-by starting processing tasks on each of the PEs alloted to the MPI
+by starting processing tasks on each of the computers alloted to the MPI
 process. These tasks are then able to send and receive messages between
 themselves allowing for inter-task communication.
 
