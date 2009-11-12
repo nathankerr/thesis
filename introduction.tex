@@ -5,21 +5,11 @@
 Geographic Information Systems (GIS) were designed to model aspects of
 the world around us. From roads to temperature, GIS data can be used to
 represent a large range of real-world objects, allowing for sophisticated
-analysis and processing. Data is usually stored as raster or vector
-data. Raster data represents the world as a grid, which each grid cell
-containing attributes associated with that area. The grid is georeferenced
-and has a specific resolution, which is the amount of space each grid
-cell represents. Vector data is comprised of a set of geometries such
-as points, lines, or polygons that are georeferenced. Popular forms
-of georeferencing include latitude and longitude, zip codes, and street
-addresses.
-
-The implementations used in this thesis only deal with vector data,
-though the principles discussed can be applied to other data types.
+analysis and processing. 
 
 GIS analysis and simulation are used to understand and develop the
-environment around us. A common use of GIS data is found in the GPS
-based car navigation systems common today. City planners will use GIS
+environment around us. A common use of GIS data is found in the GPS based
+car navigation systems in common use today. City planners will use GIS
 data in applications such as population growth models, land use planning,
 and traffic management.
 
@@ -28,20 +18,18 @@ and traffic management.
 
 The amount of data to be processed increases as populations grow,
 communities become more complex, or the size of the processing area
-grows. In the year 2000, Maricopa County, Arizona, mapped 1.2 million
-parcels of land in its 9,224 square miles of land. Each parcel of
-land is represented as a georeferenced polygon along with various
-attribute data such as a unique parcel id, ownership information, and
-zoning codes. Parcels of land is just one layer of data that is kept
-for Maricopa County. Other layers include roadways, railways, rivers,
-schools, voting districts, etc.
+grows. In the year 2000, 1.2 million parcels of land were listed in the
+9,224 square miles of Maricopa County, Arizona. Each parcel of land is
+represented as a georeferenced polygon along with various attributes such
+as a parcel id, ownership information, and zoning codes. Parcels of land
+is just one set of data that is kept for Maricopa County. Other datasets
+include roadways, railways, rivers, schools, voting districts, etc.
 
-When the data required to complete some GIS processing grows beyond the
-memory available to a single processor, the processing method must be
-adapted to fit within that limitation. A common method is to not load
-the entire dataset into memory, but to read it off disk as needed and not
-keep what is not. This method works well if the data is only needed once,
-as reading from disk is slow.
+When the data required to complete GIS processing grows beyond the memory
+available to a single processor, the processing method must be adapted
+to fit within that limitation. A common method is to not load the entire
+dataset into memory, but to read it off disk as needed. This method
+works well if the data is only needed once, as reading from disk is slow.
 
 One application, which is looked at in more detail later, associates
 businesses with parcels of land (the data was geocoded differently). The
@@ -68,42 +56,44 @@ more effort is required to perform this processing in a reasonable time.
 
 \section{Parallel GIS Processing}
 
-Using multiple interconnected computers together to complete the required
-GIS processing allows for increased memory capabilities along with
-increased computation power. Processing algorithms must be reworked to
-allow for this collaboration between computers.
+Using multiple interconnected computers to complete the required GIS
+processing allows for increased memory capabilities along with increased
+computation power. Processing algorithms must be reworked to allow for
+this collaboration between computers.
 
 % Overview, full definitions in requirements section
 
-Programming for multiple machines is not the easiest of tasks. A common
-paradigm is Single Program, Multiple Data\cite{spmd} (SPMD), uses a
-single program that is run on all the computers included in the parallel
-computations where each instance of the program operates on different
-data, for example a different set of businesses. This paradigm simplifies
-parallel algorithm complexity while providing enough power to increase
-memory capability and computation power.
+Programming for multiple machines is not the easiest of tasks. A
+common paradigm for parallel programming is Single Program, Multiple
+Data\cite{spmd} (SPMD), which uses a single program that is run on all
+the computers included in the parallel computation where each instance
+of the program operates on different data, for example a different set of
+businesses. This paradigm simplifies parallel algorithm complexity while
+providing enough power to increase memory capability and computation
+power.
 
 % data distribution - record split, size split, geographically split - quads, by number of records, how to handle overlaps?
 
 The first step in working with an SPMD program is splitting the data. GIS
 data can be split in several different ways. The specific data splitting
-method used is dependent on what data is needed on what machine. As GIS
-vector data is based on a record that contains a geometry with associated
-attributes, one method that can be used is to evenly distribute the
-records among the participating machines. Another method takes into
-account the varying size of geometries in memory by splitting the data
-up by size while taking into account record boundaries. Another class of
-data distribution is to geographically split up the dataset, for instance
-into quadrants with each machine having responsibility for one or more
-quadrants. This method is more complicated in the setup required and the
-exceptions that need to be handled such as how to handle geometries that
-span more than one quadrant.
+method used is dependent on what data is needed on what machine. The data
+used in this thesis is a set of records; each record contains a geometry
+with its associated attributes. One method that can be used is to evenly
+distribute the records among the participating machines. Another method
+takes into account the varying size of geometries in memory by splitting
+the data up by size while taking into account record boundaries. Another
+class of data distribution is to geographically split up the dataset,
+for instance into quadrants with each machine having responsibility
+for one or more quadrants. This method is more complicated in the setup
+required and the exceptions that need to be handled such as how to handle
+geometries that span more than one quadrant.
 
 After the data is distributed, the processing methodology often needs
 to be adjusted because access to the full dataset at once is no longer
 possible. Combined with the data distribution, these two additions are
 needed for a parallel implementation, but not the serial case. This is
-the overhead required by the parallel case.
+the overhead required to take advantage of more than one computer to
+complete the processing.
 
 Parallel performance is measured through speedup:
 
@@ -113,15 +103,7 @@ Parallel performance is measured through speedup:
 \end{equation}
 
 which compares the execution time of the process on $n$ processors to
-the execution time on $1$ processor. Ideal speedup is $n$. The quality
-of speedup gained is efficiency:
-
-\begin{equation}
-\label{efficiency}
-\mbox{efficiency}(n) = \mbox{speedup}(n)/n
-\end{equation}
-
-Ideal efficiency is $1$.
+the execution time on $1$ processor. Ideal speedup is $n$.
 
 The scalability of a parallel solution can be seen by graphing speedup
 by number of processors used. The best realistic case is to have linear
@@ -133,24 +115,29 @@ of processing elements used.
 \section {Alternative Approaches to Parallel GIS Processing}
 
 % Thesis: implement and evaluate.
-This thesis implements and evaluates two parallel, dataset centric approaches
-to processing large geospatial datasets on clusters. The first approach,
-called HadoopGIS, uses the Hadoop\cite{hadoop} map/reduce framework. The
-second approach, ClusterGIS, uses the more traditional approach to programming
-for clusters, MPI. Both approaches provide the geospatial operations required
-by the Open Geospatial Consortium's Simple Features\cite{ogc-sfs} standard. By
-applying data parallel programming methods and dispensing with record centric
-processing methods, both these methods create a fairly easy environment to
-program in while providing significant speedup and scaleup.
+This thesis implements and evaluates two parallel, dataset centric
+approaches to processing large geospatial datasets on clusters with the
+intent of gaining insight into which approach is more suitable for GIS
+processing, and why. The first approach uses the map-reduce paradigm. The
+second uses message passing, which is currently the standard approach
+for programming clusters. This thesis uses existing implementations of
+both these paradigms, focusing instead on their applicability for GIS
+processing. Furthermore, the geospatial operations required to handle
+GIS processing have been distilled into libraries that conform to the
+Open Geospatial Consortium's Simple Features\cite{ogc-sfs} standard. By
+applying data parallel programming methods to GIS processing, both these
+approaches create a fairly easy environment to program in while providing
+significant speedup and scaleup.
 
 % Map/Reduce with Hadoop
 
-HadoopGIS adds GIS capabilities to the Hadoop map/reduce framework. Hadoop
-is based on Google's MapReduce\cite{mapreduce}. Map reduce defines a
-two-phase method to working with data. The first phase, map, applies
-a function to every record in a data set. The map function can output
-one or more key-value pairs. Map is an inherently parallel process,
-as no record is need to process any other record.
+The first approach, called hadoopGIS, uses the open source
+Hadoop map/reduce framework.  Hadoop is based on Google's
+MapReduce\cite{mapreduce}. Map reduce defines a two-phase method to
+working with data. The first phase, map, applies a function to every
+record in a data set. The map function can output one or more key-value
+pairs. Map is an inherently parallel process, as no record is need to
+process any other record.
 
 After the map phase, the generated key-value pairs are aggregated by
 key and passed to reduce processes, one reduce process per key. There
@@ -159,20 +146,21 @@ operations. Reduce operations are inherently serial, as the operation
 must have access to all the key-value pairs associated with the key
 being processed.
 
+HadoopGIS simply adds a GIS data type to Hadoop, thus enabling for GIS
+processing. Geospatial processing is provided through the Java Topology
+Suite\cite{jts} (JTS).
+
 % Traditional Cluster: MPI
 
-ClusterGIS is a library of functions based on MPI\cite{mpi} and
-the GEOS\cite{geos} library. MPI is a message passing interface
-standard that allows multiple computers to collaborate on solving a
-problem by passing messages between themselves. GEOS is an open source
-geometry engine that handles the geometric calculations required by GIS
-processing. The combination of MPI and GEOS creates a cluster based,
-parallel GIS processing environment.
+The second approach, called clusterGIS, uses the MPI\cite{mpi} message
+passing library.  Message passing works by creating a process, called
+a task, on each participating processor core. Each task operates
+independently and is assigned a unique address. Tasks can collaborate
+with each other by passing messages.
 
-MPI has become the standard way of programming for clusters. Because
-ClusterGIS harnesses the power of MPI, a wide variety of parallel
-algorithms and configurations can be made, while maintaining the ability
-to execute on most clusters.
+ClusterGIS is simply library of functions that employ MPI and the
+GEOS\cite{geos} library to handle common situations such as loading and
+saving data.
 
 % What has been done/what is lacking. What is needed to constitute a good
 % approach. Design of the two approaches. How to evaluate approaches.
