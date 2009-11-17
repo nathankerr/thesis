@@ -243,54 +243,101 @@ not modify an existing table, its results were stored into another table.
 Full SQL statements for each operation are listed below.
 
 \subsection{Create}
-\begin{lstlisting}[caption={PostGIS Create Operation},language=]
-$ \addcontentsline{toc}{listchapter}{\lstname} $
+
+The create operation for PostGIS as shown in listing \ref{postgis-create}
+is a simple SQL insert statement.
+
+\begin{lstlisting}[caption={PostGIS Create Operation},label={postgis-create},language=]
 insert into parcels values (97123897, ST_GeomFromText('POLYGON((-112.0859375 33.4349975585938,-112.0859375 33.4675445556641,-112.059799194336 33.4675445556641,-112.059799194336 33.4349975585938,-112.0859375 33.4349975585938))', 4326), 'C');
 \end{lstlisting}
 
-\subsection{Read}
-\begin{lstlisting}[caption={PostGIS Read Operation},language=]
-create table output as select * from parcels where id = 1008130;
-\end{lstlisting}
+The most complicated portion of this operation is creating the geometry
+type. PostGIS provides several functions that can create geometry types
+from text representations. The one used here, ST\_GeomFromText, creates
+a geometry from the standard Well Know Text format.
+
+\subsection{Read, Update, and Destroy}
+
+The read, update, and destroy operations use the basic SQL select,
+update, and delete statements. Listing \ref{postgis-update} shows the
+update operation which is representative of all three of these operations.
 
 \subsection{Update}
-\begin{lstlisting}[caption={PostGIS Update Operation},language=]
+\begin{lstlisting}[caption={PostGIS Update Operation},label={postgis-update},language=]
 update parcels set devtype = 'C' where id = 1008130;
 \end{lstlisting}
 
-\subsection{Destroy}
-\begin{lstlisting}[caption={PostGIS Destroy Operation},language=]
-delete from parcels where id = 1008130;
-\end{lstlisting}
-
 \subsection{Filter}
-\begin{lstlisting}[caption={PostGIS Filter Operation},language=]
+
+The Filter operation shown in Listing \ref{postgis-filter} is the first
+of these operations to take advantage of the processing capabilities of PostGIS.
+
+\begin{lstlisting}[caption={PostGIS Filter Operation},label={postgis-filter},language=]
 create table output as
 select parcels.* from parcels, (select ST_GeomFromText('POLYGON((-112.0859375 33.4349975585938,-112.0859375 33.4675445556641,-112.059799194336 33.4675445556641,-112.059799194336 33.4349975585938,-112.0859375 33.4349975585938))', 4326) as the_geom) as box
 where ST_Intersects(parcels.the_geom, box.the_geom);
 \end{lstlisting}
 
-\subsection{Nearest}
-\begin{lstlisting}[caption={PostGIS Nearest Operation},language=]
-create table output as
-select employers.id as employer_id, parcels.id as parcel_id
-from employers, parcels
-where parcels.devtype = employers.devtype
-and parcels.id in (
-        select id from parcels where devtype = employers.devtype order by distance(employers.the_geom, the_geom) limit 1
-);
+The operation returns all the records that intersect with a predefined
+geometry, in this case created using ST\_GeomFromText. ST\_Intersects
+was chosen to perform the intersection because it does not utilize the
+bounding box based index provided by PostGIS. As the operation is not
+influenced by that index, which can only be used for a few operations,
+this query is more representative of real-world conditions and more
+complicated filtering queries.
+
+\subsection{Nearest and Chaining}
+
+The chaining operation is defined as comparing all employers to all parcels except for those parcels with a residential land-use code. PostGIS automatically performs this optimization when the land-use code field is indexed, therefore the nearest and chained operations are equivalent.
+
+\begin{lstlisting}[caption={PostGIS Nearest and Chained Operations},label={postgis-chained},language=]
+begin;
+
+-- Figure out the distance to all applicable parcels
+create index jobs_devtype_index on jobs using btree ("devtype");
+create index parcels_devtype_index on parcels using btree ("devtype");
+create temp table distances on commit drop as
+select jobs.id as job_id, parcels.id as parcel_id, distance(jobs.the_geom, parcels.the_geom)
+from jobs, parcels
+where jobs.devtype = parcels.devtype;
+
+-- Find the distance to the closest parcel
+create temp table min on commit drop as
+select job_id, min(distance) as distance
+from distances
+group by job_id;
+
+-- Match the job to the closest parcels
+create index distances_distance_index on distances using btree ("distance");
+create index min_distance_index on min using btree ("distance");
+create temp table nearest on commit drop as 
+select distances.job_id, distances.parcel_id
+from distances, min
+where distances.job_id = min.job_id
+and distances.distance = min.distance;
+
+-- Only use unique job_id's 
+create index nearest_job_id_index on nearest using btree ("job_id");
+create table "jobs_parcels" as 
+select nearest.job_id, nearest.parcel_id
+from nearest
+where nearest.parcel_id = (select n.parcel_id from nearest as n where n.job_id = nearest.job_id limit 1);
+
+commit;
 \end{lstlisting}
 
-\subsection{Chaining}
-\begin{lstlisting}[caption={PostGIS Chained Operation},language=]
-create table output as
-select employers.id as employer_id, parcels.id as parcel_id
-from employers, parcels
-where employers.devtype <> 'R' and parcels.devtype = employers.devtype
-and parcels.id in (
-        select id from parcels where devtype = employers.devtype order by distance(employers.the_geom, the_geom) limit 1
-);
-\end{lstlisting}
+When developing this operation, it was hoped that a single
+nested query would be sufficient. Unfortunately the nested query
+performed significantly slower than the optimized query shown in Listing
+\ref{postgis-chained}. Indexes beyond the standard primary key index are
+created as part of this query.
+
+The first step in the query process is to create a distance table between
+every job and ever parcel with matching devtypes. The next step determines
+what the minimum distance is for each employer. The third step matches
+the previously found minimum distance with all the parcels that are
+that distance away. The final step reduces the number of parcels that
+are equidistant (using the minimum distance) from each employer to one.
 
 \section{HadoopGIS Implementation}
 
@@ -304,7 +351,8 @@ and altering the HDFS block size to produce the desired number of mappers.
 
 Core algorithm details are described below. In all cases the reduce
 function is an identity function where all input is passed through as
-output. Full listings are available in the appendix.
+output, therefore the including listings in this section display code that
+is part of the map function. Full listings are available in the appendix.
 
 \subsection{Create}
 
@@ -314,9 +362,9 @@ records. Since it was not possible to add a record to the output
 dataset without relying on some input, like is possible for PostGIS and
 clusterGIS, this operation creates the new record when triggered by a
 record that already exists in the dataset. The resulting map function
-is as follows:
+is shown in Listing \ref{hadoopgis-create}.
 
-\begin{lstlisting}[caption={HadoopGIS Create Operation},language=]
+\begin{lstlisting}[caption={HadoopGIS Create Operation},label={hadoopgis-create},language=]
 if(key == 1008130) {
         GIS created = new GIS();
         GIS.update("\"97123897\",\"POLYGON((-112.0859375 33.4349975585938,-112.0859375 33.4675445556641,-112.059799194336 33.4675445556641,-112.059799194336 33.4349975585938,-112.0859375 33.4349975585938))\",\"C\"");
@@ -325,42 +373,35 @@ if(key == 1008130) {
 output.collect(key, value);
 \end{lstlisting}
 
-\subsection{Read}
-\begin{lstlisting}[caption={HadoopGIS Read Operation},language=]
-if(key.equals(new LongWritable(1008130))) {
-        output.collect(key, value);
-}
-\end{lstlisting}
+\subsection{Read, Update, and Destroy}
+
+The read, update, and destroy operations are very similar. Listing \ref{hadoopgis-update} shows the simplicity of the update operation. All three operations use a little bit of logic to determine if a record is passed onto the reduce phase. The read operation only keeps the requested record; update modifies a specific record before passing it on, and destroy passes on all the records except for the one specified.
 
 \subsection{Update}
-\begin{lstlisting}[caption={HadoopGIS Update Operation},language=]
+\begin{lstlisting}[caption={HadoopGIS Update Operation},label={hadoopgis-update},language=]
 if(key.equals(new LongWritable(1008130))) {
         value.attributes.put("devtype", "C");
 }
 output.collect(key, value);
 \end{lstlisting}
 
-\subsection{Destroy}
-\begin{lstlisting}[caption={HadoopGIS Destroy Operation},language=]
-if(!key.equals(new LongWritable(1008130))) {
-        output.collect(key, value);
-}
-\end{lstlisting}
-
 \subsection{Filter}
 
-To keep from recreating the geometry filtered against, the geometry is
-created in the configure method which is ran at the creation of the
-mapper. It is made available as a Geometry object named box and used
-as follows:
+The filter operation works in a similar manner as the read, update,
+and destroy operations as shown in Listing \ref{hadoopgis-filter}.
 
-\begin{lstlisting}[caption={HadoopGIS Filter Operation},language=]
+\begin{lstlisting}[caption={HadoopGIS Filter Operation},label={hadoopgis-filter},language=]
 if(value.geometry.intersects(box)) {
         output.collect(key, value);
 }
 \end{lstlisting}
 
-\subsection{Nearest}
+The intersects function requires a geometry. To keep from recreating
+the geometry filtered against, the geometry is created in the configure
+method which is ran at the creation of the mapper, and therefore is only
+referenced in the map function.
+
+\subsection{Nearest and Chaining}
 
 The nearest operation uses the employers dataset as input for the map
 functions. As the operations compares every employer against every parcel,
@@ -373,9 +414,10 @@ of mappers that can be ran on a single machine and the maximum size of
 the parcel dataset. The clusterGIS implementation presents a solution
 for this problem that is possible in MPI but not Hadoop.
 
-Even with that problem, the resulting map function is quite simple:
+Even with that problem, the resulting map function is quite simple as
+shown in Listing \ref{hadoopgis-nearest}.
 
-\begin{lstlisting}[caption={HadoopGIS Nearest Operation},language=]
+\begin{lstlisting}[caption={HadoopGIS Nearest Operation},label={hadoopgis-nearest},language=]
 double minDistance = Double.MAX_VALUE, currDistance;
 int closestParcel = -1;
 
@@ -396,34 +438,14 @@ LongWritable lngClosestParcel = new LongWritable (closestParcel);
 output.collect(key, lngClosestParcel);
 \end{lstlisting}
 
-\subsection{Chaining}
+The map function uses a simple algorithm to find the minimum distance
+to a parcel and then outputs the id of both the employer and the parcel.
 
 The chaining operation reduces the memory problems encountered in the
 nearest operation implementation by removing all residential parcels. This
 optimization works for this specific problem but cannot be generally
-applied. As the parcel dataset loading is done in the configure method,
-there is no change to the map function:
-
-\begin{lstlisting}[caption={HadoopGIS Chained Operation},language=]
-double minDistance = Double.MAX_VALUE, currDistance;
-int closestParcel = -1;
-
-Iterator it = parcels.iterator();
-while (it.hasNext())
-{
-        GIS parcel = (GIS) it.next();
-
-        currDistance = value.geometry.distance(parcel.geometry);
-        if (currDistance < minDistance)
-        {
-                minDistance = currDistance;
-                closestParcel = new Integer(parcel.attributes.get("id"));
-        }
-}
-
-LongWritable lngClosestParcel = new LongWritable (closestParcel);
-output.collect(key, lngClosestParcel);
-\end{lstlisting}
+applied. As this optimization is applied during the mapper's configure
+function, the algorithm used to find the nearest parcel does not change.
 
 \section{ClusterGIS Implementation}
 \lstset{language=C}
@@ -455,12 +477,12 @@ if(rank == 0) {
 }
 \end{lstlisting}
 
-\subsection{Read}
+\subsection{Read, Destroy}
 
-The hardest part of the read operation is removing records from the
-dataset. This example shows how to accomplish this.
+The read and destroy operations are implemented in a similar manner. Listing \ref{clustergis-read}
+shows the main portion of the read operation.
 
-\begin{lstlisting}[caption={ClusterGIS Read Operation},language=]
+\begin{lstlisting}[caption={ClusterGIS Read Operation},label={clustergis-read},language=]
 record = dataset->data;
 head = &(dataset->data);
 /* keep records that match the criteria, otherwise delete them */
@@ -476,8 +498,26 @@ while(record != NULL) {
 }
 \end{lstlisting}
 
+This implementation looks more complicated than the corresponding
+hadoopGIS operations, but performs the same processing. ClusterGIS
+provides all the records in a dataset as a linked list, which is not
+as pretty to manipulate as the Java container objects.
+
+This code loops through each record in the linked list. The record
+variable points to the current record. The head variable points to the
+pointer in the previous record that points to the current record. To keep
+a record, such as is done in the then block of the if statement, it is
+only necessary to update these variable to the next record. To delete
+a record, head is set to point to the next record and then the current
+record is deleted from memory. Record is then advanced to the next record.
+
 \subsection{Update}
-\begin{lstlisting}[caption={ClusterGIS Update Operation},language=]
+
+The update operation as shown in Listing \ref{clustergis-update} shows
+the simplest way to loop through a linked list. Each record is checked
+to see if it matches the criteria, and then the record is updated.
+
+\begin{lstlisting}[caption={ClusterGIS Update Operation},label={clustergis-update},language=]
 record = dataset->data;
 /* keep records that match the criteria, otherwise delete them */
 while(record != NULL) {
@@ -488,24 +528,10 @@ while(record != NULL) {
 }
 \end{lstlisting}
 
-\subsection{Destroy}
-\begin{lstlisting}[caption={ClusterGIS Destroy Operation},language=]
-record = dataset->data;
-head = &(dataset->data);
-/* keep records that match the criteria, otherwise delete them */
-while(record != NULL) {
-        if(atoi(record->data[0]) == 1008130) {
-                *head = record->next;
-                clusterGIS_Free_record(record);
-                record = *head;
-        } else {
-                head = &(record->next);
-                record = record->next;
-        }
-}
-\end{lstlisting}
-
 \subsection{Filter}
+
+The filter operation as shown in Listing \ref{clustergis-filter}
+
 \begin{lstlisting}[caption={ClusterGIS Filter Operation},language=]
 box = GEOSWKTReader_read(reader, "POLYGON((-112.0859375 33.4349975585938,-112.0859375 33.4675445556641,-112.059799194336 33.4675445556641,-112.059799194336 33.4349975585938,-112.0859375 33.4349975585938))");
 
@@ -514,12 +540,6 @@ head = &(dataset->data);
 /* keep records that match the criteria, otherwise delete them */
 while(record != NULL) {
         char intersects;
-
-        /*record_geometry = GEOSWKTReader_read(reader, record->data[1]);
-        if(record_geometry == NULL) {
-                fprintf(stderr, "%d: parse error\n", rank);
-                MPI_Abort(MPI_COMM_WORLD, 2);
-        }*/
 
         intersects = GEOSIntersects(record->geometry, box);
         if(intersects == 2) {
