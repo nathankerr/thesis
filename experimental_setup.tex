@@ -243,34 +243,35 @@ not modify an existing table, its results were stored into another table.
 Full SQL statements for each operation are listed below.
 
 \subsection{Create}
-\begin{lstlisting}[language=]
+\begin{lstlisting}[caption={PostGIS Create Operation},language=]
+$ \addcontentsline{toc}{listchapter}{\lstname} $
 insert into parcels values (97123897, ST_GeomFromText('POLYGON((-112.0859375 33.4349975585938,-112.0859375 33.4675445556641,-112.059799194336 33.4675445556641,-112.059799194336 33.4349975585938,-112.0859375 33.4349975585938))', 4326), 'C');
 \end{lstlisting}
 
 \subsection{Read}
-\begin{lstlisting}[language=]
+\begin{lstlisting}[caption={PostGIS Read Operation},language=]
 create table output as select * from parcels where id = 1008130;
 \end{lstlisting}
 
 \subsection{Update}
-\begin{lstlisting}[language=]
+\begin{lstlisting}[caption={PostGIS Update Operation},language=]
 update parcels set devtype = 'C' where id = 1008130;
 \end{lstlisting}
 
 \subsection{Destroy}
-\begin{lstlisting}[language=]
+\begin{lstlisting}[caption={PostGIS Destroy Operation},language=]
 delete from parcels where id = 1008130;
 \end{lstlisting}
 
 \subsection{Filter}
-\begin{lstlisting}[language=]
+\begin{lstlisting}[caption={PostGIS Filter Operation},language=]
 create table output as
 select parcels.* from parcels, (select ST_GeomFromText('POLYGON((-112.0859375 33.4349975585938,-112.0859375 33.4675445556641,-112.059799194336 33.4675445556641,-112.059799194336 33.4349975585938,-112.0859375 33.4349975585938))', 4326) as the_geom) as box
 where ST_Intersects(parcels.the_geom, box.the_geom);
 \end{lstlisting}
 
 \subsection{Nearest}
-\begin{lstlisting}[language=]
+\begin{lstlisting}[caption={PostGIS Nearest Operation},language=]
 create table output as
 select employers.id as employer_id, parcels.id as parcel_id
 from employers, parcels
@@ -281,7 +282,7 @@ and parcels.id in (
 \end{lstlisting}
 
 \subsection{Chaining}
-\begin{lstlisting}[language=]
+\begin{lstlisting}[caption={PostGIS Chained Operation},language=]
 create table output as
 select employers.id as employer_id, parcels.id as parcel_id
 from employers, parcels
@@ -315,7 +316,7 @@ clusterGIS, this operation creates the new record when triggered by a
 record that already exists in the dataset. The resulting map function
 is as follows:
 
-\begin{lstlisting}[language=]
+\begin{lstlisting}[caption={HadoopGIS Create Operation},language=]
 if(key == 1008130) {
         GIS created = new GIS();
         GIS.update("\"97123897\",\"POLYGON((-112.0859375 33.4349975585938,-112.0859375 33.4675445556641,-112.059799194336 33.4675445556641,-112.059799194336 33.4349975585938,-112.0859375 33.4349975585938))\",\"C\"");
@@ -325,14 +326,14 @@ output.collect(key, value);
 \end{lstlisting}
 
 \subsection{Read}
-\begin{lstlisting}[language=]
+\begin{lstlisting}[caption={HadoopGIS Read Operation},language=]
 if(key.equals(new LongWritable(1008130))) {
         output.collect(key, value);
 }
 \end{lstlisting}
 
 \subsection{Update}
-\begin{lstlisting}[language=]
+\begin{lstlisting}[caption={HadoopGIS Update Operation},language=]
 if(key.equals(new LongWritable(1008130))) {
         value.attributes.put("devtype", "C");
 }
@@ -340,7 +341,7 @@ output.collect(key, value);
 \end{lstlisting}
 
 \subsection{Destroy}
-\begin{lstlisting}[language=]
+\begin{lstlisting}[caption={HadoopGIS Destroy Operation},language=]
 if(!key.equals(new LongWritable(1008130))) {
         output.collect(key, value);
 }
@@ -353,7 +354,7 @@ created in the configure method which is ran at the creation of the
 mapper. It is made available as a Geometry object named box and used
 as follows:
 
-\begin{lstlisting}[language=]
+\begin{lstlisting}[caption={HadoopGIS Filter Operation},language=]
 if(value.geometry.intersects(box)) {
         output.collect(key, value);
 }
@@ -374,7 +375,7 @@ for this problem that is possible in MPI but not Hadoop.
 
 Even with that problem, the resulting map function is quite simple:
 
-\begin{lstlisting}[language=]
+\begin{lstlisting}[caption={HadoopGIS Nearest Operation},language=]
 double minDistance = Double.MAX_VALUE, currDistance;
 int closestParcel = -1;
 
@@ -403,7 +404,7 @@ optimization works for this specific problem but cannot be generally
 applied. As the parcel dataset loading is done in the configure method,
 there is no change to the map function:
 
-\begin{lstlisting}[language=]
+\begin{lstlisting}[caption={HadoopGIS Chained Operation},language=]
 double minDistance = Double.MAX_VALUE, currDistance;
 int closestParcel = -1;
 
@@ -445,7 +446,7 @@ record using a helper function provided by clusterGIS and then inserts
 it into its local dataset. When the dataset is written collectively,
 the new record is included.
 
-\begin{lstlisting}[language=]
+\begin{lstlisting}[caption={ClusterGIS Create Operation},language=]
 if(rank == 0) {
         int start = 0;
         record = clusterGIS_Create_record_from_csv("97123897,POINT(0 0),C\n", &start);
@@ -459,7 +460,7 @@ if(rank == 0) {
 The hardest part of the read operation is removing records from the
 dataset. This example shows how to accomplish this.
 
-\begin{lstlisting}[language=]
+\begin{lstlisting}[caption={ClusterGIS Read Operation},language=]
 record = dataset->data;
 head = &(dataset->data);
 /* keep records that match the criteria, otherwise delete them */
@@ -476,7 +477,7 @@ while(record != NULL) {
 \end{lstlisting}
 
 \subsection{Update}
-\begin{lstlisting}[language=]
+\begin{lstlisting}[caption={ClusterGIS Update Operation},language=]
 record = dataset->data;
 /* keep records that match the criteria, otherwise delete them */
 while(record != NULL) {
@@ -488,7 +489,7 @@ while(record != NULL) {
 \end{lstlisting}
 
 \subsection{Destroy}
-\begin{lstlisting}[language=]
+\begin{lstlisting}[caption={ClusterGIS Destroy Operation},language=]
 record = dataset->data;
 head = &(dataset->data);
 /* keep records that match the criteria, otherwise delete them */
@@ -505,7 +506,7 @@ while(record != NULL) {
 \end{lstlisting}
 
 \subsection{Filter}
-\begin{lstlisting}[language=]
+\begin{lstlisting}[caption={ClusterGIS Filter Operation},language=]
 box = GEOSWKTReader_read(reader, "POLYGON((-112.0859375 33.4349975585938,-112.0859375 33.4675445556641,-112.059799194336 33.4675445556641,-112.059799194336 33.4349975585938,-112.0859375 33.4349975585938))");
 
 record = dataset->data;
@@ -551,7 +552,7 @@ employers then talk amongst themselves to determine the globally nearest
 parcel. This communication is done through MPI's reduce mechanism. The
 employer id now associated parcel id are added to the output dataset.
 
-\begin{lstlisting}[language=]
+\begin{lstlisting}[caption={ClusterGIS Nearest Operation},language=]
 /* Find the min distance */
 employer = employers->data;
 min = malloc(sizeof(double)*2);
@@ -597,7 +598,7 @@ The chaining operation works in a similar manner to the nearest operation
 except that it filters out all residential parcels before searching for
 the nearest parcel.
 
-\begin{lstlisting}[language=]
+\begin{lstlisting}[caption={ClusterGIS Chaining Operation},language=]
 /* remove all residential parcels */
 parcel = parcels->data;
 head = &(parcels->data);
