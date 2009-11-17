@@ -1,7 +1,7 @@
 \chapter{DESIGN}
 
 To discover the differences between using message passing and map reduce
-as methods for parallel GIS processing, this thesis implements two
+as approaches for parallel GIS processing, this thesis implements two
 environments for manipulating GIS data. The first approach, hadoopGIS,
 is based the Hadoop map-reduce framework. The second, clusterGIS,
 uses MPI. Both implementations build on these existing technologies
@@ -17,49 +17,11 @@ one on each line. ClusterGIS just uses column numbers.
 
 \section{HadoopGIS}
 
-Hadoop\cite{hadoop} is an open source map-reduce framework developed
-in Java. The Java Topology Suite (JTS)\cite{jts} is used for geospatial
-processing.
-
-Map reduce is basically a two phase solution for parallel computing. The
-first phase applies a function, map, to each record in the input
-dataset. This phase is inherently parallel as each call to map is
-completely independent, requiring no more data than just the record that
-only it is responsible for. The second phase, reduce, is inherently
-not parallel. Some parallelization is given by Hadoop in this phase
-by limiting a reduce function from seeing all the data produced by the
-map function to only the data produced with the same key (each output
-being in the form of a key-value pair). Because of this limitation,
-reduce has some parallelism, but much much less than in map.
-
-Hadoop itself is comprised of two major parts: a distributed filesystem,
-and a parallel execution engine. The filesystem, Hadoop Distributed
-Filesystem (HDFS), splits files into blocks which are then spread among
-the participating computers. Blocks can be automatically replicated,
-such that the loss of any participating computer will not cause data
-loss. The execution engine is friendly with HDFS, in that it knows where
-file blocks, and there replicas, are located and can place computation on
-the same computer that contains the data. The idea here is that data is
-larger than the program and that therefore moving the program to the data
-will improve efficiency. Hadoop may also start additional computation
-tasks that replication the computation being done elsewhere on one of
-the replicated blocks.
-
-Basic Hadoop programs require three parts. The first part is some startup
-code that tells Hadoop which input files to use, and which map and reduce
-functions to execute.  The Hadoop environment will look at the inputs
-and decide on the number of mappers to create. Each mapper is responsible
-for channeling the data from a file block to the map function, and then
-taking that output and passing it onto the reducers. The number of mappers
-used is based on two criteria. Each file will get a mapper. If a file
-consists of more than one block of data, a mapper will be created for
-each additional block. This process is meant to be done automatically,
-but has real-world effects on program performance.
-
-The main idea on integrating GIS processing into Hadoop was to create
-a GIS datatype that could pass through the map and reduce phases like
-any other Hadoop datatype. In practical terms there are three boundaries
-where more work was required than just create a plain old java object.
+HadoopGIS provides a Hadoop native GIS datatype. This allows for GIS data
+to be used in Hadoop just like any other supported format. Geospatial
+processing support is provided through the Java Topology Suite\cite{jts}
+(JTS). Adding a new datatype to the Hadoop environment required overcoming
+three data transfer boundaries: file to map, map to reduce, and reduce to file.
 
 The first gap to overcome is getting data into the mappers. Hadoop
 uses two classes in addition to the core GIS class to load data
@@ -92,13 +54,13 @@ standard geospatial operations. All of this is done for the user by them
 stating that the input data should use the GISInputFormat and outputted
 data uses the GISOutputFormat.
 
-This enhancement does not solve one of Hadoop's problems. That is the
-use of a secondary dataset. The map function only is provided with one
-record. The framework expects most computation that requires access to
-more than just one record to be accomplished in the reduce phase. There is
-provision, however, to load extra data when a mapper is created. These
-limitation will be discussed further in the experimental setup and
-results section of this thesis.
+This enhancement does not address Hadoop's architecture. This means the
+use of a secondary dataset is still problematic. The map function only
+is provided with one record. The framework expects most computation that
+requires access to more than just one record to be accomplished in the
+reduce phase. There is provision, however, to load extra data when a
+mapper is created. These limitation will be discussed further in the
+experimental setup and results section of this thesis.
 
 \section{ClusterGIS}
 

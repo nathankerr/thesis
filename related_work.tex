@@ -211,18 +211,40 @@ tasks are then ran on one of the computers that has the block of data it
 needs. The blocking used to spread files on the distributed file system
 are also used as the basis for parallelizing the map reduce process.
 
-The map reduce process works in two phases, map and reduce. In the map
-phase the input data is split, usually automatically, into records. Each
-record is processed individually by the map function.  The map function
-takes a record as input and outputs zero or more key-value pairs. The
-map process is inherently parallel and is executed where a copy of the
-data is (the program is moved to the data).
+Map reduce is basically a two phase solution for parallel computing. The
+first phase applies a function, map, to each record in the input
+dataset. This phase is inherently parallel as each call to map is
+completely independent, requiring no more data than just the record that
+only it is responsible for. The second phase, reduce, is inherently
+not parallel. Some parallelization is given by Hadoop in this phase
+by limiting a reduce function from seeing all the data produced by the
+map function to only the data produced with the same key (each output
+being in the form of a key-value pair). Because of this limitation,
+reduce has some parallelism, but much much less than in map.
 
-The resulting key-value pairs are aggregated by the map reduce framework
-by key and passed to the reduce function, which has access to all the
-key-value pairs associated with its key. The reduce function then outputs
-zero or more key-value pairs, which are the output of the entire map
-reduce job.
+Hadoop itself is comprised of two major parts: a distributed filesystem,
+and a parallel execution engine. The filesystem, Hadoop Distributed
+Filesystem (HDFS), splits files into blocks which are then spread among
+the participating computers. Blocks can be automatically replicated,
+such that the loss of any participating computer will not cause data
+loss. The execution engine is friendly with HDFS, in that it knows where
+file blocks, and there replicas, are located and can place computation on
+the same computer that contains the data. The idea here is that data is
+larger than the program and that therefore moving the program to the data
+will improve efficiency. Hadoop may also start additional computation
+tasks that replication the computation being done elsewhere on one of
+the replicated blocks.
+
+Basic Hadoop programs require three parts. The first part is some startup
+code that tells Hadoop which input files to use, and which map and reduce
+functions to execute.  The Hadoop environment will look at the inputs
+and decide on the number of mappers to create. Each mapper is responsible
+for channeling the data from a file block to the map function, and then
+taking that output and passing it onto the reducers. The number of mappers
+used is based on two criteria. Each file will get a mapper. If a file
+consists of more than one block of data, a mapper will be created for
+each additional block. This process is meant to be done automatically,
+but has real-world effects on program performance.
 
 \section{Parallel GIS Processing}
 

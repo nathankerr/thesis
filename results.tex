@@ -18,6 +18,7 @@ As performance characteristics were clustered in this manner, the create operati
 
 % TODO: Fix time for hadoop
 \begin{table}
+\label{create-time}
 \begin{center}
 \begin{tabular}{lcc}
 Implementation & Time (seconds) & Processor Cores\\
@@ -27,14 +28,13 @@ hadoopGIS & 4 & 0\\
 clusterGIS & 6.160 & 128\\
 \end{tabular}
 \caption{Fastest Execution Time for Create Operation}
-\label{create-time}
 \end{center}
 \end{table}
 
 \begin{figure}
-        \label{create-speedup}
-        \caption{Create Speedup}
-        \includegraphics{create-speedup.eps}
+\label{create-speedup}
+\includegraphics{create-speedup.eps}
+\caption{Create Speedup}
 \end{figure}
 
 The create operation inserts a record into a dataset. In the case of PostGIS, an existing dataset is mutated to include the new record. HadoopGIS and clusterGIS, as they work on the dataset level, each create a new dataset including all the records from the original dataset and the new record.
@@ -53,6 +53,7 @@ As was expected, PostGIS is able to outperform hadoopGIS and clusterGIS in creat
 
 % TODO: Fix time for hadoop
 \begin{table}
+\label{read-time}
 \begin{center}
 \begin{tabular}{lcc}
 Implementation & Time (seconds) & Processor Cores\\
@@ -62,14 +63,13 @@ hadoopGIS & 4 & 0\\
 clusterGIS & 2.015 & 16\\
 \end{tabular}
 \caption{Fastest Execution Time for Read Operation}
-\label{read-time}
 \end{center}
 \end{table}
 
 \begin{figure}
-        \label{read}
-        \caption{Read Speedup}
+        \label{read-speedup}
         \includegraphics{read.eps}
+        \caption{Read Speedup}
 \end{figure}
 
 The read operation is similar to the create operation for the parallel implementations in that the entire dataset must be read in. The difference is that only one record must be written to disk. PostGIS is able to use an index to quickly locate the requested record and then read just that data from disk and then output it to a new table. Table \ref{read-time} shows PostGIS to still be the fastest, as compared to the create operation, but that the parallel implementations are significantly faster even with the increased computation requirement of checking every single record to see if it was the record.
@@ -88,6 +88,7 @@ A scaling issue in hadoopGIS for the second dataset was encountered while runnin
 
 % TODO: Fix time for postgis, hadoop
 \begin{table}
+\label{filter-time}
 \begin{center}
 \begin{tabular}{lcc}
 Implementation & Time (seconds) & Processor Cores\\
@@ -97,14 +98,13 @@ hadoopGIS & 4 & 0\\
 clusterGIS & 2.957 & 128\\
 \end{tabular}
 \caption{Fastest Execution Time for Filter Operation}
-\label{filter-time}
 \end{center}
 \end{table}
 
 \begin{figure}
-	\label{filter}
-	\caption{Filter Speedup}
+	\label{filter-speedup}
 	\includegraphics{filter.eps}
+	\caption{Filter Speedup}
 \end{figure}
 
 The algorithms used for the filter operation are quite similar to those used in the read operation, but that instead of doing a simple comparison of record ids, a geometric computation is required. The intersection operation was chosen to represent any generic geometric operation in that it cannot utilize indexes currently available in PostGIS.
@@ -117,8 +117,9 @@ As more computation is required to process each record, the parallel implementat
 
 \subsection{Chained}
 
-% TODO: Fix time for postgis, hadoop (used number from clovertown run)
+% TODO: Fix time for hadoop (used number from clovertown run)
 \begin{table}
+\label{chained-time}
 \begin{center}
 \begin{tabular}{lcc}
 Implementation & Time (seconds) & Processor Cores\\
@@ -128,14 +129,13 @@ hadoopGIS & 87621.129 & 0\\
 clusterGIS & 41.995 & 1024\\
 \end{tabular}
 \caption{Fastest Execution Time for Chained Operation}
-\label{chained-time}
 \end{center}
 \end{table}
 
 \begin{figure}
-	\label{chained}
-	\caption{Chained Speedup}
+	\label{chained-speedup}
 	\includegraphics{chained.eps}
+	\caption{Chained Speedup}
 \end{figure}
 
 Finding the nearest parcel for each employer is a fairly normal GIS question to ask. The fastest execution times shown in table \ref{chained-time}, however, show significant differences in the capabilities of each implementation. ClusterGIS by far outperforms the other implementations.
