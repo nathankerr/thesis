@@ -17,7 +17,18 @@
 \clearpage
 \appendixchapter{HADOOPGIS SOURCE}
 
+The complete source for hadoopGIS is included in this appendix. HadoopGIS
+is also available at \url{http://github.com/nathankerr/hadoopGIS}.
+
+The source is divided into two sections, the core code and the examples.
+
 \section{Core}
+
+These listings comprise the core components of hadoopGIS, implementing
+the GIS datatype and the facilities to extract GIS records from a file
+into the mapper, pass GIS data from mappers to reducers, and from reducers
+back to a file.
+
 \subsection{GIS.java}
 \lstinputlisting[nolol,language=]{hadoopGIS/src/GIS.java}
 \subsection{GISInputFormat.java}
@@ -30,6 +41,10 @@
 \lstinputlisting[nolol,language=]{hadoopGIS/src/GISRecordWriter.java}
 
 \section{Operations}
+
+These listings are the complete code for the required operations. Each
+operation is contained in one source file.
+
 \subsection{Create}
 \lstinputlisting[nolol,language=]{hadoopGIS/src/examples/create.java}
 \subsection{Read}
@@ -47,13 +62,28 @@
 
 \clearpage
 \chapter{CLUSTERGIS SOURCE}
+
+The complete source for clusterGIS is included in this appendix. ClusterGIS
+is also available at \url{http://github.com/nathankerr/clusterGIS}.
+
+The clusterGIS listings are comprised of two sections: the library and
+the example implementations.
+
 \section{Library}
+
+The core clusterGIS library is contained in clustergis.c. To use
+clusterGIS, include clusterGIS.h in your processing implementation and
+link clusterGIS with your code.
+
 \subsection{clustergis.h}
 \lstinputlisting[nolol,language=]{clusterGIS/src/clustergis.h}
 \subsection{clustergis.c}
 \lstinputlisting[nolol,language=]{clusterGIS/src/clustergis.c}
 
 \section{Operations}
+
+These listings implement the operations used for this thesis.
+
 \subsection{Create}
 \lstinputlisting[nolol,language=]{clusterGIS/examples/create.c}
 \subsection{Read}
