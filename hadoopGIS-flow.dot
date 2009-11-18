@@ -1,0 +1,9 @@
+digraph {
+	HDFS -> input [label="CSV"];
+	input [label="GISInputFormat/GISRecordReader"];
+	input -> Mapper [label="GIS"];
+	Mapper -> Reducer [label="GIS via Writable"];
+	Reducer -> output [label="GIS"];
+	output [label="GISOutputFormat/GISRecordWriter"];
+	output -> HDFS [label="CSV"];
+}

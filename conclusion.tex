@@ -18,7 +18,12 @@ Dataset centric operations were performed more quickly by the parallel implement
 
 In terms of usability, PostGIS had the shortest implementations, with the next largest being clusterGIS and then hadoopGIS. PostGIS uses SQL and a relational database, both of which require specialized skills to utilize effectively. Though simple SQL statements can be written, getting performance out of the database requires knowledge of indexes and processing paths. Both hadoopGIS and clusterGIS are more explicit in how the processing is done, and therefore it is easier to see what is being done. ClusterGIS is more flexible is how processing can be accomplished, allowing for easier handling of additional datasets processing methods. HadoopGIS provides a fairly easy to understand processing method, but lacks the ability to work in ways that are not provided for in that processing method. The main example of this is its inability to scale on the secondary dataset as using a secondary dataset is not provided for in the map reduce paradigm.
 
-HadoopGIS and clusterGIS show that parallel GIS processing is possible and can afford significant decreases in processing time while using simple algorithms in cases where one or more datasets must be processed in their entirety. More sophisticated algorithms could be developed to provide greater benefits.
+HadoopGIS and clusterGIS show that parallel GIS processing is possible
+and can afford significant decreases in processing time while using
+simple algorithms in cases where one or more datasets must be processed
+in their entirety. ClusterGIS is more flexible, but the basic operation
+cases remain simple. More sophisticated algorithms could be developed
+to provide greater benefits.
 
 \section{Future Work}
 

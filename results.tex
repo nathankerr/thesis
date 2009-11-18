@@ -188,11 +188,13 @@ While 2.2GB of RAM is not really that much, the computers used have a total of 1
 
 While it is possible to read in the entire parcel dataset for each map function, this is much slower due to the slow speed of disk as compared to memory. Another possible method to reduce memory usage, and thus increase the compute capabilities in this computation bound operation would be to read in the parcel data in chunks, finding local minimum distances for each employer in that chunk and then processing the next chunk and so on. This method could only be performed using the map-reduce paradigm by running multiple map-reduce processes. The first process would split the parcel dataset into manageable chunks, after which a process for each chunk would find local minimum for that chunk, and then a final process would reduce the local minimums to a global minimum. Such a process is possible to implement, but is somewhat unwieldily.
 
-The next problem is due to the size of the employers dataset. When hadoopGIS uses 1024 cores, it needs to split the 2MB file into 1024 parts. ClusterGIS is able to split it into 128 parts due to its design that also splits up the parcels dataset which places the same employers on 8 different processors. Besides scaling the parcels dataset, clusterGIS can continue using a smaller primary dataset and maintain the ability to use more resources.
+The next problem is due to the size of the employers dataset. When hadoopGIS tries to use 1024 cores, it needs to split the 2MB file into 1024 parts. HadoopGIS fails under this condition for anything greater than 128 cores. ClusterGIS is able to split it into 128 parts due to its design that also splits up the parcels dataset which places the same employers on 8 different processors. Besides scaling the parcels dataset, clusterGIS can continue using a smaller primary dataset and maintain the ability to use more resources.
 
 The clusterGIS solution to this same scaling problem is to modify how the data is split. The implementation used creates blocks of eight MPI tasks. Each block has a full copy of the parcel dataset, with each task in the block having just a portion. Instead of dividing the employer dataset between all the tasks, the tasks in each block contain the same set of employers. The block size is tunable such that the block size can be adjusted allowing for a specific implementation to be optimized for memory usage and problem granularity. This implementation was not tuned for optimal performance, but for explainability in that each computer has a full copy of the parcel dataset and a subset of the employers where each task has the same employers.
 
 The speedup shown in figure \ref{chained-speedup} for clusterGIS is nearly linear for most of its run. The speedup starts to drop off starting at 256 cores, probably due to the small size of the employer dataset. At 1024 cores the employer dataset's 34,000 records are split into 128 sections. The increased work to split and the recombine the dataset starts to affect the granularity of the problem at that scale. A larger employer dataset or more computation per record would increase the number of cores required before this effect would be noticed. The performance is still impressive, converting each hour of execution time used by PostGIS into less than one second.
+
+The speedup line for hadoopGIS is also very good, showing a linear speedup, at least in the cases that hadoopGIS is able to complete execution of this operation. Please remember that the single node execution time upon which speedup is calculated was estimated by assuming the 16 core case operated at 60\% efficiency.
 
 \begin{figure}
 	\label{chained-speedup}
@@ -200,9 +202,15 @@ The speedup shown in figure \ref{chained-speedup} for clusterGIS is nearly linea
 	\caption{Chained Speedup}
 \end{figure}
 
-Though hadoopGIS experiences a severe limitation on the size of the parcel dataset, it is also able to produce results more quickly than PostGIS while having a reasonable speedup line.
+Though hadoopGIS experiences a severe limitation on the size of the
+parcel dataset, it is able to produce results more quickly than
+PostGIS while having a reasonable speedup line. The small size of the
+employer's dataset also limited the number of resources that could be
+used.
 
 As was expected, the parallel implementations are able to outperform PostGIS. Of the two, clusterGIS is able to scale computation capabilities along with the size of both datasets.
+
+ClusterGIS is more flexible and easier to work with than hadoopGIS. However, if the processing operations fit into the type of operations that Hadoop works well with, then hadoopGIS is a reasonable choice.
 
 \section{Usability}
 

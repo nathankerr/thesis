@@ -1,0 +1,30 @@
+digraph {
+	subgraph cluster0 {
+		color=black;
+		label = "Task #0";
+		load0 -> process0 [label="dataset"];
+		process0 -> write0 [label="dataset"];
+		
+		load0 [label="load_distributed"];
+		process0 [label="processing"];
+		write0 [label="write_distributed"];
+	}
+	subgraph cluster1 {
+		color=black;
+		label = "Task #1";
+		load1 -> process1 [label="dataset"];
+		process1 -> write1 [label="dataset"];
+		
+		load1 [label="load_distributed"];
+		process1 [label="processing"];
+		write1 [label="write_distributed"];
+	}
+
+	process0 -> process1 [label="MPI"];
+	process1 -> process0 [label="MPI"];
+
+	Input -> load0 [label="CSV"];
+	Input -> load1 [label="CSV"];
+	write0 -> Output [label="CSV"];
+	write1 -> Output [label="CSV"];
+}

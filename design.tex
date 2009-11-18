@@ -22,6 +22,14 @@ to be used in Hadoop just like any other supported format. Geospatial
 processing support is provided through the Java Topology Suite\cite{jts}
 (JTS). Adding a new datatype to the Hadoop environment required overcoming
 three data transfer boundaries: file to map, map to reduce, and reduce to file.
+Figure \ref{hadoopgis-flow} shows how the components of HadoopGIS convert and pass
+data between the map and reduce phases.
+
+\begin{figure}
+\label{hadoopgis-flow}
+\includegraphics{hadoopGIS-flow.eps}
+\caption{HadoopGIS Data Flow}
+\end{figure}
 
 The first gap to overcome is getting data into the mappers. Hadoop
 uses two classes in addition to the core GIS class to load data
@@ -74,6 +82,12 @@ communicators. By passing a specific communicator to a helper function,
 the tasks participating in the processing done by that function can be
 limited. MPI provides a default communication, MPI\_COMM\_WORLD, which
 contains all the tasks controlled by the MPI runtime.
+
+\begin{figure}
+\label{clusterGIS-flow}
+\includegraphics{clusterGIS-flow.eps}
+\caption{ClusterGIS Data Flow}
+\end{figure}
 
 Datasets can be loaded into participating tasks from a file by calling
 one of the clusterGIS load functions. Two main load functions exist:
