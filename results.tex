@@ -1,22 +1,60 @@
 \chapter{RESULTS}
 
-The main purpose of pursuing parallel methods for GIS processing is to overcome the limitations of GIS processing using desktop applications. This thesis uses PostGIS, the GIS extension for the PostgreSQL relational database, to represent the capabilities of more traditional GIS processing applications.
+The main purpose of pursuing parallel methods for GIS processing
+is to overcome the limitations of GIS processing using desktop
+applications. This thesis uses PostGIS, the GIS extension for the
+PostgreSQL relational database, to represent the capabilities of more
+traditional GIS processing applications.
 
-Given the capabilities and sophistication of a relational database, record level operations performed in PostGIS are expected to outperform the simpler algorithms used in hadoopGIS and clusterGIS. While there are not limitations against using similarly sophisticated algorithms in the parallel implementations, this thesis attempts to show what can be done with relatively simple and naive algorithms, such as could be created by people not possessing computer science degrees.
+Given the capabilities and sophistication of a relational database,
+record level operations performed in PostGIS are expected to outperform
+the simpler algorithms used in hadoopGIS and clusterGIS. While there are
+not limitations against using similarly sophisticated algorithms in the
+parallel implementations, this thesis attempts to show what can be done
+with relatively simple and naive algorithms, such as could be created
+by people not possessing computer science degrees.
 
-On the other hand, hadoopGIS and clusterGIS should outperform PostGIS in operations requiring access to entire datasets. This is expected because unless the dataset level operation can be done entirely using indexes, which in the operations selected here is not the case, PostGIS is forced to work with every record in the dataset; leaving it to a basic serial algorithm. HadoopGIS and clusterGIS attempt to 
+On the other hand, hadoopGIS and clusterGIS should outperform PostGIS in
+operations requiring access to entire datasets. This is expected because
+unless the dataset level operation can be done entirely using indexes,
+which in the operations selected here is not the case, PostGIS is forced
+to work with every record in the dataset; leaving it to a basic serial
+algorithm. HadoopGIS and clusterGIS are able to process multiple records
+at one time, therefore reducing processing time.
 
-This chapter evaluates these assumptions and compares the relative performance and scalability of hadoopGIS and clusterGIS by first discussing characteristics of the record level operation experiments and then the dataset level operations. After these assumptions are evaluated, some remarks will be made on the ease of using each of these three environments for GIS processing.
+During the gathering of these results it was discovered that Hadoop,
+and therefore hadoopGIS, is difficult to run with different numbers of
+mappers. To achieve this, HDFS must be recreated with a block size that
+implies the number of mappers that will be created. Each block of a file
+gets a mapper. This methodology is not available in a production
+environment.
+
+Another problem with Hadoop is that, even with an appropriate blocksize,
+was unable to run 
+
+This chapter evaluates these assumptions and compares the relative
+performance and scalability of hadoopGIS and clusterGIS by first
+discussing characteristics of the record level operation experiments
+and then the dataset level operations. After these assumptions are
+evaluated, some remarks will be made on the ease of using each of these
+three environments for GIS processing.
 
 \section{Record Level Operations}
 
-The classic operations to determine ability to perform record level operations are to create a new record, read an existing record, update an existing record, and delete an existing record from a dataset. Of these four operations, create, update, and delete exhibited similar performance characteristics in both PostGIS and the parallel implementations. Read performance in the parallel implementations was markedly different.
+The classic operations to determine ability to perform record level
+operations are to create a new record, read an existing record, update an
+existing record, and delete an existing record from a dataset. Of these
+four operations, create, update, and delete exhibited similar performance
+characteristics in both PostGIS and the parallel implementations. Read
+performance in the parallel implementations was markedly different.
 
-As performance characteristics were clustered in this manner, the create operation will be used to represent the performance of the create, update, and delete operations. The read operation will represent itself.
+As performance characteristics were clustered in this manner, the create
+operation will be used to represent the performance of the create,
+update, and delete operations. The read operation will represent itself.
 
 \subsection{Create}
 
-% TODO: Fix time for hadoop
+% TODO: hadoop times used idealized 1core time
 \begin{table}
 \label{create-time}
 \begin{center}
@@ -24,7 +62,7 @@ As performance characteristics were clustered in this manner, the create operati
 Implementation & Time (seconds) & Processor Cores\\
 \hline
 PostGIS & 0.012 & 1\\
-hadoopGIS & 4 & 0\\
+hadoopGIS & 77.453 & 512\\
 clusterGIS & 6.160 & 128\\
 \end{tabular}
 \caption{Fastest Execution Time for Create Operation}
@@ -51,7 +89,7 @@ As was expected, PostGIS is able to outperform hadoopGIS and clusterGIS in creat
 
 \subsection{Read}
 
-% TODO: Fix time for hadoop
+% TODO: Idealized 1core time for hadoop
 \begin{table}
 \label{read-time}
 \begin{center}
@@ -59,7 +97,7 @@ As was expected, PostGIS is able to outperform hadoopGIS and clusterGIS in creat
 Implementation & Time (seconds) & Processor Cores\\
 \hline
 PostGIS & 0.023 & 1\\
-hadoopGIS & 4 & 0\\
+hadoopGIS & 49.324 & 0\\
 clusterGIS & 2.015 & 16\\
 \end{tabular}
 \caption{Fastest Execution Time for Read Operation}
@@ -87,6 +125,7 @@ A scaling issue in hadoopGIS for the second dataset was encountered while runnin
 \subsection{Filter}
 
 % TODO: Fix time for postgis, hadoop
+% TODO: Used idealized 1core time for hadoop
 \begin{table}
 \label{filter-time}
 \begin{center}
@@ -94,7 +133,7 @@ A scaling issue in hadoopGIS for the second dataset was encountered while runnin
 Implementation & Time (seconds) & Processor Cores\\
 \hline
 PostGIS & 1.123 & 1\\
-hadoopGIS & 4 & 0\\
+hadoopGIS & 50.408 & 0\\
 clusterGIS & 2.957 & 128\\
 \end{tabular}
 \caption{Fastest Execution Time for Filter Operation}

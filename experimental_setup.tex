@@ -530,9 +530,13 @@ while(record != NULL) {
 
 \subsection{Filter}
 
-The filter operation as shown in Listing \ref{clustergis-filter}
+The filter operation as shown in Listing \ref{clustergis-filter} builds on
+the structure used in the read operation. Instead of comparing against
+an id number, the filter operation uses a geometric intersection to
+determine if the record should be kept. The shown code can easily be
+extended to use an arbitrarily complex filtering parameter.
 
-\begin{lstlisting}[caption={ClusterGIS Filter Operation},language=]
+\begin{lstlisting}[caption={ClusterGIS Filter Operation},label=={clustergis-filter},language=]
 box = GEOSWKTReader_read(reader, "POLYGON((-112.0859375 33.4349975585938,-112.0859375 33.4675445556641,-112.059799194336 33.4675445556641,-112.059799194336 33.4349975585938,-112.0859375 33.4349975585938))");
 
 record = dataset->data;
@@ -542,10 +546,6 @@ while(record != NULL) {
         char intersects;
 
         intersects = GEOSIntersects(record->geometry, box);
-        if(intersects == 2) {
-                fprintf(stderr, "%d: error with overlap function\n", rank);
-                MPI_Abort(MPI_COMM_WORLD, 2);
-        }
 
         if(intersects == 1) { /* record overlaps with box */
                 head = &(record->next);
@@ -558,7 +558,11 @@ while(record != NULL) {
 }
 \end{lstlisting}
 
-\subsection{Nearest}
+The two main differences show how to create a new geometry object using
+GEOSWKTReader and how to use the GEOSIntersects function. Beyond these
+differences the loop structure is the same.
+
+\subsection{Nearest and Chaining}
 
 Upto this point, all the operations for clusterGIS have only had
 to work on one dataset. The nearest and chained operations work on
@@ -572,53 +576,10 @@ employers then talk amongst themselves to determine the globally nearest
 parcel. This communication is done through MPI's reduce mechanism. The
 employer id now associated parcel id are added to the output dataset.
 
-\begin{lstlisting}[caption={ClusterGIS Nearest Operation},language=]
-/* Find the min distance */
-employer = employers->data;
-min = malloc(sizeof(double)*2);
-global_min = malloc(sizeof(double)*2);
-output_csv = malloc(sizeof(char)*128);
-output = clusterGIS_Create_dataset();
-while(employer != NULL) {
+The nearest operation implementation and the chaining operation implementation
+are very similar. Listing \ref{clustergis-chaining} shows the chaining operation.
 
-        /* find the local min */
-        parcel = parcels->data;
-        GEOSDistance(employer->geometry, parcel->geometry, &min_distance);
-        min_distance_parcel = parcel;
-        while(parcel != NULL) {
-                if(strncmp(employer->data[2], parcel->data[2], 1) == 0) {
-                        GEOSDistance(employer->geometry, parcel->geometry, &distance);
-                        if(distance < min_distance) {
-                                min_distance = distance;
-                                min_distance_parcel = parcel;
-                        }
-                }
-                parcel = parcel->next;
-        }
-
-        /* find the global min */
-        min[0] = atoi(min_distance_parcel->data[0]);
-        min[1] = min_distance;
-        MPI_Allreduce(min, global_min, 2, MPI_DOUBLE, min_distance_op, parcels_comm);
-
-        /* Add the min to the output dataset */
-        sprintf(output_csv, "\"%s\",\"%d\"\n", employer->data[0], (int) global_min[0]);
-        start = 0;
-        output_record = clusterGIS_Create_record_from_csv(output_csv, &start);
-        output_record->next = output->data;
-        output->data = output_record;
-
-        employer = employer->next;
-}
-\end{lstlisting}
-
-\subsection{Chaining}
-
-The chaining operation works in a similar manner to the nearest operation
-except that it filters out all residential parcels before searching for
-the nearest parcel.
-
-\begin{lstlisting}[caption={ClusterGIS Chaining Operation},language=]
+\begin{lstlisting}[caption={ClusterGIS Chaining Operation},label={clustergis-chaining},language=]
 /* remove all residential parcels */
 parcel = parcels->data;
 head = &(parcels->data);
@@ -637,7 +598,6 @@ while(parcel != NULL) {
 employer = employers->data;
 min = malloc(sizeof(double)*2);
 global_min = malloc(sizeof(double)*2);
-output_csv = malloc(sizeof(char)*128);
 output = clusterGIS_Create_dataset();
 while(employer != NULL) {
 
@@ -671,3 +631,23 @@ while(employer != NULL) {
         employer = employer->next;
 }
 \end{lstlisting}
+
+The difference between nearest and chaining is the addition of the first
+loop, which removes all residential parcels from the parcel dataset. With
+the exception of this loop, the rest of the listing reflects the nearest
+operation's implementation.
+
+The main loop finds the globally nearest parcel for each employer. Each
+task first finds a locally nearest parcel using the GEOSDistance function
+to calculate distance. The nearest parcel id and distance are store in
+the min array, which is then used to find the global minimum.
+
+The MPI\_Allreduce command with the help of the min\_distance\_op,
+determines the minimum distance of all the min arrays for the tasks
+which share the same set of employers. After the function finishes,
+each task in the group have the same values their min array. This is
+the global minimum.
+
+The last section of this code creates new records which are added to
+the output dataset. This dataset can then be used just like any other
+dataset loaded in clusterGIS.
