@@ -17,6 +17,7 @@
 \usepackage{graphics}
 \usepackage{listings}
 \lstset{breaklines=true,numbers=none,language=,captionpos=b}
+\setcounter{tocdepth}{5}
 
 \begin{document} 
 
@@ -62,7 +63,7 @@
 %\@startsection {NAME}{LEVEL}{INDENT}{BEFORESKIP}{AFTERSKIP}{STYLE}
 \renewcommand\chapter{\@startsection{chapter}{1}{\z@}%
 	{0ex}%
-	{2.3ex \@plus.2ex}%
+	{2ex \@plus.2ex}%
 	{CHAPTER \normalfont\centering\thispagestyle{plain}}
 }
 \newcommand\appendixchapter{\@startsection{chapter}{1}{\z@}%

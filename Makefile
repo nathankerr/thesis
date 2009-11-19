@@ -34,7 +34,7 @@ svninfo		:= $$Id: Makefile 51 2009-05-15 14:12:07Z shiblon $$
 #
 # If you specify sources here, all other files with the same suffix
 # will be treated as if they were _include_ files.
-onlysources.tex	?= thesis.tex defense.tex
+onlysources.tex	?= thesis.tex
 #onlysources.tex.sh	?=
 #onlysources.rst	?=
 #onlysources.fig	?=

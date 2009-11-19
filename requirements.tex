@@ -34,15 +34,21 @@ data formats, a set of operations for working with geospatial data
 are specified.
 
 The OGC SFS is just a standard, and so it needs to be implemented.
-The main opensource library implementing the standard is the Java
+The main open source library implementing the standard is the Java
 Topology Suite\cite{jts} (JTS).  While the JTS is implemented in Java,
 it has been ported to other languages. For example PostGIS uses the C/C++
 GEOS library\cite{geos}.
 
 Compliance to this requirement can be tested by checking an independent
 implementation against the standard, or assumed thought the use of a
-compliant implimentation such as the JTS or GEOS libraries, assuming
+compliant implementation such as the JTS or GEOS libraries, assuming
 full access to the library functionality is allowed.
+
+\begin{figure}
+	\label{example_speedup}
+	\caption{Example Speedup Graph}
+	\includegraphics{speedup.eps}
+\end{figure}
 
 \section{Batch Mode Processing}
 
@@ -65,7 +71,7 @@ Speedup is measured by comparing the processing time on a specific number
 of processors ($n$) to the processing time on a single processor:
 
 \[
-\mbox{speedup}(n) = t(n)/t(1)
+\mbox{speedup}(n) = t(1)/t(n)
 \]
 
 To see how scalable an application is, a speedup plot is generated which
@@ -79,12 +85,6 @@ line shows an application that increases speedup to a point around 256
 processors, at which time adding more resources actually increases the
 program runtime. This limitation could occur because of limited data
 size or some other concern.
-
-\begin{figure}
-	\label{example_speedup}
-	\caption{Example Speedup Graph}
-	\includegraphics{speedup.eps}
-\end{figure}
 
 Graphs like this will be used throughout this thesis to evaluate scalability.
 
