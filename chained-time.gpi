@@ -1,0 +1,11 @@
+set style data linespoints
+set logscale
+set xtics (1,8,16,32,64,128,256,512,1024)
+set xlabel 'Number of Processors (Log Scale)'
+set ylabel 'Execution Time (Seconds, Log Scale)'
+set xrange [1:1024]
+set style line 1 linewidth 15
+set style line 2 linewidth 15
+set style line 3 linewidth 15
+l(x) = x
+plot 'hadoopGIS-chained.gplot' using 1:2 title 'hadoopGIS', 'clusterGIS-chained.gplot' using 1:2 title 'clusterGIS'
