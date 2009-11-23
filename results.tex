@@ -27,17 +27,8 @@ and therefore hadoopGIS, is difficult to run with different numbers of
 mappers. To achieve this, HDFS must be recreated with a block size that
 implies the number of mappers that will be created. Each block of a file
 gets a mapper. This methodology is not available in a production
-environment.
-
-Another problem with Hadoop is that, even with an appropriate blocksize,
+environment. Another problem with Hadoop is that, even with an appropriate blocksize,
 was unable to run using a single mapper on the 1.2GB parcels dataset.
-Because of this, it is not possible to accurately determine speedup.
-Instead the runtime for the single core case will be derived from the
-next nearest data point assuming 60\% efficiency. This allows for the
-speedup curve to be drawn, but tends to shift it up. The analysis
-for this thesis is more concerned with the shape of the speedup curve
-than the efficiency, as efficiency is more directly tied to the specifics
-of the implementations.
 
 This chapter evaluates these assumptions and compares the relative
 performance and scalability of hadoopGIS and clusterGIS by first
@@ -64,14 +55,19 @@ update, and delete operations. The read operation will represent itself.
 \begin{table}
 \label{create-time}
 \begin{center}
-\begin{tabular}{lcc}
-Implementation & Time (seconds) & Processor Cores\\
+\begin{tabular}{cccc}
+Processor Cores & PostGIS & hadoopGIS & clusterGIS\\
 \hline
-PostGIS & 0.012 & 1\\
-hadoopGIS & 77.453 & 512\\
-clusterGIS & 6.160 & 128\\
+1 & 0.012 & - & 17.142\\
+8 & - & 477.154 & 10.271\\
+16 & - & 184.23 & 7.219\\
+32 & - & 170.468 & 9.416\\
+64 & - & 137.937 & 6.939\\
+128 & - & 130.649 & 6.160\\
+256 & - & 131.555 & 19.096\\
+512 & - & 77.453 & 23.751\\
 \end{tabular}
-\caption{Fastest Execution Time for Create Operation}
+\caption{Execution Time (seconds) for Create Operation}
 \end{center}
 \end{table}
 
@@ -110,14 +106,19 @@ The speedup shown in figure \ref{read-speedup} is higher than for the create ope
 \begin{table}
 \label{read-time}
 \begin{center}
-\begin{tabular}{lcc}
-Implementation & Time (seconds) & Processor Cores\\
+\begin{tabular}{cccc}
+Processor Cores & PostGIS & hadoopGIS & clusterGIS\\
 \hline
-PostGIS & 0.023 & 1\\
-hadoopGIS & 49.324 & 8\\
-clusterGIS & 2.015 & 16\\
+1 & 0.023 & - & 7.856\\
+8 & - & 49.324 & 2.826\\
+16 & - & 61.923 & 2.015\\
+32 & - & 45.233 & 3.204\\
+64 & - & 83.173 & 2.720\\
+128 & - & 92.437 & 2.354\\
+256 & - & 124.177 & 12.240\\
+512 & - & 191.237 & 14.396\\
 \end{tabular}
-\caption{Fastest Execution Time for Read Operation}
+\caption{Execution Time (seconds) for Read Operation}
 \end{center}
 \end{table}
 
@@ -137,14 +138,19 @@ A scaling issue in hadoopGIS for the second dataset was encountered while runnin
 \begin{table}
 \label{filter-time}
 \begin{center}
-\begin{tabular}{lcc}
-Implementation & Time (seconds) & Processor Cores\\
+\begin{tabular}{cccc}
+Processor Cores & PostGIS & hadoopGIS & clusterGIS\\
 \hline
-PostGIS & 1.123 & 1\\
-hadoopGIS & 50.408 & 8\\
-clusterGIS & 2.957 & 128\\
+1 & 1.123 & - & 70.276\\
+8 & - & 50.408 & 10.876\\
+16 & - & 66.352 & 6.085\\
+32 & - & 46.365 & 5.548\\
+64 & - & 116.801 & 3.732\\
+128 & - & 97.464 & 2.957\\
+256 & - & 194.082 & 12.131\\
+512 & - & 55.074 & 15.947\\
 \end{tabular}
-\caption{Fastest Execution Time for Filter Operation}
+\caption{Execution Time (seconds) for Filter Operation}
 \end{center}
 \end{table}
 
@@ -171,12 +177,18 @@ Finding the nearest parcel for each employer is a fairly normal GIS question to 
 \begin{table}
 \label{chained-time}
 \begin{center}
-\begin{tabular}{lcc}
-Implementation & Time (seconds) & Processor Cores\\
+\begin{tabular}{cccc}
+Processor Cores & PostGIS & hadoopGIS & clusterGIS\\
 \hline
-PostGIS & 198235.521 & 1\\
-hadoopGIS & 10891.127 & 128\\
-clusterGIS & 41.995 & 1024\\
+1 & 198235.521 & - & 4771.672\\
+8 & - & - & 2129.640\\
+16 & - & 87621.129 & 1076.389\\
+32 & - & 39454.548 & 547.444\\
+64 & - & 21926.907 & 280.808\\
+128 & - & 10891.127 & 146.701\\
+256 & - & - & 87.187\\
+512 & - & - & 55.238\\
+1024 & - & - & 41.995\\
 \end{tabular}
 \caption{Fastest Execution Time for Chained Operation}
 \end{center}
@@ -200,12 +212,6 @@ The speedup line for hadoopGIS is also very good, showing a linear speedup, at l
 	\label{chained-speedup}
 	\includegraphics{chained.eps}
 	\caption{Chained Speedup}
-\end{figure}
-
-\begin{figure}
-	\label{chained-time}
-	\includegraphics{chained-time.eps}
-	\caption{Chained Execution Time}
 \end{figure}
 
 Though hadoopGIS experiences a severe limitation on the size of the
