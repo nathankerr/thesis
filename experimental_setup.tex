@@ -30,7 +30,9 @@ C and other languages, or through the provided command line client,
 passed to it. That leaves the problem of the server. Either a dedicated
 server can be used, or a script can be written to create a server as
 needed to do the processing. This thesis sets a PostgreSQL server up as
-needed. PostGIS can perform batch mode processing.
+needed. The more normal use case for PostgreSQL is to have a dedicated
+server always running to handle the required processing. PostGIS can
+perform batch mode processing.
 
 Hadoop executes user jobs from a command line interface. The only
 hindrance for Hadoop to batch mode processing is the same as PostGIS:
@@ -85,7 +87,7 @@ Total & 42 & 24\\
 
 One of the main tasks in parallelizing an algorithm is solving the
 problem of data access. HadoopGIS and clusterGIS split up the data that
-is being processed between different computers. The OGC SFS standard
+is being processed between different computers. The OGC SFS\cite{ogc-sfs} standard
 defines the operations that need to be supported. Table \ref{MethodCount}
 shows a count of the number of operations in each section of the standard
 that defines operations along with the number of geometries required to
@@ -212,7 +214,8 @@ Both datasets use R, C, I, and G to represent residential, commercial,
 industrial, and governmental use codes. These datasets are simplified
 versions of real datasets for Maricopa County, Arizona. The datasets
 were simplified by adding the simplified land use code attribute and
-removing the other attributes not used in these operations.
+removing the other attributes not used in these operations. The same
+datasets were used in all environments.
 
 \section{Execution Environment}
 
@@ -220,13 +223,16 @@ All operations will be executed on ASU's Saguaro cluster. The Saguaro
 cluster is comprised of several generations of hardware. To simplify
 comparisons, all operations will be executed on similar hardware with
 similar network interconnects, using the one most natural for use.
+This means that PostGIS and hadoopGIS use the gigabit ethernet interfaces,
+as these services are normally deployed this way. ClusterGIS uses the Infiniband
+interface for access to the Lustre filesystem.
 
 Saguaro is a CentOS 5.3 based cluster running on Intel Xeon
 processors. Each node used in these experiments has two harpertown
 processors each with four cores running at 2.83GHz and has 16GB of
 RAM. In addition each node has one gigabit ethernet connection and one
 DDR InfiniBand connection. The shared filesystem for these experiments
-is Luster 1.6.6 accessed through the InifiniBand connection.
+is Lustre 1.6.6 accessed through the InifiniBand connection.
 
 \section{PostGIS Implementation}
 
@@ -239,6 +245,8 @@ instance, running on local disk with default options. Data was loaded,
 indexed, and vacuumed before the experiment was executed. Runtimes were
 gathered by using the linux `time' command. When a query's result did
 not modify an existing table, its results were stored into another table.
+
+All data storage for PostGIS was done on the local hard disk.
 
 Full SQL statements for each operation are listed below.
 
@@ -575,6 +583,11 @@ parcels that it has (i.e., a local minimum). The tasks sharing the same
 employers then talk amongst themselves to determine the globally nearest
 parcel. This communication is done through MPI's reduce mechanism. The
 employer id now associated parcel id are added to the output dataset.
+
+This scheme for distributing both datasets was chosen for convenience 
+of discussion. More sophisticated methods that dynamically take into
+account data sizes and other heuristics are also possible and have
+potential.
 
 The nearest operation implementation and the chaining operation implementation
 are very similar. Listing \ref{clustergis-chaining} shows the chaining operation.

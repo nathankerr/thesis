@@ -30,8 +30,12 @@ The most important standard for this thesis is the Simple Features
 Standard\cite{ogc-sfs} (SFS). The SFS defines ways of storing and
 processing data including defining the Well Known Text (WKT) and Well
 Known Binary (KWB) representations of geospatial data. Along with
-data formats, a set of operations for working with geospatial data
-are specified.
+data formats, a set of operations for manipulating and working with
+geospatial data are specified. Included in this standard are data
+type definitions like points and polygons; and geometric operations
+like intersection and distance calculations. Record operations such
+as create, read, update, and delete are not part of this standard
+but must be implemented in the surrounding environment.
 
 The OGC SFS is just a standard, and so it needs to be implemented.
 The main open source library implementing the standard is the Java

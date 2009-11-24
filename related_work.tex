@@ -204,7 +204,7 @@ by the programmer.
 
 Map reduce was designed on the assumptions that disk is cheap, networking
 is expensive, and that large systems can be built with inexpensive
-hardware, as long as no piece of hardware in indispensable. With these
+hardware, as long as no piece of hardware is indispensable. With these
 restrictions map reduce makes use of a distributed file system that
 replicates data between several of these inexpensive computers. Map reduce
 tasks are then ran on one of the computers that has the block of data it
@@ -270,7 +270,7 @@ While the method used to extend GRASS GIS will in fact speed up GIS
 processing, it has two flaws. First, GRASS is designed to be used in an
 interactive mode rather than a batch or script driven approach.  Second,
 the entire set of data used must still fit on a single computer to move
-it in or out of the environment.
+it in or out of the processing environment.
 
 \subsection{Parallel Databases}
 
@@ -317,6 +317,14 @@ multiple network connected fileservers allowing access that can be
 faster than utilizing a computer's local disk for storage while also
 enabling processing to spread across the available compute resources
 based entirely on the process' grain size.
+
+\subsection{Data Decomposition}
+
+Several methods exist for splitting data among the participating
+computers.
+
+The method used in this thesis distributes records between
+
 
 \subsection{Problems with Current Parallel Approaches}
 
