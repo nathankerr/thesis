@@ -39,10 +39,6 @@ December 2009
 \thispagestyle{empty}
 \begin{center}
 ALTERNATIVE APPROACHES TO PARALLEL GIS PROCESSING\\
-%ALTERNATIVE IMPLEMENTATIONS OF LARGE SCALE GIS PROCESSING\\
-%DATASET CENTRIC LARGE SCALE GIS PROCESSING
-%ALTERNATIVE APPROACHES TO LARGE SCALE GIS PROCESSING
-%LARGE SCALE GIS PROCESSING
 ~\\
 by\\
 ~\\
@@ -75,20 +71,23 @@ ACCEPTED BY THE GRADUATE COLLEGE
 \doublespacing
 \begin{center}ABSTRACT\end{center}
 
-Geospatial Information Systems were designed to model the world around
-us. As our abilities to gather data and analyze it in more sophisticated
-ways have improved we have had larger datasets with more computationally
-intensive methods for analysis. Even with the increased power of desktop
-computers, desktop GIS processing applications are unable to perform
-the desired analysis.
+Geospatial Information Systems (GIS) were designed to model the world
+around us. With the growth and data and increasing sophistication of
+analysis and processing techniques the traditional methods of performing
+GIS processing on desktop computes is insufficient.
 
-This thesis applies the parallel processing paradigms of map reduce
-and message passing to GIS processing, creating two implementations of
-parallel GIS processing environments, one using the open source Hadoop
-map-reduce framework and the other using MPI. Both implementations are
-evaluated for scalability and usability.
+This thesis evaluates the map reduce and message passing paradigms of
+parallel programing in the context of GIS processing. This is accomplished
+by implementing two sets of operations, one using Hadoop and the other using
+the Message Passing Interface (MPI) standard. These implementations are then
+evaluated for speedup and usability. PostGIS is used to represent desktop GIS
+processing.
 
-\singlespace
+Two categories of operations were discovered. Record level operations, or operations
+that work with only one dataset run most quickly in PostGIS and are easy to implement.
+Operations requiring two datasets run most quickly with the MPI implementation and
+are easiest to implement in that environment.
+
 \clearpage
 
 %%%%%%%%%%%%%%%%%%%%%%
@@ -109,99 +108,198 @@ evaluated for scalability and usability.
 % \singlespace
 % \clearpage
 
+% \makeatletter
+% %\toc{lot}{LIST OF TABLES}{Table}
+% \newcommand{\toc}[2] {
+% 	\pagebreak
+% 	% \pagestyle{fancy}
+% 	% \thispagestyle{plain}
+% 	% \fancyhf{}
+% 	% \fancyhead[L]{#3}
+% 	% \fancyhead[R]{Page}
+% 	% \fancyfoot[C]{\thepage}
+% 	\hfill \normaltext{#2} \hfill
+% 	\@starttoc{#1}
+% }
+% \makeatother
+
 %%%%%%%%%%%%%%%%%%
 %Table of contents
-% TODO: Page header after first page
-\begin{center}TABLE OF CONTENTS\end{center}
-\begin{flushright}Page\end{flushright}
-\doublespacing
+% \begin{center}TABLE OF CONTENTS\end{center}
+% \begin{flushright}Page\end{flushright}
+% \doublespacing
+% \makeatletter
+% \renewcommand*\l@chapter[2]{%
+% 	\ifnum \c@tocdepth >\m@ne
+% 		\addpenalty{-\@highpenalty}%
+% 		\vskip 1.0em \@plus\p@
+% 		\setlength\@tempdima{1.5em}%
+% 		\begingroup
+% 			\parindent \z@ \rightskip \@pnumwidth
+% 			\parfillskip -\@pnumwidth
+% 			\leavevmode %\bfseries
+% 			\advance\leftskip\@tempdima
+% 			\hskip -\leftskip
+% 			\@chapapp\space #1\nobreak\
+% 			\leaders\hbox{$\m@th
+% 			\mkern \@dotsep mu\hbox{.}\mkern \@dotsep
+% 			mu$}\hfil\nobreak\hb@xt@\@pnumwidth{\hss #2}\par
+% 			\penalty\@highpenalty
+% 		\endgroup
+% 	\fi
+% }
+% \makeatother
+% 
+% \newcommand*\l@listchapter[2]{%
+% 	\ifnum \c@tocdepth >\m@ne
+% 		\addpenalty{-\@highpenalty}%
+% 		\vskip 1.0em \@plus\p@
+% 		\setlength\@tempdima{1.5em}%
+% 		\begingroup
+% 			\parindent \z@ \rightskip \@pnumwidth
+% 			\parfillskip -\@pnumwidth
+% 			\leavevmode %\bfseries
+% 			\advance\leftskip\@tempdima
+% 			\hskip -\leftskip
+% 			#1\nobreak\
+% 			\leaders\hbox{$\m@th
+% 			\mkern \@dotsep mu\hbox{.}\mkern \@dotsep
+% 			mu$}\hfil\nobreak\hb@xt@\@pnumwidth{\hss #2}\par
+% 			\penalty\@highpenalty
+% 		\endgroup
+% 	\fi
+% }
+% 
+% %\fancyhead[R]{Page}
+% \@starttoc{toc}
+% %\fancyhead{}
+% \makeatother
+% \renewcommand\contentsname{\normalfont\centering Table of Contents}
+% \tableofcontents
+% \toc{toc}{TABLE OF CONTENTS}
+
+% FIXME: toc page headings
 \makeatletter
-\renewcommand*\l@chapter[2]{%
-	\ifnum \c@tocdepth >\m@ne
-		\addpenalty{-\@highpenalty}%
-		\vskip 1.0em \@plus\p@
-		\setlength\@tempdima{1.5em}%
-		\begingroup
-			\parindent \z@ \rightskip \@pnumwidth
-			\parfillskip -\@pnumwidth
-			\leavevmode %\bfseries
-			\advance\leftskip\@tempdima
-			\hskip -\leftskip
-			CHAPTER #1\nobreak\
-			\leaders\hbox{$\m@th
-			\mkern \@dotsep mu\hbox{.}\mkern \@dotsep
-			mu$}\hfil\nobreak\hb@xt@\@pnumwidth{\hss #2}\par
-			\penalty\@highpenalty
-		\endgroup
-	\fi
+\fancypagestyle{plain}{%
+	\fancyhf{}
+	\fancyhead[C]{TABLE OF CONTENTS}
+	\fancyfoot[C]{\thepage}
+	\renewcommand{\headrulewidth}{0pt}
+	\renewcommand{\footrulewidth}{0pt}
 }
-
-\newcommand*\l@listchapter[2]{%
-	\ifnum \c@tocdepth >\m@ne
-		\addpenalty{-\@highpenalty}%
-		\vskip 1.0em \@plus\p@
-		\setlength\@tempdima{1.5em}%
-		\begingroup
-			\parindent \z@ \rightskip \@pnumwidth
-			\parfillskip -\@pnumwidth
-			\leavevmode %\bfseries
-			\advance\leftskip\@tempdima
-			\hskip -\leftskip
-			#1\nobreak\
-			\leaders\hbox{$\m@th
-			\mkern \@dotsep mu\hbox{.}\mkern \@dotsep
-			mu$}\hfil\nobreak\hb@xt@\@pnumwidth{\hss #2}\par
-			\penalty\@highpenalty
-		\endgroup
-	\fi
-}
-
-%\fancyhead[R]{Page}
+\addtolength\topmargin{40pt}
+\addtolength\textheight{-40pt}
+\pagestyle{fancy}
+\thispagestyle{plain}
+\fancyhf{}
+\fancyhead[L]{CHAPTER}
+\fancyhead[R]{Page}
+\fancyfoot[C]{\thepage}
+\begin{center}
+%	TABLE OF CONTENTS\\
+	CHAPTER \hfill Page
+\end{center}
+\vspace{-\baselineskip}
 \@starttoc{toc}
-%\fancyhead{}
-%TODO: Page heading on toc pages after the first one
-\makeatother
-\singlespace
+\fancyhead[L]{APPENDIX}
+\thispagestyle{fancy}
 \clearpage
+\fancypagestyle{plain}{%
+	\fancyhf{}
+	\fancyfoot[C]{\thepage}
+	\renewcommand{\headrulewidth}{0pt}
+	\renewcommand{\footrulewidth}{0pt}
+}
+\pagestyle{plain}
+\addtolength\textheight{40pt}
+\addtolength\topmargin{-40pt}
+\makeatother
+
+\tableofcontents
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %List of tables (if tables appear in document)
-\addcontentsline{toc}{listchapter}{LIST OF TABLES}
-\begin{center}LIST OF TABLES\end{center}
-Table\hspace{\stretch{1}}Page
-\doublespacing
+% \addcontentsline{toc}{listchapter}{LIST OF TABLES}
+% \begin{center}LIST OF TABLES\end{center}
+% Table\hspace{\stretch{1}}Page
+% \doublespacing
+% \makeatletter
+% \@starttoc{lot}
+% \makeatother
+% \singlespace
+% \clearpage
+% \pagebreak
+% \addcontentsline{toc}{chapter}{\listtablename}
+% \listoftables
+% \toc{lot}{LIST OF TABLES}{Table}
+
+\clearpage
 \makeatletter
+\addcontentsline{toc}{chapter}{LIST OF TABLES}
+\begin{center}
+	LIST OF TABLES\\
+	TABLE \hfill Page
+\end{center}
+\vspace{-\baselineskip}
 \@starttoc{lot}
 \makeatother
-\singlespace
-\clearpage
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %List of figures (if figures appear in document)
-\addcontentsline{toc}{listchapter}{LIST OF FIGURES}
-\begin{center}LIST OF FIGURES\end{center}
-Figure\hspace{\stretch{1}}Page
-\doublespacing
+% \addcontentsline{toc}{listchapter}{LIST OF FIGURES}
+% \begin{center}LIST OF FIGURES\end{center}
+% Figure\hspace{\stretch{1}}Page
+% \doublespacing
+% \makeatletter
+% \@starttoc{lof}
+% \makeatother
+% \singlespace
+% \pagebreak
+% \addcontentsline{toc}{chapter}{\listfigurename}
+% \listoffigures
+% \toc{lof}{LIST OF FIGURES}{Figure}
+
+\clearpage
 \makeatletter
+\addcontentsline{toc}{chapter}{LIST OF FIGURES}
+\begin{center}
+	LIST OF FIGURES\\
+	TABLE \hfill Page
+\end{center}
+\vspace{-\baselineskip}
 \@starttoc{lof}
 \makeatother
-\singlespace
-\clearpage
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %List of listings (if figures appear in document)
-\addcontentsline{toc}{listchapter}{LIST OF LISTINGS}
-\begin{center}LIST OF LISTINGS\end{center}
-Listing\hspace{\stretch{1}}Page
-\doublespacing
+% \addcontentsline{toc}{listchapter}{LIST OF LISTINGS}
+% \begin{center}LIST OF LISTINGS\end{center}
+% Listing\hspace{\stretch{1}}Page
+% \doublespacing
+% \makeatletter
+% \@starttoc{lol}
+% \makeatother
+% \singlespace
+% \clearpage
+% \pagebreak
+% \renewcommand\lstlistlistingname{List of Listings}
+% \addcontentsline{toc}{chapter}{\lstlistlistingname}
+% \lstlistoflistings
+% \toc{lol}{LIST OF LISTINGS}{Listing}
+
+\clearpage
 \makeatletter
+\addcontentsline{toc}{chapter}{LIST OF LISTINGS}
+\begin{center}
+	LIST OF LISTINGS\\
+	TABLE \hfill Page
+\end{center}
+\vspace{-\baselineskip}
 \@starttoc{lol}
 \makeatother
-\singlespace
-\clearpage
 
 %Other lists (e.g., nomenclature, definitions, glossary of terms, etc.)
 %Preface (optional; must be less than 10 pages)
 
 %Revert change to get page number in right spot
-\addtolength\textheight{30pt}
+%\addtolength\textheight{30pt}

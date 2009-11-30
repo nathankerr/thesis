@@ -6,17 +6,34 @@
 
 % Notes (if you have elected to group them at the end of the document)
 % References (AKA “Bibliography” or “Works Cited”)
-\clearpage
+% \clearpage
 \singlespace
-\addcontentsline{toc}{listchapter}{BIBLIOGRAPHY}
+\pagebreak
+\addcontentsline{toc}{chapter}{Bibliography}
 \bibliography{thesis}
 \bibliographystyle{ieeetr}
 
+% Make a new chapter command so the !#$#@ appendix cover pages are the
+% way the @#$# format manual wants them
+\makeatletter
+\renewcommand\appendixname{APPENDIX}
+\def\@makechapterhead#1{%
+	\clearpage
+	\begin{center}
+		\@chapapp\space \thechapter\\
+		~\\
+		#1
+	\end{center}
+	\thispagestyle{plain}
+	\clearpage
+}
+\makeatother
+
 % Appendices
 \appendix
-\clearpage
-\appendixchapter{HADOOPGIS SOURCE}
+\chapter{HADOOPGIS SOURCE}
 
+\doublespacing
 The complete source for hadoopGIS is included in this appendix. HadoopGIS
 is also available at \url{http://github.com/nathankerr/hadoopGIS}.
 
@@ -28,6 +45,7 @@ These listings comprise the core components of hadoopGIS, implementing
 the GIS datatype and the facilities to extract GIS records from a file
 into the mapper, pass GIS data from mappers to reducers, and from reducers
 back to a file.
+\singlespace
 
 \subsection{GIS.java}
 \lstinputlisting[nolol,language=]{hadoopGIS/src/GIS.java}
@@ -42,8 +60,10 @@ back to a file.
 
 \section{Operations}
 
+\doublespacing
 These listings are the complete code for the required operations. Each
 operation is contained in one source file.
+\singlespace
 
 \subsection{Create}
 \lstinputlisting[nolol,language=]{hadoopGIS/src/examples/create.java}
@@ -60,9 +80,9 @@ operation is contained in one source file.
 \subsection{Chained}
 \lstinputlisting[nolol,language=]{hadoopGIS/src/examples/chained.java}
 
-\clearpage
 \chapter{CLUSTERGIS SOURCE}
 
+\doublespacing
 The complete source for clusterGIS is included in this appendix. ClusterGIS
 is also available at \url{http://github.com/nathankerr/clusterGIS}.
 
@@ -74,6 +94,7 @@ the example implementations.
 The core clusterGIS library is contained in clustergis.c. To use
 clusterGIS, include clusterGIS.h in your processing implementation and
 link clusterGIS with your code.
+\singlespace
 
 \subsection{clustergis.h}
 \lstinputlisting[nolol,language=]{clusterGIS/src/clustergis.h}
@@ -82,7 +103,9 @@ link clusterGIS with your code.
 
 \section{Operations}
 
+\doublespacing
 These listings implement the operations used for this thesis.
+\singlespace
 
 \subsection{Create}
 \lstinputlisting[nolol,language=]{clusterGIS/examples/create.c}
