@@ -9,7 +9,7 @@
 % \clearpage
 \singlespace
 \pagebreak
-\addcontentsline{toc}{chapter}{Bibliography}
+\addcontentsline{toc}{listchapter}{BIBLIOGRAPHY}
 \bibliography{thesis}
 \bibliographystyle{ieeetr}
 
@@ -31,7 +31,8 @@
 
 % Appendices
 \appendix
-\chapter{HADOOPGIS SOURCE}
+\addcontentsline{toc}{appendixchapter}{HADOOPGIS SOURCE}
+\chapter*{HADOOPGIS SOURCE}
 
 \doublespacing
 The complete source for hadoopGIS is included in this appendix. HadoopGIS
@@ -80,6 +81,7 @@ operation is contained in one source file.
 \subsection{Chained}
 \lstinputlisting[nolol,language=]{hadoopGIS/src/examples/chained.java}
 
+\addcontentsline{toc}{appendixchapter}{CLUSTERGIS SOURCE}
 \chapter{CLUSTERGIS SOURCE}
 
 \doublespacing
