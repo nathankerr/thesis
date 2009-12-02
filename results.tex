@@ -234,7 +234,7 @@ Usability of execution address the difficulty in executing a GIS processing oper
 
 PostGIS based processing operations can be done in any way that PostgreSQL supports. The main interfaces are through programming libraries, the psql command line client, and the PgAdmin client. Both PgAdmin and psql are able to execute SQL queries that are stored in text files or entered interactively. SQL queries do not need to be compiled. PgAdmin also provides a method to browse and edit the data in tables. The programming libraries are the most sophisticated, but also the hardest to use.
 
-HadoopGIS execution is done by compiling the Java source code for the processing operation into a jar file. It is also necessary for the processing operation to have a main function and implement the Tool interface. After the jar file is created, the processing can be launched from the command line using the 'hadoop jar' command. It is also possible to develop in the Eclipse environment which can handle the compilation and execution of Hadoop jobs.
+HadoopGIS execution is done by compiling the Java source code for the processing operation into a jar file. It is also necessary for the processing operation to have a main function and implement the Tool interface. After the jar file is created, the processing can be launched from the command line using the `hadoop jar' command. It is also possible to develop in the Eclipse environment which can handle the compilation and execution of Hadoop jobs.
 
 ClusterGIS execution is done through the mpirun or mpiexec commands provided by the MPI environment. Usually this command is wrapped in a jobscript that is sent to a scheduler which allocates resources from the cluster for this specific processing run. The MPI execution engine works on compiled code.
 
@@ -251,3 +251,11 @@ PostGIS produced the shortest programs. The record operations and the filter ope
 HadoopGIS is easy to work with assuming the map-reduce paradigm is understood and the processing operation works well in that paragidm. Operations like Filter are well matched to the paradigm and are easy to code. Operations like Chained work, and give speedup, but can produce errors such as running out of memory that are not easy to solve.
 
 ClusterGIS is the most flexible in terms of what can be done. This flexibility also produces the opportunity for trouble. However, most of the operations implemented for this thesis follow the load, loop, write pattern. Loading and writing are done through helper functions. Looping currently requires an understanding of how to use linked lists. More advanced usage patterns like the scaling done in the nearest and chaining operations requires either the ability to understand what is happening, or the ability to copy and past the example and modify the interior parts.
+
+\subsection{Adapting for New Algorithms}
+
+Both hadoopGIS and clusterGIS were designed for easily implementing new processing methods. The operations developed for this thesis can be used as templates or examples of how to create new operations.
+
+HadoopGIS provides a GIS datatype to the Hadoop environment. To implement a new algorithm, simply create a new map-reduce class. The operations developed for this thesis can be used as templates. All of the core geospatial operations are provided by the Java Topology Suite\cite{jts} (JTS). A good example to start with is the filter operation, as it only uses one dataset and the intersection geometric function. The chained operation shows how to use more than one dataset.
+
+ClusterGIS provides a set of functions that perform common operations such as loading and saving datasets. The GEOS\cite{geos} library provides the basic geometric manipulation functions, all of which can be used. The two best examples to work from are the filter and nearest operations. Filter shows the algorithm used to loop through a dataset and filter it based on the result of a GEOS function. Nearest shows how to utilize two datasets and the setup required to scale both of them.

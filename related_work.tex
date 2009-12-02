@@ -11,6 +11,8 @@ Geographic Information Systems (GIS)\cite{gis} have been in use since the
 and then moving from the mainframes to current desktop applications like
 ESRI's ArcGIS\cite{arcgis} product, which began development in the 1980's.
 
+A geographic information system (GIS), or geographical information system captures, stores, analyzes, manages, and presents data that is linked to location.\cite{gis}
+
 In general, there are two types of GIS data: raster and vector. Raster
 data is a set of cells, such as pixels in a picture, that have one or
 more attributes (e.g., temperature, humidity, elevation). Each attribute
@@ -323,8 +325,11 @@ based entirely on the process' grain size.
 Several methods exist for splitting data among the participating
 computers.
 
-The method used in this thesis distributes records between
+The method used in this thesis distributes records between computers based on record size. This is because of the variable record size and the simplicity of the method.
 
+Another method is to distribute the records based on record count. This means that each participating computer would be responsible for a similar number of records.
+
+A more advanced method is spatial declustering\cite{paradise}. Spatial declustering divides the area covered by all the records in the dataset between the computers. Each computer is responsible for all the records in the dataset that exist in that geographical region. Extra effort is required to handle records which contain geometries that span more than one region. This extra processing can be worth the effort for problems that have natural geographic limits such as finding the nearest neighbor.
 
 \subsection{Problems with Current Parallel Approaches}
 

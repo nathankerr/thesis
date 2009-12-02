@@ -25,6 +25,8 @@ in their entirety. ClusterGIS is more flexible, but the basic operation
 cases remain simple. More sophisticated algorithms could be developed
 to provide greater benefits.
 
+To generalize, PostGIS should be used for non-compute-intensive operations on a single dataset or on relatively small datasets when more than one is required. Any compute intensive operation should be done using clusterGIS. The benefits in decreased computation time can greatly outweigh any export and import costs required to move data into and out from PostGIS.
+
 \section{Future Work}
 
 The operations created for this thesis provide examples of how to use hadoopGIS and clusterGIS. These examples can be used as building blocks to create programs that solve more complicated problems to to enable parallel simulation methods.
