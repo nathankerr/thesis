@@ -75,6 +75,7 @@ ACCEPTED BY THE GRADUATE COLLEGE
 
 \setlength\parskip{0ex}
 
+\vspace{-2ex}
 Geospatial Information Systems (GIS) were designed to model the world.
 With the growth and data and increasing sophistication of
 analysis and processing techniques the traditional methods of performing
@@ -222,8 +223,27 @@ are easiest to implement in that environment.
 			\penalty\@highpenalty
 		\endgroup
 	\fi}
+	% \def\@dottedtocline#1#2#3#4#5{%
+	%   \ifnum #1>\c@tocdepth \else
+	%     \vskip \z@ \@plus.2\p@
+	%     {\leftskip #2\relax \rightskip \@tocrmarg \parfillskip -\rightskip
+	%      \parindent #2\relax\@afterindenttrue
+	%      \interlinepenalty\@M
+	%      \leavevmode
+	%      \@tempdima #3\relax
+	%      \advance\leftskip \@tempdima \null\nobreak\hskip -\leftskip
+	%      {#4}\nobreak
+	%      \leaders\hbox{$\m@th
+	%         \mkern \@dotsep mu\hbox{.}\mkern \@dotsep
+	%         mu$}\hfill
+	%      \nobreak
+	%      \hb@xt@\@pnumwidth{\hfil\normalfont \normalcolor #5}%
+	%      \par}%
+	%   \fi}
 \renewcommand*\l@listchapter{\@dottedtocline{1}{0em}{1.5em}}
 \renewcommand*\l@chapter{\@dottedtocline{1}{0em}{1.5em}}
+% \renewcommand*\l@table{\@dottedtocline{1}{0em}{1.5em}}
+% \renewcommand*\l@figure{\@dottedtocline{1}{0em}{2.3em}}
 \makeatother
 % \newcommand*\l@appendixchapter[2]{%
 % 	\ifnum \c@tocdepth >\m@ne
