@@ -23,6 +23,9 @@
 \renewcommand{\footrulewidth}{0pt}
 
 \usepackage[left=115pt,top=70pt,right=72pt,bottom=75pt]{geometry}
+\addtolength\headsep{-\baselineskip}
+\addtolength\textheight{\baselineskip}
+
 \usepackage{graphics}
 \usepackage{listings}
 \lstset{breaklines=true,numbers=none,language=,captionpos=b}
@@ -123,26 +126,27 @@
 }
 % %\@startsection {NAME}{LEVEL}{INDENT}{BEFORESKIP}{AFTERSKIP}{STYLE}
 \renewcommand\section{\@startsection {section}{1}{\z@}%
-                                   {1ex}%
-                                   {1ex}%
+                                   {0ex}%
+                                   {1pt}%
                                    {\normalfont\normalsize\bfseries}}
 \renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
-                                     {1ex}%
-                                     {1ex}%
+                                     {0ex}%
+                                     {1pt}%
                                      {\normalfont\normalsize\bfseries}}
 \renewcommand\subsubsection{\@startsection{subsubsection}{2}{\z@}%
-                                     {1ex}%
-                                     {1ex}%
+                                     {0ex}%
+                                     {1pt}%
                                      {\normalfont\normalsize\bfseries}}
 \renewcommand\paragraph{\@startsection{paragraph}{2}{\z@}%
-                                    {1ex}%
-                                    {1ex}%
+                                    {0ex}%
+                                    {1pt}%
                                     {\normalfont\normalsize\bfseries}}
 \renewcommand\subparagraph{\@startsection{subparagraph}{2}{\parindent}%
-                                       {1ex}%
-                                       {1ex}%
+                                       {0ex}%
+                                       {1pt}%
                                       {\normalfont\normalsize\bfseries}}
 \makeatother
+\addtocontents{toc}{\protect{\hspace{-1.5em}CHAPTER}}
 \include{introduction}
 \include{related_work}
 \include{requirements}

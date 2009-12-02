@@ -36,14 +36,25 @@
 % Make a new chapter command so the !#$#@ appendix cover pages are the
 % way the @#$# format manual wants them
 \makeatletter
+\addtocontents{toc}{\protect{\hspace{-1.5em}APPENDIX}}
 \renewcommand\appendixname{APPENDIX}
 \def\@makechapterhead#1{%
 	\clearpage
-	\begin{center}
-		\@chapapp\space \thechapter\\
-		~\\
-		#1
-	\end{center}
+	% \vspace{-0.5in}
+	% \begin{center}
+	% 	\@chapapp\space \thechapter\\
+	% 	~\\
+	% 	#1
+	% \end{center}
+	\fancypagestyle{plain}{%
+		\fancyhf{}
+		\fancyhead[C]{\@chapapp\space \thechapter}
+		\renewcommand{\headrulewidth}{0pt}
+		\renewcommand{\footrulewidth}{0pt}
+	}
+	
+	\protect{\hfill #1 \hfill}
+	
 	\thispagestyle{plain}
 	\clearpage
 }
