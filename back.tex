@@ -9,6 +9,26 @@
 % \clearpage
 \singlespace
 \pagebreak
+\makeatletter
+\renewenvironment{thebibliography}[1]
+	{\hspace{-1em}\textbf{BIBLIOGRAPHY}%
+      \list{\@biblabel{\@arabic\c@enumiv}}%
+           {\settowidth\labelwidth{\@biblabel{#1}}%
+            \leftmargin\labelwidth
+            \advance\leftmargin\labelsep
+            \@openbib@code
+            \usecounter{enumiv}%
+            \let\p@enumiv\@empty
+            \renewcommand\theenumiv{\@arabic\c@enumiv}}%
+      \sloppy
+      \clubpenalty4000
+      \@clubpenalty \clubpenalty
+      \widowpenalty4000%
+      \sfcode`\.\@m}
+     {\def\@noitemerr
+       {\@latex@warning{Empty `thebibliography' environment}}%
+      \endlist}
+\makeatother
 \addcontentsline{toc}{listchapter}{BIBLIOGRAPHY}
 \bibliography{thesis}
 \bibliographystyle{ieeetr}
@@ -31,8 +51,8 @@
 
 % Appendices
 \appendix
-\addcontentsline{toc}{appendixchapter}{HADOOPGIS SOURCE}
-\chapter*{HADOOPGIS SOURCE}
+% \addcontentsline{toc}{appendixchapter}{HADOOPGIS SOURCE}
+\chapter{HADOOPGIS SOURCE}
 
 \doublespacing
 The complete source for hadoopGIS is included in this appendix. HadoopGIS
@@ -81,7 +101,7 @@ operation is contained in one source file.
 \subsection{Chained}
 \lstinputlisting[nolol,language=]{hadoopGIS/src/examples/chained.java}
 
-\addcontentsline{toc}{appendixchapter}{CLUSTERGIS SOURCE}
+% \addcontentsline{toc}{appendixchapter}{CLUSTERGIS SOURCE}
 \chapter{CLUSTERGIS SOURCE}
 
 \doublespacing

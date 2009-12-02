@@ -27,6 +27,12 @@
 \usepackage{listings}
 \lstset{breaklines=true,numbers=none,language=,captionpos=b}
 \setcounter{tocdepth}{5}
+\widowpenalty=1000
+\clubpenalty=1000
+\setlength{\parskip}{1ex plus 1ex minus 1ex}
+\makeatletter
+\def\lst@makecaption{\bfseries\@makecaption}
+\makeatother
 
 \renewcommand\figurename{\bfseries Figure}
 \renewcommand\tablename{\bfseries Table}
@@ -108,6 +114,35 @@
 \renewcommand{\footrulewidth}{0pt}
 \pagestyle{fancy}
 \doublespacing
+\makeatletter
+\renewcommand\appendixname{APPENDIX}
+\def\@makechapterhead#1{%
+	\clearpage
+	\hspace{-1.5em}\textbf{CHAPTER\space \thechapter\space\space #1}
+	\thispagestyle{plain}
+}
+% %\@startsection {NAME}{LEVEL}{INDENT}{BEFORESKIP}{AFTERSKIP}{STYLE}
+\renewcommand\section{\@startsection {section}{1}{\z@}%
+                                   {1ex}%
+                                   {1ex}%
+                                   {\normalfont\normalsize\bfseries}}
+\renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
+                                     {1ex}%
+                                     {1ex}%
+                                     {\normalfont\normalsize\bfseries}}
+\renewcommand\subsubsection{\@startsection{subsubsection}{2}{\z@}%
+                                     {1ex}%
+                                     {1ex}%
+                                     {\normalfont\normalsize\bfseries}}
+\renewcommand\paragraph{\@startsection{paragraph}{2}{\z@}%
+                                    {1ex}%
+                                    {1ex}%
+                                    {\normalfont\normalsize\bfseries}}
+\renewcommand\subparagraph{\@startsection{subparagraph}{2}{\parindent}%
+                                       {1ex}%
+                                       {1ex}%
+                                      {\normalfont\normalsize\bfseries}}
+\makeatother
 \include{introduction}
 \include{related_work}
 \include{requirements}
