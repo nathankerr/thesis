@@ -34,3 +34,11 @@ The operations created for this thesis provide examples of how to use hadoopGIS 
 The algorithms presented in this thesis were intentionally simplistic and naive. More advanced methods than just looping through the datasets such as using indexes have the potential to further improve the provided capabilities.
 
 Another improvement that can be made is the addition of alternate decomposition methods. These decomposition method used in this thesis was very simple and just split up the records between computers. More sophisticated decomposition methods such as a geospatial decomposition where record are distributed by locality would be beneficial for many processing methods.
+
+Comparisons should also be made with the major parallel capable databases such as SQL Server,
+Oracle, and DB2. Utilizing a parallel database should offer sufficient speedup for queries that
+it is tuned for. One problem that could be encountered, ignoring configuration and usability,
+is data decomposition and how it related to the operation's granularity. With clusterGIS,
+distributing the data for each operation is done every time. Databases already have a data
+distribution, and changing it could be costly in terms of moving data around, reconfiguring
+table partitions to support new distribution, and rebuilding indexes.
